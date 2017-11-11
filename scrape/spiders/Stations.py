@@ -3,7 +3,7 @@ import scrapy
 from scrape.items import Station
 
 
-class StationsSpider(scrapy.Spider):
+class Spider(scrapy.Spider):
 	name = 'Stations'
 	allowed_domains = ['12306.cn']
 	start_urls = ['https://kyfw.12306.cn/otn/resources/js/framework/station_name.js']

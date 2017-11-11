@@ -20,4 +20,7 @@ class TrainAdmin(admin.ModelAdmin):
 
 @admin.register(models.Record)
 class RecordAdmin(admin.ModelAdmin):
-	list_display = ('departureDate', )
+	def name(self, obj):
+		return obj.train.name
+
+	list_display = ('name', 'departureDate')

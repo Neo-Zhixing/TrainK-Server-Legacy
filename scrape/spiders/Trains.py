@@ -1,36 +1,73 @@
-# -*- coding: utf-8 -*-
 import scrapy
 import json
 import urllib
 from scrapy.exceptions import CloseSpider
-from scrape.items import Train, Stop
+from scrape.items import Train, Stop, Record
+
+from scrapy.exceptions import DropItem
+
+import logging
+from api import models
 
 
-class TrainsSpider(scrapy.Spider):
+class Spider(scrapy.Spider):
 	name = 'Trains'
 	allowed_domains = ['12306.cn']
 	start_urls = ['https://kyfw.12306.cn/otn/resources/js/query/train_list.js']
 	custom_settings = {
 		'ITEM_PIPELINES': {
-			'scrape.pipelines.TrainSavingPipeline': 400
+			'scrape.spiders.Trains.Pipeline': 400
 		}
 	}
+	createRecords = False
+	date = None
+	keys = None
 
 	def parse(self, response):
-		if not hasattr(self, 'date'):
-			raise CloseSpider('Cannot get argument date')
+		# Check the existence of required parameter Date
+		if not self.date:
+			raise CloseSpider('Cannot get argument "date"')
+
+		# Parse page info into JSON
 		data = response.body.decode('utf-8')
 		data = data[data.index('=') + 1:]  # REMOVE var train_list =
 		jsonData = json.loads(data)
 		if not jsonData:
 			raise CloseSpider('Can not parse data as JSON')
+
+		# Extract needed date
 		jsonData = jsonData.get(self.date)
 		if not jsonData:
 			raise CloseSpider('Can not find designated date')
 
-		for prefix in jsonData.keys():
-			for train in jsonData[prefix]:
-				import re
+		# Set train parsing keys to all the keys by default
+		if not self.keys:
+			keys = jsonData.keys()
+
+		# Extract useful records into a single list
+		content = []
+		for prefix in keys:
+			contentInPrefix = jsonData.get(prefix)
+			if contentInPrefix:
+				content.extend(contentInPrefix)
+			else:
+				self.logger.warning('Train prefix %s not exist', prefix)
+				continue
+
+		# Create Records for each day
+		if self.createRecords:
+			for train in content:
+				record = Record(
+					departureDate=self.date,
+					train=train['train_no'],
+				)
+				yield record
+			return
+
+		# Parse Train Schedules
+		else:
+			import re
+			for train in content:
 				trainIDMatch = re.match(r'(\w+)\((.+)-(.+)\)', train['station_train_code'])
 				telecode = train['train_no']
 				name = trainIDMatch.group(1)
@@ -70,3 +107,46 @@ class TrainsSpider(scrapy.Spider):
 		train = response.meta['train']
 		train['stops'] = stops
 		yield train
+
+
+class Pipeline(object):
+	def process_item(self, item, spider):
+		if isinstance(item, Record):
+			if models.Record.objects.filter(departureDate=item['departureDate'], train__telecode=item['train']).exists():
+				raise DropItem('Record exist for %s at %s', item['train'], item['departureDate'])
+			train = models.Train.objects.filter(telecode=item['train'])
+			if not train.exists():
+				raise DropItem('Train %s schedule not exist!', item['train'])
+			if train.count() > 1:
+				raise DropItem('Duplicated trains exist for %s', item['train'])
+			train = train.first()
+			item['train'] = train
+			models.Record(departureDate=item['departureDate'], train=train).save()
+
+			return item
+
+		originalTrain = item.originalTrain
+		if originalTrain:
+			if item['name'] in originalTrain.names:
+				raise DropItem('Duplicated Item %s, telecode %s', item['name'], item['telecode'])
+			else:
+				originalTrain.names.append(item['name'])
+				originalTrain.save()
+				logging.info('Merged with %s, telecode %s', originalTrain.name, originalTrain.telecode)
+				return item
+		else:
+			train = models.Train(names=[item['name']], telecode=item['telecode'])
+			train.save()
+			for stop in item['stops']:
+				station = models.Station.objects.filter(name=stop['station'])
+				if station.exists():
+					station = station.first()
+				else:
+					station = models.Station(name=stop['station'])
+					station.save()
+					logging.info('Station %s not exist. Created.', station.name)
+				newStop = models.Stop(station=station, departureTime=stop['departureTime'], arrivalTime=stop['arrivalTime'])
+				newStop.save()
+				train.stops.add(newStop)
+			train.save()
+			return item

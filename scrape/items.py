@@ -31,3 +31,9 @@ class Stop(scrapy.Item):
 	station = scrapy.Field()
 	arrivalTime = scrapy.Field()
 	departureTime = scrapy.Field()
+
+
+class Record(scrapy.Item):
+	departureDate = scrapy.Field()
+	train = scrapy.Field()
+	stops = scrapy.Field()
