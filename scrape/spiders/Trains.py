@@ -1,12 +1,12 @@
 import scrapy
 import json
 import urllib
+from datetime import timedelta
 from scrapy.exceptions import CloseSpider
-from scrape.items import Train, Stop, Record
-
 from scrapy.exceptions import DropItem
-
+import re
 import logging
+from scrape.items import Train, Record
 from api import models
 
 
@@ -14,11 +14,6 @@ class Spider(scrapy.Spider):
 	name = 'Trains'
 	allowed_domains = ['12306.cn']
 	start_urls = ['https://kyfw.12306.cn/otn/resources/js/query/train_list.js']
-	custom_settings = {
-		'ITEM_PIPELINES': {
-			'scrape.spiders.Trains.Pipeline': 400
-		}
-	}
 	createRecords = False
 	date = None
 	keys = None
@@ -66,7 +61,6 @@ class Spider(scrapy.Spider):
 
 		# Parse Train Schedules
 		else:
-			import re
 			for train in content:
 				trainIDMatch = re.match(r'(\w+)\((.+)-(.+)\)', train['station_train_code'])
 				telecode = train['train_no']
@@ -79,7 +73,7 @@ class Spider(scrapy.Spider):
 					name=name,
 					telecode=telecode
 				)
-				if train.originalTrain:
+				if train.duplicated:
 					yield train
 				else:
 					parameters = {
@@ -94,14 +88,21 @@ class Spider(scrapy.Spider):
 					yield request
 
 	def parseTrainSchedule(self, response):
+		def dictForStop(stop):
+			departureTime = re.match(r'(\d{2}):(\d{2})', stop['start_time'])
+			departureTime = departureTime.groups() if departureTime else None
+			arrivalTime = re.match(r'(\d{2}):(\d{2})', stop['arrive_time'])
+			arrivalTime = arrivalTime.groups() if arrivalTime else None
+			return {
+				'station': stop['station_name'],
+				'departureTime': timedelta(hours=int(departureTime[0]), minutes=int(departureTime[1]))
+				if departureTime else None,
+				'arrivalTime': timedelta(hours=int(arrivalTime[0]), minutes=int(arrivalTime[1]))
+				if arrivalTime else None,
+			}
 		jsonData = json.loads(response.body.decode('utf-8'))
-		stops = []
-		for stop in jsonData['data']['data']:
-			stops.append(Stop(
-				station=stop['station_name'],
-				departureTime=stop['start_time'],
-				arrivalTime=stop['arrive_time']
-			))
+		stops = [dictForStop(stop) for stop in jsonData['data']['data']]
+
 		stops[0]['arrivalTime'] = None
 		stops[-1]['departureTime'] = None
 		train = response.meta['train']

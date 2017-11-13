@@ -14,23 +14,28 @@ class Station(DjangoItem):
 		return self['name']
 
 
-class Train(scrapy.Item):
+class Train(DjangoItem):
+	django_model = models.Train
 	name = scrapy.Field()
-	telecode = scrapy.Field()
-	stops = scrapy.Field()
 
 	def __str__(self):
 		return self['name'] + ' | ' + self['telecode']
 
 	@property
-	def originalTrain(self):
-		return models.Train.objects.filter(telecode=self['telecode']).first()
+	def duplicated(self):
+		return models.Train.objects.filter(telecode=self['telecode']).exists()
 
+	def duplicatedWillDiscard(self):
+		originalTrain = models.Train.objects.filter(telecode=self['telecode']).first()
+		if self['name'] in originalTrain.names:
+			return '%s, telecode %s' % (self['name'], self['telecode'])
+		else:
+			originalTrain.names.append(self['name'])
+			originalTrain.save()
+			return 'Merged with %s, telecode %s' % (originalTrain.name, originalTrain.telecode)
 
-class Stop(scrapy.Item):
-	station = scrapy.Field()
-	arrivalTime = scrapy.Field()
-	departureTime = scrapy.Field()
+	def itemWillCreate(self):
+		self['names'] = [self['name']]
 
 
 class Record(scrapy.Item):

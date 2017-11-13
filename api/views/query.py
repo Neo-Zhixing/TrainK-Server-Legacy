@@ -73,10 +73,10 @@ def train(request):
 		})
 	if request.GET.get('telecode'):
 		condition = request.GET.get('telecode')
-		trains = models.Train.objects.filter(telecode=condition)
+		train = models.Train.objects.filter(telecode=condition).first()
 	elif request.GET.get('name'):
 		condition = request.GET.get('name')
-		trains = models.Train.objects.filter(names__contains=[condition])
+		train = models.Train.objects.filter(names__contains=[condition]).first()
 	else:
 		return JsonResponse({
 			'result': False,
@@ -84,36 +84,16 @@ def train(request):
 			'reason': 'Parameters illegal'
 		})
 
-	if trains:
-		if trains.count() > 1:
-			return JsonResponse({
-				'result': False,
-				'code': 500,
-				'reason': ('Multiple trains found for %s' % condition),
-			},
-				json_dumps_params={
-					'ensure_ascii': False
-			})
-
-		train = trains[0]
-		schedule = []
-		for stop in train.stops.all():
-			schedule.append({
-				'stationName': stop.station.name,
-				'stationTelecode': stop.station.telecode,
-				'departureTime': stop.departureTime,
-				'arrivalTime': stop.arrivalTime
-			})
-		body = {
-			'name': train.names,
-			'telecode': train.telecode,
-			'schedule': schedule
-		}
+	if train:
 		return JsonResponse(
 			{
 				'result': True,
 				'code': 200,
-				'body': body
+				'body': {
+					'name': train.names,
+					'telecode': train.telecode,
+					'schedule': train.stops
+				}
 			},
 			json_dumps_params={
 				'ensure_ascii': False
