@@ -58,5 +58,6 @@ class Record(DjangoItem):
 		def setTimeAnticipated(stop):
 			stop['departureTime'] = -stop['departureTime'] if stop['departureTime'] else None
 			stop['arrivalTime'] = -stop['arrivalTime'] if stop['arrivalTime'] else None
+			return stop
 
 		self['stops'] = [setTimeAnticipated(stop) for stop in self['train'].stops]

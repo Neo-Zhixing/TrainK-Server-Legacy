@@ -18,3 +18,4 @@ class RecordAdmin(admin.ModelAdmin):
 		return obj.train.name
 
 	list_display = ('name', 'departureDate')
+	date_hierarchy = 'departureDate'
