@@ -38,7 +38,25 @@ class Train(DjangoItem):
 		self['names'] = [self['name']]
 
 
-class Record(scrapy.Item):
-	departureDate = scrapy.Field()
-	train = scrapy.Field()
-	stops = scrapy.Field()
+class Record(DjangoItem):
+	django_model = models.Record
+	telecode = scrapy.Field()
+
+	def __str__(self):
+		return self['telecode'] + ' on ' + self['departureDate']
+
+	@property
+	def duplicated(self):
+		return models.Record.objects.filter(departureDate=self['departureDate'], train__telecode=self['telecode']).exists()
+
+	def itemWillCreate(self):
+		query = models.Train.objects.filter(telecode=self['telecode'])
+		if not query.exists():
+			return 'Train %s not exist!' % self['telecode']
+		self['train'] = query.first()
+
+		def setTimeAnticipated(stop):
+			stop['departureTime'] = -stop['departureTime'] if stop['departureTime'] else None
+			stop['arrivalTime'] = -stop['arrivalTime'] if stop['arrivalTime'] else None
+
+		self['stops'] = [setTimeAnticipated(stop) for stop in self['train'].stops]
