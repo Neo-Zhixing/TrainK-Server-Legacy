@@ -12,7 +12,7 @@ class Station(models.Model):
 
 class Train(models.Model):
 	names = fields.ArrayField(models.CharField(max_length=10))
-	telecode = models.CharField(max_length=50)
+	telecode = models.CharField(max_length=50, primary_key=True)
 	stops = fields.JSONField(encoder=DjangoJSONEncoder)
 
 	def __str__(self):
