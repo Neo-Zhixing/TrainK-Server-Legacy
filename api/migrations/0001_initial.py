@@ -46,15 +46,17 @@ class Migration(migrations.Migration):
 			name='train',
 			field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.Train'),
 		),
-		migrations.RunSQL(
-			"""CREATE OR REPLACE VIEW api_stop AS
+		migrations.RunSQL("""
+			CREATE OR REPLACE VIEW api_stop AS
 			SELECT
-				train_id AS train,
-				station,
+				(api_record.id::text || '_' || index::text) AS id,
+				api_record.id AS record_id,
+				train_id,
+				station AS station_id,
 				index,
-				"departureDate" + "departureTime" AS "departureDate",
+				("departureDate" + "departureTime") AT TIME ZONE 'CCT' AS "departureTime",
 				"departureTimeAnticipated",
-				"departureDate" + "arrivalTime" AS "arrivalDate",
+				("departureDate" + "arrivalTime") AT TIME ZONE 'CCT' AS "arrivalTime",
 				"arrivalTimeAnticipated"
 
 			FROM api_record, jsonb_to_recordset(stops)
@@ -65,6 +67,6 @@ class Migration(migrations.Migration):
 				"departureTimeAnticipated" boolean,
 				"arrivalTime" interval,
 				"arrivalTimeAnticipated" boolean
-			)"""
-		)
+			)
+		""")
 	]

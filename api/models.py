@@ -28,3 +28,17 @@ class Record(models.Model):
 	departureDate = models.DateField()
 	train = models.ForeignKey(Train)
 	stops = fields.JSONField(encoder=DjangoJSONEncoder)
+
+
+class Stop(models.Model):
+	train = models.ForeignKey(Train)
+	record = models.ForeignKey(Record)
+	station = models.ForeignKey(Station)
+	index = models.IntegerField()
+	departureTime = models.DateTimeField()
+	departureTimeAnticipated = models.BooleanField()
+	arrivalTime = models.DateTimeField()
+	arrivalTimeAnticipated = models.BooleanField()
+
+	class Meta:
+		managed = False
