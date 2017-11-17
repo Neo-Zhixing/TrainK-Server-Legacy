@@ -98,18 +98,17 @@ class Spider(scrapy.Spider):
 			departureTime = departureTime.groups() if departureTime else None
 			arrivalTime = re.match(r'(\d{2}):(\d{2})', stop['arrive_time'])
 			arrivalTime = arrivalTime.groups() if arrivalTime else None
-			return {
-				'station': stop['station_name'],
-				'departureTime': timedelta(hours=int(departureTime[0]), minutes=int(departureTime[1]))
-				if departureTime else None,
-				'arrivalTime': timedelta(hours=int(arrivalTime[0]), minutes=int(arrivalTime[1]))
-				if arrivalTime else None,
-			}
+			stops = {'index': int(stop['station_no']), 'station': stop['station_name']}
+			if departureTime:
+				stops['departureTime'] = timedelta(hours=int(departureTime[0]), minutes=int(departureTime[1]))
+			if arrivalTime:
+				stops['arrivalTime'] = timedelta(hours=int(arrivalTime[0]), minutes=int(arrivalTime[1]))
+			return stops
 		jsonData = json.loads(response.body.decode('utf-8'))
 		stops = [dictForStop(stop) for stop in jsonData['data']['data']]
 
-		stops[0]['arrivalTime'] = None
-		stops[-1]['departureTime'] = None
+		stops[0].pop('arrivalTime', None)
+		stops[-1].pop('departureTime', None)
 		train = response.meta['train']
 		train['stops'] = stops
 		yield train
