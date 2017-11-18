@@ -15,57 +15,59 @@ class Spider(scrapy.Spider):
 	date = None
 	keys = None
 
-	def pre_parse(self, response):
+	def pre_parse(self, body):
 		if not self.date:
 			from datetime import date
 			self.date = date.today().isoformat()
 
 		# Parse page info into JSON
-		data = response.body.decode('utf-8')
+		data = body.decode('utf-8')
 		data = data[data.index('=') + 1:]  # REMOVE var train_list =
 		jsonData = json.loads(data)
 		if not jsonData:
-			return 'Can not parse data as JSON'
+			raise CloseSpider('Can not parse data as JSON')
 
 		# Extract needed date
 		jsonData = jsonData.get(self.date)
 		if not jsonData:
-			return 'Can not find designated date'
+			raise CloseSpider('Can not find designated date')
 
 		# Set train parsing keys to all the keys by default
 		if not self.keys:
 			keys = jsonData.keys()
 
 		# Extract useful records into a single list
-		content = []
+		telecodes = {}
 		for prefix in keys:
 			contentInPrefix = jsonData.get(prefix)
-			if contentInPrefix:
-				content.extend(contentInPrefix)
-			else:
+			if not contentInPrefix:
 				self.logger.warning('Train prefix %s not exist', prefix)
 				continue
-		return content
+			for train in contentInPrefix:
+				match = re.match(r'(\w+)\((.+)-(.+)\)', train['station_train_code'])
+				if not match:
+					self.logger.warning('Can not parse info str %s for train %s', train['station_train_code'], train['train_no'])
+					continue
+				name = match.group(1)
+				telecode = train['train_no']
+				if telecode in telecodes:
+					telecodes[telecode].append(name)
+				else:
+					telecodes[telecode] = [name]
+		return telecodes
 
 	def parseRecords(self, content):
-		for train in content:
+		for (telecode, names) in content.items():
 				record = Record(
 					departureDate=self.date,
-					telecode=train['train_no'],
+					telecode=telecode,
 				)
 				yield record
 
 	def parseSchedules(self, content):
-		for train in content:
-			trainIDMatch = re.match(r'(\w+)\((.+)-(.+)\)', train['station_train_code'])
-			telecode = train['train_no']
-			name = trainIDMatch.group(1)
-			if not name:
-				self.logger.warning('Can not parse info str %s for train %s', train['station_train_code'], train['train_no'])
-				continue
-
+		for (telecode, names) in content.items():
 			train = Train(
-				name=name,
+				names=names,
 				telecode=telecode
 			)
 			if train.duplicated:
@@ -80,13 +82,11 @@ class Spider(scrapy.Spider):
 				url = 'https://kyfw.12306.cn/otn/czxx/queryByTrainNo?' + urllib.parse.urlencode(parameters)
 				request = scrapy.Request(url, callback=self.parseTrainSchedule)
 				request.meta['train'] = train
+				request.meta['dont_redirect'] = True
 				yield request
 
 	def parse(self, response):
-		content = self.pre_parse(response)
-		if isinstance(content, str):
-			raise CloseSpider(content)
-
+		content = self.pre_parse(response.body)
 		# Create Records for each day
 		parser = self.parseRecords if self.createRecords else self.parseSchedules
 		for i in parser(content):

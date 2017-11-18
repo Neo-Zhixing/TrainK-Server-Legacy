@@ -18,26 +18,18 @@ class Station(DjangoItem):
 class Train(DjangoItem):
 	django_model = models.Train
 	save_batch_size = 50
-	name = scrapy.Field()
 
 	def __str__(self):
-		return self['name'] + ' | ' + self['telecode']
+		nameStr = ''
+		for name in self['names']:
+			nameStr += name + '/'
+		return nameStr[:-1] + '|' + self['telecode']
 
 	@property
 	def duplicated(self):
 		return models.Train.objects.filter(telecode=self['telecode']).exists()
 
-	def duplicatedWillDiscard(self):
-		originalTrain = models.Train.objects.get(telecode=self['telecode'])
-		if self['name'] in originalTrain.names:
-			return '%s, telecode %s' % (self['name'], self['telecode'])
-		else:
-			originalTrain.names.append(self['name'])
-			originalTrain.save()
-			return 'Merged with %s, telecode %s' % (originalTrain.name, originalTrain.telecode)
-
 	def itemWillCreate(self):
-		self['names'] = [self['name']]
 		for stop in self['stops']:
 			station = models.Station.objects.filter(name=stop['station'])
 			if station.exists():

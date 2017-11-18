@@ -33,9 +33,7 @@ class DjangoDatabaseSavePipeline(object):
 				raise DropItem("Duplicate item found. %s" % msg)
 
 		if hasattr(item, 'itemWillCreate'):
-			msg = item.itemWillCreate()
-			if msg:
-				raise DropItem("Saving error, %s" % msg)
+			item.itemWillCreate()
 
 		bulkCreateDisabled = type(item).save_batch_size == 1
 		djangoItem = item.save(commit=bulkCreateDisabled)
