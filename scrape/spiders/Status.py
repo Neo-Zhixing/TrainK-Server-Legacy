@@ -26,10 +26,6 @@ class StatusSpider(scrapy.Spider):
 		Anticipated = enum.auto()     # 预计列车，到达出发时间为
 		Actual = enum.auto()          # 列车到达出发时间为
 
-	class TrainAction(enum.Enum):
-		Departure = 1
-		Arrival = 0
-
 	def parseStr(self, string):
 		if re.match(r'^列车时刻表中无[\w/]+次列车的信息$', string):
 			return (self.TrainStatus.ParamError, None)
@@ -58,24 +54,38 @@ class StatusSpider(scrapy.Spider):
 				'cc': stop.train.names[0],                                                    # Train Code
 				'cxlx': action.value,                                                         # Action, StatusSpider.TrainAction
 				'rq': datetime.date.today().isoformat(),                                      # ISO Formatted current date (Not the date of departure)
-				'czEn': parse.quote(stop.station.name.encode('utf-8')).replace('%', '-'),   # UTF-8 Encoded Station Name, replacing % with -
-				'tp': int(datetime.datetime.now().timestamp())                                     # Current timestamp
+				'czEn': parse.quote(stop.station.name.encode('utf-8')).replace('%', '-'),     # UTF-8 Encoded Station Name, replacing % with -
+				'tp': int(datetime.datetime.now().timestamp())                                # Current timestamp
 			}
 			return 'http://dynamic.12306.cn/mapping/kfxt/zwdcx/LCZWD/cx.jsp?' + parse.urlencode(parameters)
-		for stop in models.Stop.objects.filter(
-			departureTimeAnticipated=True,
-			departureTime__lte=timezone.now(),
-			departureTime__gte=timezone.now() - datetime.timedelta(hours=1)):
 
-			action = self.TrainAction.Departure
-			request = scrapy.Request(requestLink(stop, action), callback=self.parse)
-			self.logger.debug('Yielded for station %s, train %s ', stop.station.name, stop.train.names[0])
-			request.meta['stop'] = stop
-			request.meta['action'] = action
-			yield request
+		for (action, stops) in (
+			(models.TrainAction.Departure, models.Stop.objects.filter(
+				departureTimeAnticipated=True,
+				departureTime__lte=timezone.now(),
+				departureTime__gte=timezone.now() - datetime.timedelta(hours=1))),
+			(models.TrainAction.Arrival, models.Stop.objects.filter(
+				arrivalTimeAnticipated=True,
+				arrivalTime__lte=timezone.now(),
+				arrivalTime__gte=timezone.now() - datetime.timedelta(hours=1))),
+		):
+			for stop in stops:
+				request = scrapy.Request(requestLink(stop, action), callback=self.parse)
+				request.meta['stop'] = stop
+				request.meta['action'] = action
+				yield request
 
 	def parse(self, response):
 		string = response.body.decode('gbk')
 		string = re.match(r'^\s+(\S+)\s+$', string).group(1)
 		(status, result) = self.parseStr(string)
 		self.logger.info("scraped string %s, status %s, result %s", string, status.name, str(result))
+
+		stop = response.meta['stop']
+		action = response.meta['action']
+		if status is self.TrainStatus.Actual:
+			stop.update(action, result, False)
+		elif status is self.TrainStatus.Anticipated:
+			stop.update(action, result, True)
+		else:
+			self.logger

@@ -49,15 +49,14 @@ class Migration(migrations.Migration):
 		migrations.RunSQL("""
 			CREATE OR REPLACE VIEW api_stop AS
 			SELECT
-				(api_record.id::text || '_' || index::text) AS id,
 				api_record.id AS record_id,
 				train_id,
 				station AS station_id,
 				index,
-				("departureDate" + "departureTime") AT TIME ZONE 'CCT' AS "departureTime",
-				"departureTimeAnticipated",
 				("departureDate" + "arrivalTime") AT TIME ZONE 'CCT' AS "arrivalTime",
-				"arrivalTimeAnticipated"
+				"arrivalTimeAnticipated",
+				("departureDate" + "departureTime") AT TIME ZONE 'CCT' AS "departureTime",
+				"departureTimeAnticipated"
 
 			FROM api_record, jsonb_to_recordset(stops)
 			AS x(

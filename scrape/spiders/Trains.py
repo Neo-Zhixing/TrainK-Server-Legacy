@@ -93,19 +93,30 @@ class Spider(scrapy.Spider):
 			yield i
 
 	def parseTrainSchedule(self, response):
-		def dictForStop(stop):
+		jsonData = json.loads(response.body.decode('utf-8'))
+		stops = []
+		lastTime = timedelta()
+		for stop in jsonData['data']['data']:
+			# Parse time string into timedelta objects
 			departureTime = re.match(r'(\d{2}):(\d{2})', stop['start_time'])
 			departureTime = departureTime.groups() if departureTime else None
 			arrivalTime = re.match(r'(\d{2}):(\d{2})', stop['arrive_time'])
 			arrivalTime = arrivalTime.groups() if arrivalTime else None
-			stops = {'index': int(stop['station_no']), 'station': stop['station_name']}
-			if departureTime:
-				stops['departureTime'] = timedelta(hours=int(departureTime[0]), minutes=int(departureTime[1]))
+			stopDict = {'index': int(stop['station_no']), 'station': stop['station_name']}
 			if arrivalTime:
-				stops['arrivalTime'] = timedelta(hours=int(arrivalTime[0]), minutes=int(arrivalTime[1]))
-			return stops
-		jsonData = json.loads(response.body.decode('utf-8'))
-		stops = [dictForStop(stop) for stop in jsonData['data']['data']]
+				arrivalTime = timedelta(hours=int(arrivalTime[0]), minutes=int(arrivalTime[1]))
+				if lastTime > arrivalTime:  # Date interpretation
+					arrivalTime += timedelta(days=1)
+				lastTime = arrivalTime
+				stopDict['arrivalTime'] = arrivalTime
+			if departureTime:
+				departureTime = timedelta(hours=int(departureTime[0]), minutes=int(departureTime[1]))
+				if lastTime > departureTime:  # Date interpretation
+					departureTime += timedelta(days=1)
+				lastTime = departureTime
+				stopDict['departureTime'] = departureTime
+
+			stops.append(stopDict)
 
 		stops[0].pop('arrivalTime', None)
 		stops[-1].pop('departureTime', None)

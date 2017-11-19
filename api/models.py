@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres import fields
 from django.core.serializers.json import DjangoJSONEncoder
+import enum
 
 
 class Station(models.Model):
@@ -32,7 +33,7 @@ class Record(models.Model):
 
 class Stop(models.Model):
 	train = models.ForeignKey(Train)
-	record = models.ForeignKey(Record)
+	record = models.ForeignKey(Record, primary_key=True)
 	station = models.ForeignKey(Station)
 	index = models.IntegerField()
 	departureTime = models.DateTimeField()
@@ -42,3 +43,19 @@ class Stop(models.Model):
 
 	class Meta:
 		managed = False
+
+	def update(self, action, time=None, anticipated=None):
+		key = 'departureTime' if action == TrainAction.Departure else 'arrivalTime'
+		if time is not None:
+			self.record.stops[self.index][key] = time
+			setattr(self, key, time)
+		if anticipated is not None:
+			key = key + 'Anticipated'
+			self.record.stops[self.index][key] = anticipated
+			setattr(self, key, anticipated)
+		self.record.save()
+
+
+class TrainAction(enum.Enum):
+		Departure = 1
+		Arrival = 0
