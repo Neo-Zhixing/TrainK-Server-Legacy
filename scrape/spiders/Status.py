@@ -73,6 +73,7 @@ class StatusSpider(scrapy.Spider):
 				request = scrapy.Request(requestLink(stop, action), callback=self.parse)
 				request.meta['stop'] = stop
 				request.meta['action'] = action
+				request.meta['dont_redirect'] = True
 				yield request
 
 	def parse(self, response):
@@ -88,4 +89,4 @@ class StatusSpider(scrapy.Spider):
 		elif status is self.TrainStatus.Anticipated:
 			stop.update(action, result, True)
 		else:
-			self.logger
+			self.logger.info(string)

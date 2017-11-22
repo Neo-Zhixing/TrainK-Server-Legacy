@@ -92,7 +92,7 @@ ITEM_PIPELINES = {
 
 # Django Intergration
 import sys
-sys.path.append('/Users/nilchang/Developer/TrainK')
+sys.path.append('/Users/nilchang/Developer/TrainK/TrainK-Server')
 
 import os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'TrainK.settings'
