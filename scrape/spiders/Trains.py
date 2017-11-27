@@ -96,13 +96,16 @@ class Spider(scrapy.Spider):
 		jsonData = json.loads(response.body.decode('utf-8'))
 		stops = []
 		lastTime = timedelta()
+
+		index = 0
 		for stop in jsonData['data']['data']:
 			# Parse time string into timedelta objects
 			departureTime = re.match(r'(\d{2}):(\d{2})', stop['start_time'])
 			departureTime = departureTime.groups() if departureTime else None
 			arrivalTime = re.match(r'(\d{2}):(\d{2})', stop['arrive_time'])
 			arrivalTime = arrivalTime.groups() if arrivalTime else None
-			stopDict = {'index': int(stop['station_no']), 'station': stop['station_name']}
+			stopDict = {'index': index, 'station': stop['station_name']}
+			index += 1
 			if arrivalTime:
 				arrivalTime = timedelta(hours=int(arrivalTime[0]), minutes=int(arrivalTime[1]))
 				if lastTime > arrivalTime:  # Date interpretation

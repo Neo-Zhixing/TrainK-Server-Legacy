@@ -78,7 +78,10 @@ class StatusSpider(scrapy.Spider):
 
 	def parse(self, response):
 		string = response.body.decode('gbk')
-		string = re.match(r'^\s+(\S+)\s+$', string).group(1)
+		string = re.match(r'^\s+(\S+)\s+$', string)
+		if not string:
+			self.logger.warning("scrape %s error, result is empty, can't extract prompt string")
+		string = string.group(1)
 		(status, result) = self.parseStr(string)
 		self.logger.info("scraped string %s, status %s, result %s", string, status.name, str(result))
 
