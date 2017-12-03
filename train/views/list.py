@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from train import models
 
-from django.conf.urls import url
+from django.urls import path
 
 
 def stations(request):
@@ -33,6 +33,6 @@ def trains(request):
 
 
 urlpatterns = [
-	url(r'^stations$', stations, name='list.stations'),
-	url(r'^trains$', trains, name='list.trainss'),
+	path('stations', stations, name='list.stations'),
+	path('trains', trains, name='list.trainss'),
 ]

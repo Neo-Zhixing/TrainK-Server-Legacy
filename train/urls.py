@@ -1,6 +1,8 @@
-from django.conf.urls import url, include
+from django.urls import include, path
+from train.views import home
 
 urlpatterns = [
-	url(r'^list/', include('train.views.list')),
-	url(r'^query/', include('train.views.query')),
+	path('', home.HomeView.as_view()),
+	path('list', include('train.views.list')),
+	path('query', include('train.views.query')),
 ]

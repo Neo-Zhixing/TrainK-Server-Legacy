@@ -27,14 +27,14 @@ class Train(models.Model):
 
 class Record(models.Model):
 	departureDate = models.DateField()
-	train = models.ForeignKey(Train)
+	train = models.ForeignKey(Train, on_delete=models.CASCADE)
 	stops = fields.JSONField(encoder=DjangoJSONEncoder)
 
 
 class Stop(models.Model):
-	train = models.ForeignKey(Train)
-	record = models.ForeignKey(Record)
-	station = models.ForeignKey(Station)
+	train = models.ForeignKey(Train, on_delete=models.PROTECT)
+	record = models.ForeignKey(Record, on_delete=models.PROTECT)
+	station = models.ForeignKey(Station, on_delete=models.PROTECT)
 	index = models.IntegerField(primary_key=True)
 
 	# Both time and anticipated indicator are None:

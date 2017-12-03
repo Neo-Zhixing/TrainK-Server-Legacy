@@ -1,11 +1,12 @@
 from django.http import JsonResponse
 from train import models
 
-from django.conf.urls import url
+from django.urls import path
 
 import re
 from django.utils import timezone
 import datetime
+
 
 def station(request):
 	if request.method != 'GET':
@@ -139,6 +140,6 @@ def train(request):
 
 
 urlpatterns = [
-	url(r'^station$', station, name='query.station'),
-	url(r'^train$', train, name='query.train'),
+	path('station', station, name='query.station'),
+	path('train', train, name='query.train'),
 ]
