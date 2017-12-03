@@ -1,6 +1,6 @@
 import scrapy
 from scrapy_djangoitem import DjangoItem
-from api import models
+from train import models
 
 
 class Station(DjangoItem):

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from api import models
+from train import models
 
 
 @admin.register(models.Station)

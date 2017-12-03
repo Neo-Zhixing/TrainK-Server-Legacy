@@ -5,7 +5,7 @@ import enum
 import datetime
 from django.utils import timezone
 from urllib import parse
-from api import models
+from train import models
 
 
 class StatusSpider(scrapy.Spider):

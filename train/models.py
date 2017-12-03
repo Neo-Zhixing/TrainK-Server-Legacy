@@ -33,9 +33,9 @@ class Record(models.Model):
 
 class Stop(models.Model):
 	train = models.ForeignKey(Train)
-	record = models.ForeignKey(Record, primary_key=True)
+	record = models.ForeignKey(Record)
 	station = models.ForeignKey(Station)
-	index = models.IntegerField()
+	index = models.IntegerField(primary_key=True)
 
 	# Both time and anticipated indicator are None:
 	# 	This stop is the origin or destination stop, so the arrival/departure time is not available.

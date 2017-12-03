@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from api import models
+from train import models
 
 from django.conf.urls import url
 
