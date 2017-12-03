@@ -36,6 +36,15 @@ class Stop(models.Model):
 	record = models.ForeignKey(Record, primary_key=True)
 	station = models.ForeignKey(Station)
 	index = models.IntegerField()
+
+	# Both time and anticipated indicator are None:
+	# 	This stop is the origin or destination stop, so the arrival/departure time is not available.
+	# Anticipated indicator is None, while time has value:
+	# 	The program cannot fetch the information about this stop. NotImplemented or TimeNotInRange Errer
+	# Both Anticipated indicator and time have value:
+	# 	Anticipated indicator is True: the delays information is yet to be scraped.
+	# 	Anticipated indicator is False: the information is accurately scraped.
+
 	departureTime = models.DateTimeField()
 	departureTimeAnticipated = models.BooleanField()
 	arrivalTime = models.DateTimeField()
@@ -44,12 +53,12 @@ class Stop(models.Model):
 	class Meta:
 		managed = False
 
-	def update(self, action, time=None, anticipated=None):
+	def update(self, action, time='NoChange', anticipated='NoChange'):
 		key = 'departureTime' if action == TrainAction.Departure else 'arrivalTime'
-		if time is not None:
+		if time is not 'NoChange':
 			self.record.stops[self.index][key] = time
 			setattr(self, key, time)
-		if anticipated is not None:
+		if anticipated is not 'NoChange':
 			key = key + 'Anticipated'
 			self.record.stops[self.index][key] = anticipated
 			setattr(self, key, anticipated)

@@ -81,6 +81,7 @@ class StatusSpider(scrapy.Spider):
 		string = re.match(r'^\s+(\S+)\s+$', string)
 		if not string:
 			self.logger.warning("scrape %s error, result is empty, can't extract prompt string")
+			return
 		string = string.group(1)
 		(status, result) = self.parseStr(string)
 		self.logger.info("scraped string %s, status %s, result %s", string, status.name, str(result))
@@ -91,5 +92,7 @@ class StatusSpider(scrapy.Spider):
 			stop.update(action, result, False)
 		elif status is self.TrainStatus.Anticipated:
 			stop.update(action, result, True)
+		elif status is self.TrainStatus.TimeNotInRange or status is self.TrainStatus.NotImplemented:
+			stop.update(action=action, anticipated=None)
 		else:
 			self.logger.info(string)

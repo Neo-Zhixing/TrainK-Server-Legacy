@@ -3,6 +3,9 @@ from api import models
 
 from django.conf.urls import url
 
+import re
+from django.utils import timezone
+import datetime
 
 def station(request):
 	if request.method != 'GET':
@@ -84,16 +87,41 @@ def train(request):
 			'reason': 'Parameters illegal'
 		})
 
+	def convertStopStation(stop):
+		station = models.Station.objects.get(id=stop['station'])
+		stop['station'] = station.name
+		stop['telecode'] = station.telecode
+		return stop
+
+	def delStopStationInfo(stop):
+		stop.pop('station')
+		return stop
+
 	if train:
+		body = {
+			'name': train.names,
+			'telecode': train.telecode,
+			'schedule': list(map(convertStopStation, train.stops))
+		}
+		date = request.GET.get('date')
+		if date:
+			match = re.match(r'^r(\d+)$', date)
+			if match:
+				days = int(match.group(1))
+				records = models.Record.objects.filter(train=train, departureDate__gte=timezone.now() - datetime.timedelta(days=days))
+			else:
+				dates = date.split('|')
+				records = models.Record.objects.filter(train=train, departureDate__in=dates)
+
+			body['records'] = {}
+			for record in records:
+				body['records'][record.departureDate.isoformat()] = list(map(delStopStationInfo, record.stops))
+
 		return JsonResponse(
 			{
 				'result': True,
 				'code': 200,
-				'body': {
-					'name': train.names,
-					'telecode': train.telecode,
-					'schedule': train.stops
-				}
+				'body': body
 			},
 			json_dumps_params={
 				'ensure_ascii': False
