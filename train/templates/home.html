@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block breadcrumb %}
+{% endblock %}
+
+{% block body %}
+<div class="py-5" style="background-image: url(&quot;{% static "img/hero.jpg" %}&quot;); background-position: center top; ">
+  <div class="container">
+    <div class="row">
+      <div class="align-self-center col-md-6 text-white">
+        <h1 class="text-center text-md-left display-3">车客 TrainK</h1>
+        <p class="lead">最好的火车票网站</p>
+      </div>
+      <div class="col-md-6" id="book">
+        <div class="card" style="opacity: .95;">
+          <div class="card-body p-5">
+            <ul class="nav nav-tabs" id="BookingTab" role="tablist">
+              <li class="nav-item">
+                <a class="nav-link active" id="OneWay-tab" data-toggle="tab" href="#OneWay" role="tab" aria-controls="OneWay" aria-selected="true">单程</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" id="RoundTrip-tab" data-toggle="tab" href="#RoundTrip" role="tab" aria-controls="RoundTrip" aria-selected="false">往返</a>
+              </li>
+            </ul>
+            <br/>
+            <form>
+              <div class="form-group">
+               <label for="departureStation">行程</label>
+               <div class="input-group">
+                <input type="text" class="form-control" id="departureStation" placeholder="出发站">
+                <span class="input-group-btn">
+                  <button class="btn btn-secondary" type="button"><em class="fa d-inline fa-lg fa-arrows-h"></em></button>
+                </span>
+                <input type="text" class="form-control" id="arrivalStation" placeholder="目的站">
+              </div>
+            </div>
+            <div class="form-group">
+             <label for="departureDate">出发日期</label>
+             <input type="text" class="form-control" id="departureDate" placeholder="日期">
+           </div>
+           <div class="tab-content" id="BookingTabContent">
+            <div class="tab-pane fade show active" id="OneWay" role="tabpanel" aria-labelledby="OneWay-tab"></div>
+            <div class="tab-pane fade" id="RoundTrip" role="tabpanel" aria-labelledby="RoundTrip-tab">
+             <div class="form-group">
+               <label for="departureDate">返回日期</label>
+               <input type="text" class="form-control" id="departureDate" placeholder="日期">
+             </div>
+           </div>
+         </div>
+         <button type="button" class="btn btn-primary btn-block btn-lg">搜索</button>
+       </form>
+     </div>
+   </div>
+ </div>
+</div>
+</div>
+</div>
+<div class="py-5 bg-light text-dark">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 my-3">
+        <div class="card">
+          <div class="card-header bg-primary text-white text-center"> 列车详情</div>
+          <img class="img-fluid" src="https://pingendo.github.io/templates/sections/assets/features_mac.jpg" alt="Card image">
+          <div class="card-body">
+            <h6 class="card-subtitle text-muted">Support card subtitle</h6>
+            <p class="card-text p-y-1">Some quick example text to build on the card title .</p>
+            <a href="#" class="card-link">link</a>
+            <a href="#" class="card-link">Second link</a>
+          </div>
+        </div>
+      </div><div class="col-md-4 my-3">
+        <div class="card">
+          <div class="card-header bg-primary text-white text-center"> 铁路地图</div>
+          <img class="img-fluid" src="https://pingendo.github.io/templates/sections/assets/features_mac.jpg" alt="Card image">
+          <div class="card-body">
+            <h6 class="card-subtitle text-muted">Support card subtitle</h6>
+            <p class="card-text p-y-1">Some quick example text to build on the card title .</p>
+            <a href="#" class="card-link">link</a>
+            <a href="#" class="card-link">Second link</a>
+          </div>
+        </div>
+      </div><div class="col-md-4 my-3">
+        <div class="card">
+          <div class="card-header bg-primary text-white text-center"> 车迷社区</div>
+          <img class="img-fluid" src="https://pingendo.github.io/templates/sections/assets/features_mac.jpg" alt="Card image">
+          <div class="card-body">
+            <h6 class="card-subtitle text-muted">Support card subtitle</h6>
+            <p class="card-text p-y-1">Some quick example text to build on the card title .</p>
+            <a href="#" class="card-link">link</a>
+            <a href="#" class="card-link">Second link</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="py-5 text-center text-white opaque-overlay gradient-overlay" style="background-image: url(&quot;{% static "img/features.jpg" %}&quot;);  background-position: center; ">
+  <div class="container">
+    <div class="row">
+      <div class="p-4 col-md-3"> <i class="d-block fa fa-3x fa-pie-chart"></i>
+        <h2 class="my-3">Improve</h2>
+        <p>Based on fluid design principles. Works with any screen resolution</p>
+      </div>
+      <div class="col-md-3 p-4"> <i class="d-block fa fa-3x fa-th"></i>
+        <h2 class="my-3">Scale</h2>
+        <p>Work simultaneously on different panels. Share the work with teammates.</p>
+      </div>
+      <div class="col-md-3 p-4"> <i class="d-block fa fa-3x fa-globe"></i>
+        <h2 class="my-3">Spread</h2>
+        <p>Help us spreading the word. Tell your friends with just one-click</p>
+      </div>
+      <div class="col-md-3 p-4"> <i class="d-block fa fa-3x fa-money"></i>
+        <h2 class="my-3">Make money</h2>
+        <p>Choose settings depending on the criteria you value the most</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="py-5 bg-light">
+  <div class="container">
+    <div class="row">
+      <div class="py-5 col-md-6">
+        <div class="row">
+          <div class="text-center col-4"><i class="d-block mx-auto fa fa-5x fa-angle-double-up"></i></div>
+          <div class="col-8">
+            <h5 class="mb-3 text-primary"><strong>迅捷购票</strong></h5>
+            <p class="my-1">车客提供给您独一无二的流畅购票体验，让您与广告和隐藏收费说再见。对接12306官方网站，保证每一张票来源正规，即刻可用。</p>
+          </div>
+        </div>
+      </div>
+      <div class="py-5 col-md-6">
+        <div class="row">
+          <div class="text-center col-4"><i class="d-block mx-auto fa fa-5x fa-map-o"></i></div>
+          <div class="col-8">
+            <h5 class="mb-3 text-primary"><strong>智能规划</strong></h5>
+            <p class="my-1">结合多种查询方式，综合考量各方面因素，为您提供最适合的出行路径。同时，您也可参照线路图自行规划换乘。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="py-5 col-md-6">
+        <div class="row">
+          <div class="text-center col-4"><i class="d-block mx-auto fa fa-5x fa-file-o"></i></div>
+          <div class="col-8">
+            <h5 class="mb-3 text-primary"><strong>详尽信息</strong></h5>
+            <p class="my-1">一旦您选择了车客，等待您的将会是一次无比流畅的旅行。从检票口、正晚点信息，到车上餐食、目的地交通，我们将会为你安排好一切。</p>
+          </div>
+        </div>
+      </div>
+      <div class="py-5 col-md-6">
+        <div class="row">
+          <div class="text-center col-4"><i class="d-block mx-auto fa fa-5x fa-code"></i></div>
+          <div class="col-8">
+            <h5 class="mb-3 text-primary"><strong>可靠服务</strong></h5>
+            <p class="my-1">7x24小时永不关张，即便是夜晚，我们也能为你持续提供服务</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="pt-5 text-white bg-primary">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 text-md-left text-center align-self-center my-5">
+        <h1 class="display-1">车客 App</h1>
+        <p class="lead">四通八达的铁路网络，尽收你手中</p>
+        <div class="row mt-5">
+          <div class="col-md-5 col-6">
+            <a href="#">
+              <img class="center-block img-fluid d-block" src="https://pingendo.github.io/templates/sections/assets/download_android.png"> </a>
+            </div>
+            <div class="col-md-5 col-6">
+              <a href="#">
+                <img class="center-block img-fluid d-block" src="https://pingendo.github.io/templates/sections/assets/download_ios.png"> </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <img class="img-fluid d-block mx-auto" src="https://pingendo.github.io/templates/sections/assets/iphone_cover.png"> </div>
+          </div>
+        </div>
+      </div>
+
+      {% endblock %}

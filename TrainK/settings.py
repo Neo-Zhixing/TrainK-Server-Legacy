@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'train',
 
     # Machina related apps:
-    'mptt',
+    # 'mptt',
     'haystack',
     'widget_tweaks',
 ] + get_machina_apps()
@@ -138,13 +138,21 @@ CACHES = {
     }
 }
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/web/'
 STATICFILES_DIRS = (
     MACHINA_MAIN_STATIC_DIR,
+    os.path.join(BASE_DIR, "static")
 )
+STATICFILES_STORAGE = 'aliyun_oss2_storage.backends.AliyunStaticStorage'
+DEFAULT_FILE_STORAGE = 'aliyun_oss2_storage.backends.AliyunMediaStorage'
+ACCESS_KEY_ID = "LTAIP3L1SzIaldrp"
+ACCESS_KEY_SECRET = "hUf7QPw1TL7tM18QfMw74fpRCSo5G8"
+END_POINT = "oss-cn-hangzhou.aliyuncs.com"  # OSS存储节点
+BUCKET_NAME = "traink"
+ALIYUN_OSS_CNAME = "https://static.tra.ink"
+BUCKET_ACL_TYPE = "public-read"  # private, public-read, public-read-write
+
 
 # Machina
 MACHINA_FORUM_NAME = 'TrainK'
