@@ -1,107 +1,127 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-
 <head>
+  {% block head %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  {% block meta %}
+  {% endblock meta %}
+
   <link rel="stylesheet" href={% static "css/bootstrap.min.css" %} type="text/css">
   <link rel="stylesheet" href={% static "css/font-awesome.min.css" %} type="text/css">
+  <style type="text/css">
+  {% block css %}
+  {% endblock css %}
+  </style>
+
+  {% endblock head %}
 </head>
 
 <body>
+  {% block body %}
+  {% block navbar %}
   <nav class="navbar navbar-expand-md bg-primary navbar-dark">
     <div class="container">
-      <a class="navbar-brand" href="#"><i class="fa d-inline fa-lg fa-train"></i><b> TrainK<br></b></a>
-      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbar2SupportedContent" aria-controls="navbar2SupportedContent" aria-expanded="false"
-      aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button>
-      <div class="collapse navbar-collapse text-center justify-content-end" id="navbar2SupportedContent">
-        <ul class="navbar-nav">
-          <li class="nav-item"> <a class="nav-link" href="#"><em class="fa d-inline fa-lg fa-ticket"></em> 购票</a> </li>
-          <li class="nav-item"> <a class="nav-link" href="#"><em class="fa d-inline fa-lg fa-info"></em> 查询</a> </li>
-          <li class="nav-item"> <a class="nav-link" href="#"><em class="fa d-inline fa-lg fa-train"></em> 通勤</a> </li>
-          <li class="nav-item"> <a class="nav-link" href="#"><em class="fa d-inline fa-lg fa-map"></em> 地图</a> </li>
-          <li class="nav-item"> <a class="nav-link" href="#"><em class="fa d-inline fa-lg fa-institution"></em> 社区</a></li>
-        </ul>
-        &nbsp;&nbsp;&nbsp;
-        <div class="btn-group">
-          <button class="btn navbar-btn btn-outline-light dropdown-toggle" id="user-btn"><em class="fa d-inline fa-lg fa-user-circle-o"></em> 登录</button>
-          
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="#">Action</a>
-            <a class="dropdown-item" href="#">Another action</a>
-            <a class="dropdown-item" href="#">Something else here</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Separated link</a>
-          </div>
+      <a class="navbar-brand" href="/"><i class="fa d-inline fa-lg fa-train"></i><b class="px-2">TrainK</b></a>
+      <div class="dropdown">
+        {% if user.is_authenticated %}
+        <button class="btn navbar-btn btn-outline-light dropdown-toggle" id="user-btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><em class="fa d-inline fa-lg fa-user-circle-o"></em> 登录</button>
+        <div class="dropdown-menu">
+          <a class="dropdown-item" href="#">Action</a>
+          <a class="dropdown-item" href="#">Another action</a>
+          <a class="dropdown-item" href="#">Something else here</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Separated link</a>
         </div>
+        {% else %}
+        <button class="btn navbar-btn btn-outline-light" id="user-btn"><em class="fa d-inline fa-lg fa-user-circle-o"></em> 登录</button>
+        {% endif %}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> <span class="navbar-toggler-icon"></span> </button>
+      </div>
+      <div class="collapse navbar-collapse text-left justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"> <a class="nav-link disabled" href="#"><em class="fa d-inline fa-lg fa-ticket"></em> 购票</a> </li>
+          <li class="nav-item"> <a class="nav-link" href="/query"><em class="fa d-inline fa-lg fa-info"></em> 查询</a> </li>
+          <li class="nav-item"> <a class="nav-link disabled" href="#"><em class="fa d-inline fa-lg fa-train"></em> 通勤</a> </li>
+          <li class="nav-item"> <a class="nav-link disabled" href="#"><em class="fa d-inline fa-lg fa-map"></em> 地图</a> </li>
+          <li class="nav-item"> <a class="nav-link disabled" href="#"><em class="fa d-inline fa-lg fa-institution"></em> 社区</a></li>
+        </ul>
       </div>
     </div>
   </nav>
+  {% endblock navbar %}
 
   {% block breadcrumb %}
   <nav aria-label="breadcrumb" role="navigation">
-    <ul class="breadcrumb" style="margin-bottom: 0px; margin-top: 0px;">
-      <li class="breadcrumb-item">
-        <a href="#">Home</a>
-      </li>
-      <li class="breadcrumb-item active">Link</li>
-    </ul>
-  </nav>
-  {% endblock %}
+  <ul class="breadcrumb" style="margin-bottom: 0px; margin-top: 0px;">
+    <li class="breadcrumb-item">
+      <a href="#">Home</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">Link</li>
+  </ul>
+</nav>
+  {% endblock breadcrumb %}
 
-  {% block body %}
-  {% endblock %}
-  <div class="bg-dark text-white">
+  {% block content %}
+  {% endblock content%}
+
+  {% block footer %}
+  <footer class="bg-dark text-secondary">
     <div class="container">
       <div class="row">
         <div class="p-4 col-md-3">
-          <h2 class="mb-4 text-secondary">关于我们</h2>
-          <p class="text-white">一群傻逼hhh</p>
-        </div>
-        <div class="p-4 col-md-3">
-          <h2 class="mb-4 text-secondary">站点链接</h2>
+          <h2 class="mb-4">关于我们</h2>
+          <p class="text-white">Begin Studio, 中国第一个零零后开发团队</p>
           <ul class="list-unstyled">
-            <a href="#" class="text-white">Home</a>
+            <a href="#" class="text-white">了解更多</a>
             <br>
-            <a href="#" class="text-white">About us</a>
-            <br>
-            <a href="#" class="text-white">Our services</a>
-            <br>
-            <a href="#" class="text-white">Stories</a>
+            <a href="#" class="text-white">加入我们</a>
           </ul>
         </div>
         <div class="p-4 col-md-3">
           <h2 class="mb-4">联系我们</h2>
           <p>
-            <a href="tel:+246 - 542 550 5462" class="text-white"><i class="fa d-inline mr-3 text-secondary fa-phone"></i>+246 - 542 550 5462</a>
+            <a href="mailto:support@tra.ink" class="text-white"><i class="fa d-inline mr-3 text-secondary fa-envelope-o"></i>技术支持</a>
           </p>
           <p>
-            <a href="mailto:info@pingendo.com" class="text-white"><i class="fa d-inline mr-3 text-secondary fa-envelope-o"></i>info@pingendo.com</a>
-          </p>
-          <p>
-            <a href="https://goo.gl/maps/AUq7b9W7yYJ2" class="text-white" target="_blank"><i class="fa d-inline mr-3 fa-map-marker text-secondary"></i>365 Park Street, NY</a>
+            <a href="mailto:admin@tra.ink" class="text-white"><i class="fa d-inline mr-3 text-secondary fa-envelope-o"></i>商业合作</a>
           </p>
         </div>
         <div class="p-4 col-md-3">
-          <h2 class="mb-4 text-light">Subscribe</h2>
-          <form>
-            <fieldset class="form-group text-white"> <label for="exampleInputEmail1">Get our newsletter</label>
-              <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email"> </fieldset>
-              <button type="submit" class="btn btn-outline-secondary">Submit</button>
-            </form>
-          </div>
+          <h2 class="mb-4">关注本站</h2>
+          
         </div>
-        <div class="row">
-          <div class="col-md-12 mt-3">
-            <p class="text-center text-white">© Copyright 2017 Begin Studio - All rights reserved. </p>
-          </div>
+        <div class="p-4 col-md-3">
+          <h2 class="mb-4">站点链接</h2>
+          <ul class="list-unstyled">
+            <a href="#" class="text-white">隐私政策</a>
+            <br>
+            <a href="#" class="text-white">使用条款</a>
+            <br>
+            <a href="#" class="text-white">网站地图</a>
+            <br>
+            <a href="#" class="text-white">关于本站</a>
+          </ul>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mt-3">
+          <p class="text-center text-white">© Copyright 2017 Begin Studio - All rights reserved. </p>
+        </div>
+        <div class="col-md-6 mt-3">
+          <p class="text-center text-white">皖ICP备16011422号-2</p>
         </div>
       </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src={% static "js/bootstrap.min.js" %}></script>
-  </body>
+  </footer>
+  {% endblock footer %}
 
-  </html>
+  {% block script %}
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+  <script src={% static "js/bootstrap.min.js" %}></script>
+  {% endblock script %}
+  {% endblock body %}
+</body>
+</html>
