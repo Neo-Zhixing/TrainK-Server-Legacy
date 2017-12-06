@@ -1,8 +1,8 @@
 from django.urls import include, path
-from train.views import home
 
 urlpatterns = [
-	path('', home.HomeView.as_view()),
+	path('', include('train.views.home')),
 	path('list/', include('train.views.list')),
-	path('query/', include('train.views.query')),
+	path('query/', include('train.views.query.home')),
+	path('map/', include('train.views.map')),
 ]

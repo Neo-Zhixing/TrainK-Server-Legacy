@@ -2,10 +2,10 @@ from django.views.generic import TemplateView
 from django.urls import path
 
 
-class HomeView(TemplateView):
-	template_name = "home.html"
+class MapView(TemplateView):
+	template_name = "map.html"
 
 
 urlpatterns = [
-	path('', HomeView.as_view()),
+	path('', MapView.as_view()),
 ]

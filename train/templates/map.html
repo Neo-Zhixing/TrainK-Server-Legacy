@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block meta %}
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no">
+{% endblock meta %}
+
+{% block css %}
+html, body {
+  height: 100%;
+  overflow-y: hidden;
+}
+#map-container {
+	width:100%;
+	height:100%;
+}
+{% endblock css %}
+
+
+{% block breadcrumb %}
+{% endblock breadcrumb %}
+
+{% block content %}
+<div id="map-container" style=""></div>
+<script type="text/javascript" src='https://webapi.amap.com/maps?v=1.4.2&key=e92f5a3f865ca9e0aa00572360efcf49'></script>
+<script type="text/javascript">
+      var map = new AMap.Map('map-container', {
+         mapStyle: 'amap://styles/0f7879e21379b7d03f8cb7feac6870f6'
+     });
+</script>
+{% endblock content %}
+
+{% block footer %}
+{% endblock footer %}
