@@ -1,67 +1,44 @@
-from django.views.generic import TemplateView
+from datetime import timedelta
+import re
+from django.utils import timezone
 from django.views.defaults import page_not_found
-from django.shortcuts import render
+from rest_framework.views import APIView
+from rest_framework.response import Response
 
-from train import models
+from train import models, serializers
 
-class QueryTrainView(TemplateView):
+
+class TrainView(APIView):
 	template_name = 'query-train.html'
 
-	def getTrain(self, name=None, telecode=None):
-		if telecode:
-			train = models.Train.objects.filter(telecode=telecode).first()
-		elif name:
-			train = models.Train.objects.filter(names__contains=[name]).first()
-		else:
-			return 'NoParameters'
-
-		def convertStopStation(stop):
-			station = models.Station.objects.get(id=stop['station'])
-			stop['station'] = station.name
-			stop['telecode'] = station.telecode
-			return stop
-
-		def delStopStationInfo(stop):
-			stop.pop('station')
-			return stop
-
-		if train:
-			return train
-			body = {
-				'name': train.names,
-				'telecode': train.telecode,
-				'schedule': list(map(convertStopStation, train.stops))
-			}
-			date = request.GET.get('date')
-			if date:
-				match = re.match(r'^r(\d+)$', date)
-				if match:
-					days = int(match.group(1))
-					records = models.Record.objects.filter(train=train, departureDate__gte=timezone.now() - datetime.timedelta(days=days))
-				else:
-					dates = date.split('|')
-					records = models.Record.objects.filter(train=train, departureDate__in=dates)
-
-				body['records'] = {}
-				for record in records:
-					body['records'][record.departureDate.isoformat()] = list(map(delStopStationInfo, record.stops))
-
-			return JsonResponse(
-				{
-					'result': True,
-					'code': 200,
-					'body': body
-				},
-				json_dumps_params={
-					'ensure_ascii': False
-				}
-			)
-
 	def get(self, request):
-		if not request.GET.get('name'):
-			return page_not_found(request, exception='Parameters')
-		train = self.getTrain(name=request.GET['name'])
-		if not train:
-			return page_not_found(request, exception='Parameters')
+		name = request.GET.get('name')
+		telecode = request.GET.get('telecode')
+		if name:
+			train = models.Train.objects.filter(names__contains=[name]).first()
+		elif telecode:
+			train = models.Train.objects.filter(telecode=telecode).first()
+		else:
+			return page_not_found(request, exception='Invalid Parameters')
 
-		return render(request, self.template_name, {'train': train})
+		if not train:
+			return page_not_found(request, exception='Train Not Found')
+		context = {'train': train}
+
+		serializer = serializers.TrainSerializer(train)
+		return Response(serializer.data)
+
+
+		date = request.GET.get('date')
+		if not date:
+			date = 'r7'
+		match = re.match(r'^r(\d+)$', date)
+		if match:
+			days = int(match.group(1))
+			records = models.Record.objects.filter(train=train, departureDate__gte=timezone.now() - timedelta(days=days))
+		else:
+			dates = date.split('|')
+			records = models.Record.objects.filter(train=train, departureDate__in=dates)
+		context['records'] = records
+
+		return render(request, self.template_name, context)

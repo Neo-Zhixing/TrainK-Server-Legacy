@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='train.Train'),
         ),
         migrations.RunSQL("""
-            CREATE OR REPLACE VIEW api_stop AS
+            CREATE OR REPLACE VIEW train_stop AS
             SELECT
                 train_record.id AS record_id,
                 train_id,

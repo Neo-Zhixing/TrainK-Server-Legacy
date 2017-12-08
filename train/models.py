@@ -1,8 +1,7 @@
 from django.db import models
 from django.contrib.postgres import fields
 from django.core.serializers.json import DjangoJSONEncoder
-from django.utils.dateparse import parse_duration
-from django.utils.duration import _get_duration_components as durationComponents
+
 import enum
 
 
@@ -25,22 +24,6 @@ class Train(models.Model):
 		for name in self.names:
 			nameStr += name + '/'
 		return nameStr[:-1]
-
-	def stop(self, index):
-		return Stop(jsonData=self.stops[index])
-
-	@property
-	def allStops(self):
-		for stop in self.stops:
-			yield Stop(jsonData=stop)
-
-	@property
-	def originStop(self):
-		return Stop(jsonData=self.stops[0])
-
-	@property
-	def destinationStop(self):
-		return Stop(jsonData=self.stops[-1])
 
 
 class Record(models.Model):
@@ -67,48 +50,6 @@ class Stop(models.Model):
 	departureTimeAnticipated = models.BooleanField()
 	arrivalTime = models.DateTimeField()
 	arrivalTimeAnticipated = models.BooleanField()
-
-	def timeComponents(self, action):
-		time = self.departureTime if action is TrainAction.Departure else self.arrivalTime
-		if time is None:
-			return None
-		key = '_timeComponents' + action.name
-		if hasattr(self, key):
-			return getattr(self, key)
-		components = {}
-		days, hours, minutes, _, _ = durationComponents(time)
-		components['formatted'] = "{:02d}:{:02d}".format(hours, minutes)
-		components['days'] = days
-		components['hours'] = hours
-		components['minutes'] = minutes
-		setattr(self, key, components)
-		return components
-
-	@property
-	def departureTimeComponents(self):
-		return self.timeComponents(TrainAction.Departure)
-
-	@property
-	def arrivalTimeComponents(self):
-		return self.timeComponents(TrainAction.Arrival)
-
-	def __init__(self, jsonData):
-		super(Stop, self).__init__()
-		self.index = jsonData.get('index')
-		self.departureTimeAnticipated = jsonData.get('departureTimeAnticipated')
-		self.arrivalTimeAnticipated = jsonData.get('arrivalTimeAnticipated')
-
-		departureTime = jsonData.get('departureTime')
-		if departureTime:
-			self.departureTime = parse_duration(departureTime)
-
-		arrivalTime = jsonData.get('arrivalTime')
-		if arrivalTime:
-			self.arrivalTime = parse_duration(arrivalTime)
-
-		stationID = jsonData.get('station')
-		if stationID:
-			self.station = Station.objects.get(id=stationID)
 
 	class Meta:
 		managed = False

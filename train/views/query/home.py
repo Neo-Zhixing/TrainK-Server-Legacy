@@ -93,8 +93,9 @@ class QueryHomeView(TemplateView):
 		return render(request, self.template_name, forms)
 
 from train.views.query import train
+from train.views.query import station
 urlpatterns = [
 	path('', QueryHomeView.as_view()),
-	path('station', station, name='query.station'),
-	path('train', train.QueryTrainView.as_view()),
+	path('station', station.StationView.as_view()),
+	path('train', train.TrainView.as_view()),
 ]

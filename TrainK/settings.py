@@ -27,7 +27,7 @@ SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['tra.ink']
+ALLOWED_HOSTS = ['tra.ink', 'localhost']
 
 
 # Application definition
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'train',
 
+
+    'rest_framework',
     # Machina related apps:
     # 'mptt',
     'haystack',
@@ -89,7 +91,7 @@ DATABASES = {
         'NAME': 'TrainK',
         'USER': 'TrainK',
         'PASSWORD': 'Braungardt4365',
-        'HOST': 'localhost',
+        'HOST': '192.168.1.10',
         'PORT': '',
     }
 }
@@ -152,6 +154,16 @@ END_POINT = "oss-cn-hangzhou.aliyuncs.com"  # OSS存储节点
 BUCKET_NAME = "traink"
 ALIYUN_OSS_CNAME = "https://static.tra.ink"
 BUCKET_ACL_TYPE = "public-read"  # private, public-read, public-read-write
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.TemplateHTMLRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+        'rest_framework.renderers.AdminRenderer',
+        'rest_framework.renderers.JSONRenderer',
+    )
+}
 
 
 # Machina
