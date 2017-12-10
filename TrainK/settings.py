@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'train',
+    'ticket',
 
 
     'rest_framework',
@@ -65,7 +66,10 @@ ROOT_URLCONF = 'TrainK.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [MACHINA_MAIN_TEMPLATE_DIR],
+        'DIRS': [
+            MACHINA_MAIN_TEMPLATE_DIR,
+            os.path.join(BASE_DIR, "templates")
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

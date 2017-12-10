@@ -19,6 +19,7 @@ from machina.app import board
 
 urlpatterns = [
     path(r'admin/', admin.site.urls),
+    path(r'ticket/', include('ticket.urls')),
     path(r'', include('train.urls')),
     path(r'forum/', include(board.urls)),
 ]

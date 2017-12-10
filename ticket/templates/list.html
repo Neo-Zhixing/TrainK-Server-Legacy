@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<div class='container py' id="ticket-list">
+<ticket
+v-for="ticket in tickets"
+v-bind:ticket = 'ticket'></ticket>
+</div>
+<script>
+{% verbatim myblock %}
+function ticketList(){
+      axios.get('//api.tra.ink/ticket/list', {
+        params: {
+          'date': '2017-12-23',
+          'from': 'XCH',
+          'to': 'BJP',
+          'type': 'ADULT'
+        }
+      })
+      .then(function (response) {
+        data = response.data['data']
+        map = response.data['map']
+        console.log(data)
+        ticket_list.tickets = data;
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+    }
+Vue.component('ticket', {
+  props: ['ticket'],
+  template: '<div class="row jumbotron"><p>{{ ticket.trainName }}</p></div>'
+})
+var ticket_list = new Vue({
+  el: '#ticket-list',
+  data: {
+    tickets: null
+  },
+  methods: {
+    ticketList
+  },
+  mounted: function () {
+      this.ticketList();
+  }
+})
+{% endverbatim myblock %}
+</script>
+
+{% endblock %}
