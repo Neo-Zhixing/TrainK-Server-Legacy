@@ -36,29 +36,121 @@ max-width: 600px;
 
 <div class="container py-5">
   <div class="row">
-    <div class="col-md-9">
+    <div class="col-md-7">
       {% for stop in stops %}
       <div class="row py-1 jumbotron">
         <div class="col-1 py-1">
-          <h6>{{ stop.arrivalTime }}</h6>
-          <h6>{{ stop.departureTime }}</h6>
+          <h6>{{ stop.arrivalTime|timedelta }}</h6>
+          <h6>{{ stop.departureTime|timedelta }}</h6>
         </div>
         <div class="col-5 py-1"><h1>{{ stop.station.name }}</h1></div>
       </div>
       {% endfor %}
     </div>
-    <div class="col-md-3">
-      <div class="card">
+    <div class="col-md-5">
+      <div class="card" id="delay">
         <div class="card-header">
           正晚点
         </div>
         <div class="card-body">
-          <h4 class="card-title">Special title treatment</h4>
-          <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-          <a href="#" class="btn btn-primary">Go somewhere</a>
+          {% verbatim myblock %}
+          <h4 class="card-title">{{title}}</h4>
+          <p class="card-text">{{subtitle}}</p>
+          {% endverbatim myblock %}
+          <delay-chart v-bind:delays="delays" v-bind:dates="dates" telecode="{{telecode}}"></delay-chart>
+          <a href="/query/record?telecode={{telecode}}" class="btn btn-primary">查看历史记录</a>
         </div>
       </div>
+      <!--PC和WAP自适应版-->
+<div id="SOHUCS" sid="train:{{telecode}}" ></div> 
+<script> 
+(function(){ 
+var appid = 'cytmtq0Qf'; 
+var conf = 'prod_625608e62a2bdd5da5c0ec0374b8dbd5'; 
+var width = window.innerWidth || document.documentElement.clientWidth; 
+if (width < 960) { 
+window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="text/javascript" src="http://changyan.sohu.com/upload/mobile/wap-js/changyan_mobile.js?client_id=' + appid + '&conf=' + conf + '"><\/script>'); } else { var loadJs=function(d,a){var c=document.getElementsByTagName("head")[0]||document.head||document.documentElement;var b=document.createElement("script");b.setAttribute("type","text/javascript");b.setAttribute("charset","UTF-8");b.setAttribute("src",d);if(typeof a==="function"){if(window.attachEvent){b.onreadystatechange=function(){var e=b.readyState;if(e==="loaded"||e==="complete"){b.onreadystatechange=null;a()}}}else{b.onload=a}}c.appendChild(b)};loadJs("http://changyan.sohu.com/upload/changyan.js",function(){window.changyan.api.config({appid:appid,conf:conf})}); } })(); </script>
     </div>
   </div>
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+<script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+
+<script>
+Vue.component('delay-chart', {
+  extends: VueChartJs.Line,
+  props: ['delays', 'dates', 'telecode'],
+  watch: {
+    delays: function() {
+      //this.renderChart(this.data, this.options);
+      this.renderChart({
+      labels: this.dates,
+      datasets: [
+        {
+          label: '平均晚点',
+          backgroundColor: '#f87979',
+          data: this.delays
+        }
+      ]
+    }, {responsive: true, maintainAspectRatio: false})
+    }
+  }
+})
+var delay = new Vue({
+  el: '#delay',
+  data: {
+    delays: [],
+    dates:[],
+    title: '',
+    subtitle: ''
+  },
+  mounted() {
+    axios.get('/query/record', {
+        params: {
+          'telecode': '{{telecode}}',
+          'recent': '30',
+          'actions': 'analysis'
+        }
+      })
+      .then(function (response) {
+        var results = response.data.results
+        delay.delays = results.map(function(obj){return obj.delayAvg})
+        delay.dates = results.map(function(obj){return obj.departureDate})
+        var avgDelay = 0
+        for(var i=1;i<delay.delays.length;i++){
+          avgDelay += delay.delays[i] 
+        }
+        avgDelay /= delay.delays.length
+        var title = ''
+        var subtitle = ''
+        if(avgDelay > 90){
+          title = '不在一个时区'
+          subtitle = '搭车前请自行调整时钟'
+        }
+        else if(avgDelay > 30){
+          title = '生活习惯问题'
+          subtitle = '适度迟到是礼貌的一种表现形式'
+        }
+        else if(avgDelay > 5){
+          title = '一般不会迟到'
+          subtitle = '除非家里有事'
+        }
+        else{
+          title = '小嘛小火车'
+          subtitle = '不怕太阳晒，不怕风雪狂'
+        }
+        delay.title = title
+        delay.subtitle = subtitle
+        console.log(response.data)
+      })
+      .catch(function (error) {
+        console.log(error);
+      })
+  }
+})
+</script>
 {% endblock content %}

@@ -84,10 +84,19 @@ class StatusSpider(scrapy.Spider):
 			return
 		string = string.group(1)
 		(status, result) = self.parseStr(string)
-		self.logger.info("scraped string %s, status %s, result %s", string, status.name, str(result))
 
 		stop = response.meta['stop']
 		action = response.meta['action']
+
+		# Result corrections - support for cross-day delays.
+		scheduledTime, _ = stop.scheduledStop.timeForAction(action)
+		result += datetime.timedelta(days=scheduledTime.days)
+		diff = scheduledTime - result
+		if diff > datetime.timedelta(hours=4):
+			result += datetime.timedelta(days=1)
+		elif diff < -datetime.timedelta(hours=4):
+			result -= datetime.timedelta(days=1)
+
 		if status is self.TrainStatus.Actual:
 			stop.update(action, result, False)
 		elif status is self.TrainStatus.Anticipated:

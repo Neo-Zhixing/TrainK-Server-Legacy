@@ -41,4 +41,4 @@ class TrainSerializer(serializers.ModelSerializer):
 class RecordSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = models.Record
-		fields = ('departureDate', 'train', 'stops')
+		fields = ('departureDate', 'stops')

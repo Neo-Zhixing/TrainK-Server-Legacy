@@ -14,8 +14,8 @@ class QueryHomeView(TemplateView):
 		name = forms.CharField(label='', widget=forms.TextInput(attrs={'class': 'form-control text-center', 'placeholder': 'G100'}))
 
 	class PathForm(forms.Form):
-		origin = forms.CharField(label='', widget=forms.TextInput(attrs={'class': 'form-control text-right', 'placeholder': '北京'}))
-		destination = forms.CharField(label='', widget=forms.TextInput(attrs={'class': 'form-control text-left', 'placeholder': '上海'}))
+		departure_name = forms.CharField(label='', widget=forms.TextInput(attrs={'class': 'form-control text-right', 'placeholder': '北京'}))
+		arrival_name = forms.CharField(label='', widget=forms.TextInput(attrs={'class': 'form-control text-left', 'placeholder': '上海'}))
 
 	template_name = 'query.html'
 

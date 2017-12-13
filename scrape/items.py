@@ -31,11 +31,7 @@ class Train(DjangoItem):
 
 	def itemWillCreate(self):
 		for stop in self['stops']:
-			station = models.Station.objects.filter(name=stop['station'])
-			if station.exists():
-				station = station.first()
-			else:
-				station = models.Station.objects.create(name=stop['station'])
+			station, _ = models.Station.objects.get_or_create(name=stop['station'])
 			stop['station'] = station.id
 
 
@@ -59,6 +55,7 @@ class Record(DjangoItem):
 				stop['departureTimeAnticipated'] = True
 			if stop.get('arrivalTime'):
 				stop['arrivalTimeAnticipated'] = True
+			del self['station']
 			return stop
 
 		self['stops'] = [setTimeAnticipated(stop) for stop in self['train'].stops]

@@ -38,6 +38,10 @@ class Stop(models.Model):
 	station = models.ForeignKey(Station, on_delete=models.PROTECT)
 	index = models.IntegerField(primary_key=True)
 
+	@property
+	def scheduledStop(self):
+		return self.train.stops[self.index]
+
 	# Both time and anticipated indicator are None:
 	# 	This stop is the origin or destination stop, so the arrival/departure time is not available.
 	# Anticipated indicator is None, while time has value:
@@ -53,6 +57,10 @@ class Stop(models.Model):
 
 	class Meta:
 		managed = False
+
+	def timeForAction(self, action):
+		key = action.name.lower()
+		return (getattr(self, key + 'Time'), getattr(self, key + 'TimeAnticipated'))
 
 	def update(self, action, time='NoChange', anticipated='NoChange'):
 		key = 'departureTime' if action is TrainAction.Departure else 'arrivalTime'
