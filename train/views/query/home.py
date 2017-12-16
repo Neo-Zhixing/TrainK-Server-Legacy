@@ -23,7 +23,7 @@ class QueryHomeView(TemplateView):
 		forms = {'pathForm': self.PathForm()}
 		theForm = self.Form()
 		for (name, placeholder) in [
-			('trainForm', 'G100'),
+			('trainForm', 'G1'),
 			('stationForm', '北京'),
 			('railwayForm', '广深港高铁')]:
 			newForm = deepcopy(theForm)

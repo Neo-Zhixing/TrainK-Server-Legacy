@@ -9,11 +9,10 @@ class StationSerializer(serializers.ModelSerializer):
 
 
 class TrainSerializer(serializers.ModelSerializer):
-	serializeStops = True
 
 	def __init__(self, *args, **kwargs):
-		# Don't pass the 'fields' arg up to the superclass
-		self.serializeStops = kwargs.pop('stops', True)
+		self.serializeStops = kwargs.pop('serializeStops', True)
+		self.stopsToInclude = kwargs.pop('includingStops', {})
 		super(TrainSerializer, self).__init__(*args, **kwargs)
 
 	class Meta:
@@ -28,12 +27,18 @@ class TrainSerializer(serializers.ModelSerializer):
 		else:
 			data['originStop'] = data['stops'][0]
 			data['destinationStop'] = data['stops'][-1]
-			del data['stops']
 			stopsToSerialize = [data['originStop'], data['destinationStop']]
 
+			additionalStops = dict((self.stopsToInclude[stop['station']], stop) for stop in data['stops'] if stop['station'] in self.stopsToInclude)
+			data.update(additionalStops)
+			stopsToSerialize += additionalStops.values()
+
+			del data['stops']
+
 		for stop in stopsToSerialize:
-			station = models.Station.objects.get(id=stop['station'])
-			stop['station'] = StationSerializer(station).data
+			if isinstance(stop['station'], int):
+				station = models.Station.objects.get(id=stop['station'])
+				stop['station'] = StationSerializer(station).data
 
 		return data
 

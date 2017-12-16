@@ -43,15 +43,14 @@ class TrainView(APIView):
 		# 通过列车名或Telecode查找单个列车
 		train = _getTrain(request.GET)
 		if train:
-			return Response(serializers.TrainSerializer(train).data, template_name='query-train.html')
+			return Response(serializers.TrainSerializer(train).data, template_name='train.html')
 
 		# 通过站点ID/Telecode/中文名查找经过该站点的所有列车
 		stationID = _getStationID(request.GET, 'station')
 		if stationID:
 			train = models.Train.objects.filter(stops__contains=[{'station': stationID}])
 			train = self.paginator.paginate_queryset(train, request)
-			response = self.paginator.get_paginated_response(serializers.TrainSerializer(train, many=True, stops=False).data)
-			response.template_name = 'query-train.html'
+			response = self.paginator.get_paginated_response(serializers.TrainSerializer(train, many=True, serializeStops=False).data)
 			return response
 
 		# 通过站点ID/Telecode/中文名查找两个站点之间的所有列车
@@ -59,9 +58,27 @@ class TrainView(APIView):
 		arrivalID = _getStationID(request.GET, 'arrival')
 		if departureID and arrivalID:
 			train = models.Train.objects.filter(stops__contains=[{'station': departureID}, {'station': arrivalID}])
+			trainsToExclude = []
+			for i in train:
+				for index, stop in enumerate(i.stops):
+					if stop['station'] == departureID:
+						departureIndex = index
+					elif stop['station'] == arrivalID:
+						arrivalIndex = index
+				if departureIndex > arrivalIndex:
+					trainsToExclude.append(i.telecode)
+			for telecode in trainsToExclude:
+				train = train.exclude(telecode=telecode)
 			train = self.paginator.paginate_queryset(train, request)
-			response = self.paginator.get_paginated_response(serializers.TrainSerializer(train, many=True, stops=False).data)
-			response.template_name = 'query-train.html'
+			response = self.paginator.get_paginated_response(
+				serializers.TrainSerializer(
+					train,
+					many=True,
+					serializeStops=False,
+					includingStops={departureID: 'departureStop', arrivalID: 'arrivalStop'})
+				.data
+			)
+			response.template_name = 'route.html'
 			return response
 
 		return bad_request(request, None)

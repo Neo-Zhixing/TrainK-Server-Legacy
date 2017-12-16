@@ -8,13 +8,18 @@ register = template.Library()
 
 @register.filter(name='timedelta')
 def Timedelta(value):
+	return parse_duration(value)
+
+
+@register.filter(name='timedeltaStr')
+def timedeltaStr(value):
 	duration = parse_duration(value)
 	days, hours, minutes, seconds, miliseconds = durationComponents(duration)
 	return '{:02d}:{:02d}'.format(hours, minutes)
 
 
-@register.filter(name='timedeltaSec')
-def TimedeltaSec(value):
+@register.filter
+def timedeltaSec(value):
 	duration = parse_duration(value)
 
 	flag = 1
@@ -26,12 +31,35 @@ def TimedeltaSec(value):
 
 @register.filter
 def timedeltaMin(value):
-	return round(abs(TimedeltaSec(value)) / 60)
+	return round(abs(timedeltaSec(value)) / 60)
 
 
-@register.filter(name='connect')
-def Connect(value):
+@register.filter
+def timedeltaMinus(value1, value2):
+	return parse_duration(value1) - parse_duration(value2)
+
+
+@register.filter
+def timedeltaComponent(value, key):
+	keys = ['days', 'hours', 'minutes', 'seconds', 'miliseconds']
+	values = {}
+	components = durationComponents(value)
+	for index, value in enumerate(components):
+		values[keys[index]] = value
+	return values[key]
+
+
+@register.filter
+def connect(value):
 	nameStr = ''
 	for name in value:
 		nameStr += name + '/'
+	return nameStr[:-1]
+
+
+@register.filter
+def combine(value):
+	nameStr = ''
+	for name in value:
+		nameStr += name + '\n'
 	return nameStr[:-1]

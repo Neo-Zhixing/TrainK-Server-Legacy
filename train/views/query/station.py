@@ -1,12 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.views.defaults import page_not_found
-
+from django.shortcuts import get_object_or_404
+from django.views.defaults import bad_request
 from train import models, serializers
 
 
 class StationView(APIView):
-	template_name = 'query-train.html'
+	template_name = 'station.html'
 
 	def get(self, request):
 		name = request.GET.get('name')
@@ -14,14 +14,11 @@ class StationView(APIView):
 
 		# 根据请求参数获取Station Object
 		if name:
-			station = models.Station.objects.filter(name=name).first()
+			station = get_object_or_404(models.Station, name=name)
 		elif telecode:
-			station = models.Station.objects.filter(telecode=telecode).first()
+			station = get_object_or_404(models.Station, telecode=telecode)
 		else:
-			return page_not_found(request, exception='Invalid Parameters')
-
-		if not station:
-			return page_not_found(request, exception='Train Not Found')
+			return bad_request(request, None)
 
 		serializer = serializers.StationSerializer(station)
 		return Response(serializer.data)
