@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     # Machina related apps:
-    # 'mptt',
+    'mptt',
     'haystack',
     'widget_tweaks',
 ] + get_machina_apps()
@@ -67,8 +67,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
+            os.path.join(BASE_DIR, "templates"),
             MACHINA_MAIN_TEMPLATE_DIR,
-            os.path.join(BASE_DIR, "templates")
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -174,7 +174,7 @@ REST_FRAMEWORK = {
 
 # Machina
 MACHINA_FORUM_NAME = 'TrainK'
-
+MACHINA_BASE_TEMPLATE_NAME = 'base.html'
 # Django-haystack settings
 HAYSTACK_CONNECTIONS = {
     'default': {
