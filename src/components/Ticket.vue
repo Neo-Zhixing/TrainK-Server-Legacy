@@ -1,0 +1,145 @@
+<template>
+  <b-row class="ticket">
+    <b-col>
+      <b-row :class="{ 'ticket-gist-triggered': !collapsed }" class="ticket-gist" @click="expand">
+        <b-col>
+          <h1>{{ ticket.trainName }}</h1>
+        </b-col>
+        <b-col>
+          <b-badge v-if="ticket.departureStation === ticket.originStation" variant="primary">始</b-badge>
+          <b-badge v-else>过</b-badge>
+          {{ stationmap[ticket.departureStation] }}
+          <h2>{{ ticket.departureTime }}</h2>
+        </b-col>
+        <b-col>
+          {{ticket.duration}}
+          <div class="separate-line"></div>
+          {{arrivalDay}}
+          <font-awesome-icon v-if="ticket.IDCardSupported" v-b-tooltip.hover title="支持刷身份证进站" icon="id-card" />
+        </b-col>
+        <b-col>
+          <b-badge v-if="ticket.arrivalStation === ticket.destinationStation" variant="primary">终</b-badge>
+          <b-badge v-else>过</b-badge>
+          {{ stationmap[ticket.arrivalStation] }}
+          <h2>{{ ticket.arrivalTime }}</h2>
+        </b-col>
+      </b-row>
+      <b-row class="py-2" v-if="!collapsed">
+        <b-col cols="10" class="text-left">
+          <ul class="ticket-info">
+            <li v-for="info in ticketInfo">
+              {{info.key}}<b-badge :variant="info.badge">{{info.value}}</b-badge>
+            </li>
+          </ul>
+        </b-col>
+        <b-col cols="2">
+          <b-button variant="primary" :disabled="buttonText != '预订'" size="sm">{{buttonText}}</b-button>
+        </b-col>
+      </b-row>
+    </b-col>
+  </b-row>
+</template>
+
+<script>
+  import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
+  import { EventBus } from '../bus.js'
+  export default {
+    name: 'ticket',
+    props: ['ticket', 'stationmap'],
+    data () {
+      return {
+        collapsed: true
+      }
+    },
+    computed: {
+      arrivalDay () {
+        var hour = Number(this.ticket.departureTime.substring(0, 2)) + Number(this.ticket.duration.substring(0, 2))
+        var minute = Number(this.ticket.departureTime.substring(3, 5)) + Number(this.ticket.duration.substring(3, 5))
+        if (minute >= 60) hour = hour + 1
+
+        var matchStr
+        if (hour >= 24 && hour < 48) matchStr = '次'
+        else if (hour >= 48 && hour < 72) matchStr = '两'
+        else if (hour >= 72) matchStr = '三'
+        else matchStr = '当'
+        return matchStr + '日到达'
+      },
+      ticketInfo () {
+        let types = ['gg_num', 'tz_num', 'yb_num', '高级软卧', '软卧', '硬卧', '软座', '硬座', '动卧', '商务座', '一等座', '二等座', '无座', '其他']
+        var values = []
+        for (var index in types) {
+          let value = this.ticket[types[index]]
+          if (value !== undefined) {
+            var info = {}
+            info.key = types[index]
+            info.value = value
+            if (value === '有') info.badge = 'success'
+            else if (value === '无') info.badge = 'danger'
+            else info.badge = 'primary'
+            values.push(info)
+          }
+        }
+        return values
+      },
+      buttonText () {
+        if (this.ticket.buttonText === '23:00-06:00系统维护时间') return '系统维护'
+        return this.ticket.buttonText
+      }
+    },
+    methods: {
+      expand () {
+        // Expand/Collapse the ticket details, and if we're expanding, send an event to all of other ticket components.
+        if (this.collapsed) {
+          EventBus.$emit('ticket-expand', this)
+        }
+        this.collapsed = !this.collapsed
+      }
+    },
+    mounted () {
+      // Register EventBus. Listen to the events other ticket components sent.
+      EventBus.$on('ticket-expand', sender => {
+        // Collapse the ticket details unless this is the sender
+        if (this !== sender) this.collapsed = true
+      })
+    },
+    components: {
+      FontAwesomeIcon
+    }
+  }
+</script>
+
+<style scoped>
+.separate-line {
+  background-color: black;
+  height: 1px;
+  margin: 5px 0;
+  width: 100%;
+}
+
+.ticket {
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.ticket-gist {
+  user-select: none;
+  cursor:pointer;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  transition: background-color 0.3s;
+}
+.ticket-gist:hover,
+.ticket-gist-triggered {
+  background-color: #DDDDDD;
+}
+.ticket-info {
+  list-style-type: none;
+}
+.ticket-info li {
+  margin-right: 2rem;
+  float: left;
+}
+</style>
