@@ -33,7 +33,7 @@
           </ul>
         </b-col>
         <b-col cols="2">
-          <b-button variant="primary" :disabled="buttonText != '预订'" size="sm">{{buttonText}}</b-button>
+          <b-button variant="primary" :disabled="ticket.buttonText != '预订'" size="sm">{{ticket.buttonText}}</b-button>
         </b-col>
       </b-row>
     </b-col>
@@ -41,8 +41,11 @@
 </template>
 
 <script>
+  import fontawesome from '@fortawesome/fontawesome'
   import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
+  import { faIdCard } from '@fortawesome/fontawesome-free-solid'
   import { EventBus } from '../bus.js'
+  fontawesome.library.add(faIdCard)
   export default {
     name: 'ticket',
     props: ['ticket', 'stationmap'],
@@ -81,10 +84,6 @@
         }
         return values
       },
-      buttonText () {
-        if (this.ticket.buttonText === '23:00-06:00系统维护时间') return '系统维护'
-        return this.ticket.buttonText
-      }
     },
     methods: {
       expand () {

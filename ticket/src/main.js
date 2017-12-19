@@ -8,11 +8,6 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-import fontawesome from '@fortawesome/fontawesome'
-import { faIdCard } from '@fortawesome/fontawesome-free-solid'
-
-fontawesome.library.add(faIdCard)
-
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)

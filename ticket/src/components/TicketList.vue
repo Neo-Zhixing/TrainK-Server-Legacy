@@ -28,9 +28,9 @@ export default {
     ticketList () {
       axios.get('//api.tra.ink/ticket/list', {
         params: {
-          'date': '2017-12-23',
-          'from': 'XCH',
-          'to': 'BJP',
+          'date': this.$route.query.date,
+          'from': this.$route.query.from,
+          'to': this.$route.query.to,
           'type': 'ADULT'
         }
       })

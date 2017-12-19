@@ -8,7 +8,7 @@ module.exports = {
   dev: {
 
     // Paths
-    assetsSubDirectory: 'static',
+    assetsSubDirectory: 'ticket',
     assetsPublicPath: '//localhost:8080/',
     proxyTable: {},
 
@@ -54,7 +54,7 @@ module.exports = {
 
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
-    assetsSubDirectory: '',
+    assetsSubDirectory: 'ticket',
     assetsPublicPath: '//static.tra.ink/web/',
 
     /**
