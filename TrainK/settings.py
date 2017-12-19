@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'webpack_loader',
+
     'train',
     'ticket',
 
@@ -148,7 +151,8 @@ CACHES = {
 STATIC_URL = '/web/'
 STATICFILES_DIRS = (
     MACHINA_MAIN_STATIC_DIR,
-    os.path.join(BASE_DIR, "static")
+    os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, 'dist'),
 )
 STATICFILES_STORAGE = 'aliyun_oss2_storage.backends.AliyunStaticStorage'
 DEFAULT_FILE_STORAGE = 'aliyun_oss2_storage.backends.AliyunMediaStorage'
@@ -180,4 +184,11 @@ HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
     },
+}
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'dist/',
+        'STATS_FILE': os.path.join(BASE_DIR, 'build/webpack-stats.json'),
+    }
 }
