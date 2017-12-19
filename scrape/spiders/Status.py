@@ -4,6 +4,7 @@ import re
 import enum
 import datetime
 from django.utils import timezone
+from django.utils.dateparse import parse_duration
 from urllib import parse
 from train import models
 
@@ -89,13 +90,15 @@ class StatusSpider(scrapy.Spider):
 		action = response.meta['action']
 
 		# Result corrections - support for cross-day delays.
-		scheduledTime, _ = stop.scheduledStop.timeForAction(action)
-		result += datetime.timedelta(days=scheduledTime.days)
-		diff = scheduledTime - result
-		if diff > datetime.timedelta(hours=4):
-			result += datetime.timedelta(days=1)
-		elif diff < -datetime.timedelta(hours=4):
-			result -= datetime.timedelta(days=1)
+		if result:
+			scheduledTime = stop.scheduledStop['departureTime'] if action is models.TrainAction.Departure else stop.scheduledStop['arrivalTime']
+			scheduledTime = parse_duration(scheduledTime)
+			result += datetime.timedelta(days=scheduledTime.days)
+			diff = scheduledTime - result
+			if diff > datetime.timedelta(hours=4):
+				result += datetime.timedelta(days=1)
+			elif diff < -datetime.timedelta(hours=4):
+				result -= datetime.timedelta(days=1)
 
 		if status is self.TrainStatus.Actual:
 			stop.update(action, result, False)

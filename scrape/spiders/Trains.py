@@ -19,6 +19,10 @@ class Spider(scrapy.Spider):
 		if not self.date:
 			from datetime import date
 			self.date = date.today().isoformat()
+		if isinstance(self.date, str) and self.date.isnumeric():
+			from datetime import date
+			date = date.today() + timedelta(days=int(self.date))
+			self.date = date.isoformat()
 
 		# Parse page info into JSON
 		data = body.decode('utf-8')

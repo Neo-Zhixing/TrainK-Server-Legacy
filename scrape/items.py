@@ -55,7 +55,7 @@ class Record(DjangoItem):
 				stop['departureTimeAnticipated'] = True
 			if stop.get('arrivalTime'):
 				stop['arrivalTimeAnticipated'] = True
-			del self['station']
+			del stop['station']
 			return stop
 
 		self['stops'] = [setTimeAnticipated(stop) for stop in self['train'].stops]

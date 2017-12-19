@@ -35,8 +35,12 @@ class Record(models.Model):
 class Stop(models.Model):
 	train = models.ForeignKey(Train, on_delete=models.PROTECT)
 	record = models.ForeignKey(Record, on_delete=models.PROTECT)
-	station = models.ForeignKey(Station, on_delete=models.PROTECT)
 	index = models.IntegerField(primary_key=True)
+
+	@property
+	def station(self):
+		stationID = self.train.stops[self.index]['station']
+		return Station.objects.get(pk=stationID)
 
 	@property
 	def scheduledStop(self):
