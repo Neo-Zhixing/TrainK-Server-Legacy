@@ -1,7 +1,7 @@
 <template>
   <b-row class="ticket">
     <b-col>
-      <b-row :class="{ 'ticket-gist-triggered': !collapsed }" class="ticket-gist" @click="expand">
+      <b-row :class="{ 'ticket-gist-triggered': !collapsed }" class="ticket-gist text-center" @click="expand">
         <b-col>
           <h1>{{ ticket.trainName }}</h1>
         </b-col>
@@ -12,10 +12,10 @@
           <h2>{{ ticket.departureTime }}</h2>
         </b-col>
         <b-col>
-          {{ticket.duration}}
+          {{ticket.duration}} {{arrivalDay}}
           <div class="separate-line"></div>
-          {{arrivalDay}}
           <font-awesome-icon v-if="ticket.IDCardSupported" v-b-tooltip.hover title="支持刷身份证进站" icon="id-card" />
+          <font-awesome-icon v-if="ticket.reward" v-b-tooltip.hover title="可用积分兑换" icon="tag" />
         </b-col>
         <b-col>
           <b-badge v-if="ticket.arrivalStation === ticket.destinationStation" variant="primary">终</b-badge>
@@ -24,18 +24,20 @@
           <h2>{{ ticket.arrivalTime }}</h2>
         </b-col>
       </b-row>
-      <b-row class="py-2" v-if="!collapsed">
-        <b-col cols="10" class="text-left">
-          <ul class="ticket-info">
-            <li v-for="info in ticketInfo">
-              {{info.key}}<b-badge :variant="info.badge">{{info.value}}</b-badge>
-            </li>
-          </ul>
-        </b-col>
-        <b-col cols="2">
-          <b-button variant="primary" :disabled="ticket.buttonText != '预订'" size="sm">{{ticket.buttonText}}</b-button>
-        </b-col>
-      </b-row>
+      <b-collapse :id="ticket.trainTelecode + '-details'" :visible="!collapsed">
+        <b-row class="py-2">
+          <b-col cols="10" class="text-left">
+            <ul class="ticket-info">
+              <li v-for="info in ticketInfo">
+                {{info.key}}<b-badge :variant="info.badge">{{info.value}}</b-badge>
+              </li>
+            </ul>
+          </b-col>
+          <b-col cols="2">
+            <b-button variant="primary" :disabled="ticket.buttonText != '预订'" size="sm">{{ticket.buttonText}}</b-button>
+          </b-col>
+        </b-row>
+      </b-collapse>
     </b-col>
   </b-row>
 </template>
@@ -43,9 +45,9 @@
 <script>
   import fontawesome from '@fortawesome/fontawesome'
   import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
-  import { faIdCard } from '@fortawesome/fontawesome-free-solid'
+  import { faIdCard, faTag } from '@fortawesome/fontawesome-free-solid'
   import { EventBus } from '../bus.js'
-  fontawesome.library.add(faIdCard)
+  fontawesome.library.add(faIdCard, faTag)
   export default {
     name: 'ticket',
     props: ['ticket', 'stationmap'],
@@ -83,7 +85,7 @@
           }
         }
         return values
-      },
+      }
     },
     methods: {
       expand () {

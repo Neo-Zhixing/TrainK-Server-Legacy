@@ -9,7 +9,7 @@ export default new Router({
   mode: 'history',
   base: '/ticket',
   routes: [
-  	{
+    {
       path: '/',
       name: 'TicketHome',
       component: TicketHome

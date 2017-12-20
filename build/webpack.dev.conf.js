@@ -38,7 +38,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     },
     headers: {
       "Access-Control-Allow-Origin":"\*"
-  },
+    },
   },
   plugins: [
     new webpack.DefinePlugin({

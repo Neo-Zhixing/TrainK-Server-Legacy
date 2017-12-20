@@ -1,7 +1,12 @@
 <template>
   <b-container>
+    <ticket-input-panel horizontal
+    :from="this.$route.query.from"
+    :to="this.$route.query.to"
+    :date="this.$route.query.date"
+    @submit="submit"/>
     <b-row>
-      <b-col md="9" class="px-4">
+      <b-col md="9">
         <ticket
         v-for="ticket in tickets" :key="ticket.trainTelecode"
         v-bind:ticket = 'ticket'
@@ -16,6 +21,7 @@
 <script>
 import axios from 'axios'
 import Ticket from './Ticket'
+import TicketInputPanel from './TicketInputPanel'
 export default {
   name: 'TicketList',
   data () {
@@ -42,11 +48,22 @@ export default {
       .catch(function (error) {
         console.log(error)
       })
+    },
+    submit (event) {
+      this.$router.replace({
+        path: 'list',
+        query: {
+          from: event.departureStation,
+          to: event.arrivalStation,
+          date: event.date
+        }
+      })
+      this.ticketList()
     }
   },
   mounted () {
     this.ticketList()
   },
-  components: { Ticket }
+  components: { Ticket, TicketInputPanel }
 }
 </script>

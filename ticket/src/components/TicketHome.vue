@@ -1,9 +1,9 @@
 <template>
-<div class="py-5">
+<div class="py-5" id="ticket-panel-row">
   <b-container>
     <b-row>
       <b-col md="6">
-        <ticket-input-panel/>
+        <ticket-input-panel @submit="submit"/>
       </b-col>
     </b-row>
   </b-container>
@@ -15,8 +15,16 @@
   export default {
     name: 'ticket',
     props: [],
-    data () {
-      return {
+    methods: {
+      submit (event) {
+        this.$router.replace({
+          path: 'list',
+          query: {
+            from: event.departureStation,
+            to: event.arrivalStation,
+            date: event.date
+          }
+        })
       }
     },
     components: {
@@ -26,4 +34,9 @@
 </script>
 
 <style scoped>
+#ticket-panel-row {
+  background-image: url("../static/img/features.jpg");
+  background-height:100%;
+  background-position: center top;
+}
 </style>
