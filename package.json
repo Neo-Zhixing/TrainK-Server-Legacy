@@ -25,6 +25,7 @@
     "vue": "^2.5.2",
     "vue-flatpickr-component": "^5.0.1",
     "vue-router": "^3.0.1",
+    "vue-simple-spinner": "^1.2.8",
     "webpack-bundle-tracker": "^0.2.0"
   },
   "devDependencies": {

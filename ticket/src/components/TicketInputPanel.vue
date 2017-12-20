@@ -71,7 +71,7 @@
   fontawesome.library.add(faArrowsAltH, faCalendarAlt)
   
   export default {
-    name: 'ticket',
+    name: 'TicketInputPanel',
     props: {
       'horizontal': Boolean,
       'from': String,
@@ -93,7 +93,7 @@
         return {
           locale: Mandarin,
           mode: this.form.tripType === 1 ? 'single' : 'range',
-          minDate: new Date()
+          minDate: 'today'
         }
       }
     },

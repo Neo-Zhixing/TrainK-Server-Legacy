@@ -12,10 +12,11 @@
           <h2>{{ ticket.departureTime }}</h2>
         </b-col>
         <b-col>
-          {{ticket.duration}} {{arrivalDay}}
-          <div class="separate-line"></div>
-          <font-awesome-icon v-if="ticket.IDCardSupported" v-b-tooltip.hover title="支持刷身份证进站" icon="id-card" />
+          {{ticket.duration}}
+           <font-awesome-icon v-if="ticket.IDCardSupported" v-b-tooltip.hover title="支持刷身份证进站" icon="id-card" />
           <font-awesome-icon v-if="ticket.reward" v-b-tooltip.hover title="可用积分兑换" icon="tag" />
+          <div class="separate-line"></div>
+          {{arrivalDay}}
         </b-col>
         <b-col>
           <b-badge v-if="ticket.arrivalStation === ticket.destinationStation" variant="primary">终</b-badge>
@@ -30,11 +31,12 @@
             <ul class="ticket-info">
               <li v-for="info in ticketInfo">
                 {{info.key}}<b-badge :variant="info.badge">{{info.value}}</b-badge>
+                {{info.price}}
               </li>
             </ul>
           </b-col>
           <b-col cols="2">
-            <b-button variant="primary" :disabled="ticket.buttonText != '预订'" size="sm">{{ticket.buttonText}}</b-button>
+            <b-button variant="primary" size="sm">详情</b-button>
           </b-col>
         </b-row>
       </b-collapse>
@@ -43,6 +45,7 @@
 </template>
 
 <script>
+  import axios from 'axios'
   import fontawesome from '@fortawesome/fontawesome'
   import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
   import { faIdCard, faTag } from '@fortawesome/fontawesome-free-solid'
@@ -50,10 +53,11 @@
   fontawesome.library.add(faIdCard, faTag)
   export default {
     name: 'ticket',
-    props: ['ticket', 'stationmap'],
+    props: ['ticket', 'stationmap', 'querydate'],
     data () {
       return {
-        collapsed: true
+        collapsed: true,
+        price: null
       }
     },
     computed: {
@@ -70,19 +74,19 @@
         return matchStr + '日到达'
       },
       ticketInfo () {
-        let types = ['gg_num', 'tz_num', 'yb_num', '高级软卧', '软卧', '硬卧', '软座', '硬座', '动卧', '商务座', '一等座', '二等座', '无座', '其他']
+        let types = ['gg_num', 'yb_num', '特等座', '高级软卧', '软卧', '硬卧', '软座', '硬座', '动卧', '商务座', '一等座', '二等座', '无座', '其他']
         var values = []
         for (var index in types) {
           let value = this.ticket[types[index]]
-          if (value !== undefined) {
-            var info = {}
-            info.key = types[index]
-            info.value = value
-            if (value === '有') info.badge = 'success'
-            else if (value === '无') info.badge = 'danger'
-            else info.badge = 'primary'
-            values.push(info)
-          }
+          if (value === undefined) continue
+          var info = {}
+          info.key = types[index]
+          info.value = value
+          info.price = this.price === null ? null : this.price[info.key]
+          if (value === '有') info.badge = 'success'
+          else if (value === '无') info.badge = 'danger'
+          else info.badge = 'primary'
+          values.push(info)
         }
         return values
       }
@@ -92,6 +96,23 @@
         // Expand/Collapse the ticket details, and if we're expanding, send an event to all of other ticket components.
         if (this.collapsed) {
           EventBus.$emit('ticket-expand', this)
+          if (this.price === null) {
+            axios.get('//api.tra.ink/ticket/price', {
+              params: {
+                'telecode': this.ticket.trainTelecode,
+                'from': this.ticket.departureIndex,
+                'to': this.ticket.arrivalIndex,
+                'seat_types': this.ticket.seat_types,
+                'date': this.querydate
+              }
+            })
+            .then((response) => {
+              if (response.data !== {}) this.price = response.data
+            })
+            .catch(function (error) {
+              console.log(error)
+            })
+          }
         }
         this.collapsed = !this.collapsed
       }

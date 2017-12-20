@@ -17,7 +17,7 @@
     props: [],
     methods: {
       submit (event) {
-        this.$router.replace({
+        this.$router.push({
           path: 'list',
           query: {
             from: event.departureStation,
