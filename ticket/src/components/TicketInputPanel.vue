@@ -1,6 +1,6 @@
 <template>
 
-<b-row v-if="horizontal" id="ticket-input-body">
+<b-row v-if="horizontal">
   <b-col lg="2" class="my-1">
     <b-nav pills fill class="text-center">
       <b-nav-item :active="form.tripType==1" id="1" @click="tripTypeTab">单程</b-nav-item>
@@ -116,19 +116,3 @@
     }
   }
 </script>
-
-<style scoped>
-#ticket-input-body {
-  background-color: #f5f5f5;
-  border-radius: 10px;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-
-.ticket-input-component {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-</style>

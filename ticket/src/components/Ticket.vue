@@ -1,7 +1,7 @@
 <template>
   <b-row class="ticket">
     <b-col>
-      <b-row :class="{ 'ticket-gist-triggered': !collapsed }" class="ticket-gist text-center" @click="expand">
+      <b-row :class="{ 'ticket-gist-triggered': !collapsed, 'ticket-available': ticket.status === 0 }" class="ticket-gist text-center" @click="expand">
         <b-col>
           <h1>{{ ticket.trainName }}</h1>
         </b-col>
@@ -9,20 +9,24 @@
           <b-badge v-if="ticket.departureStation === ticket.originStation" variant="primary">始</b-badge>
           <b-badge v-else>过</b-badge>
           {{ stationmap[ticket.departureStation] }}
-          <h2>{{ ticket.departureTime }}</h2>
+          <h2>{{ ticket.status === 0 ? ticket.departureTime : '----' }}</h2>
         </b-col>
         <b-col>
-          {{ticket.duration}}
-           <font-awesome-icon v-if="ticket.IDCardSupported" v-b-tooltip.hover title="支持刷身份证进站" icon="id-card" />
-          <font-awesome-icon v-if="ticket.reward" v-b-tooltip.hover title="可用积分兑换" icon="tag" />
+          <template v-if="ticket.status === 0">
+            {{ticket.duration}}
+            <font-awesome-icon v-if="ticket.IDCardSupported" v-b-tooltip.hover title="支持刷身份证进站" icon="id-card" />
+            <font-awesome-icon v-if="ticket.reward" v-b-tooltip.hover title="可用积分兑换" icon="tag" />
+          </template>
+          <br/>
           <div class="separate-line"></div>
-          {{arrivalDay}}
+          <template v-if="ticket.status === 0">{{arrivalDay}}</template>
+          <template v-else><div class="text-danger">列车停运</div></template>
         </b-col>
         <b-col>
           <b-badge v-if="ticket.arrivalStation === ticket.destinationStation" variant="primary">终</b-badge>
           <b-badge v-else>过</b-badge>
           {{ stationmap[ticket.arrivalStation] }}
-          <h2>{{ ticket.arrivalTime }}</h2>
+          <h2>{{ ticket.status === 0 ? ticket.arrivalTime : '----' }}</h2>
         </b-col>
       </b-row>
       <b-collapse :id="ticket.trainTelecode + '-details'" :visible="!collapsed">
@@ -45,6 +49,7 @@
 </template>
 
 <script>
+  import TicketUtils from '../utils'
   import axios from 'axios'
   import fontawesome from '@fortawesome/fontawesome'
   import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
@@ -74,18 +79,16 @@
         return matchStr + '日到达'
       },
       ticketInfo () {
-        let types = ['gg_num', 'yb_num', '特等座', '高级软卧', '软卧', '硬卧', '软座', '硬座', '动卧', '商务座', '一等座', '二等座', '无座', '其他']
         var values = []
-        for (var index in types) {
-          let value = this.ticket[types[index]]
+        for (let index in this.ticket.seats) {
+          let value = this.ticket.seats[index]
           if (value === undefined) continue
           var info = {}
-          info.key = types[index]
-          info.value = value
-          info.price = this.price === null ? null : this.price[info.key]
-          if (value === '有') info.badge = 'success'
-          else if (value === '无') info.badge = 'danger'
-          else info.badge = 'primary'
+          info.key = TicketUtils.seatTypeMap[index]
+          info.price = this.price === null ? null : this.price[index]
+
+          info.value = value ? (value === true ? '有' : value) : '无'
+          info.badge = value ? (value === true ? 'success' : 'primary') : 'danger'
           values.push(info)
         }
         return values
@@ -93,6 +96,7 @@
     },
     methods: {
       expand () {
+        if (this.ticket.status !== 0) return
         // Expand/Collapse the ticket details, and if we're expanding, send an event to all of other ticket components.
         if (this.collapsed) {
           EventBus.$emit('ticket-expand', this)
@@ -146,14 +150,17 @@
 }
 .ticket-gist {
   user-select: none;
-  cursor:pointer;
   background-color: #f5f5f5;
   border-radius: 10px;
   padding-top: 1rem;
   padding-bottom: 1rem;
   transition: background-color 0.3s;
 }
-.ticket-gist:hover,
+.ticket-available{
+  cursor:pointer;
+}
+
+.ticket-available:hover,
 .ticket-gist-triggered {
   background-color: #DDDDDD;
 }

@@ -1,10 +1,32 @@
 <template>
   <b-container>
-    <ticket-input-panel horizontal
+    <ticket-input-panel id="ticket-input" horizontal
     :from="$route.query.from"
     :to="$route.query.to"
     :date="$route.query.date"
     @submit="submit"/>
+    <b-row>
+      <b-col lg="4">
+        <b-nav pills fill class="text-center">
+          <b-nav-item disabled :active="filters.order===0" id="0" @click="rankingTypePills">综合</b-nav-item>
+          <b-nav-item :active="filters.order===1" id="1" @click="rankingTypePills">
+            出发时间
+            <font-awesome-icon v-if="filters.order===1" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
+          </b-nav-item>
+          <b-nav-item :active="filters.order===2" id="2" @click="rankingTypePills">
+            时长
+            <font-awesome-icon v-if="filters.order===2" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
+          </b-nav-item>
+          <b-nav-item :active="filters.order===3" id="3" @click="rankingTypePills">
+            到达时间
+            <font-awesome-icon v-if="filters.order===3" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
+          </b-nav-item>
+        </b-nav>
+      </b-col>
+      <b-col lg="8">
+        <v-select multiple v-model="filters.options" :options="availableOptions"></v-select>
+      </b-col>
+    </b-row>
     <b-row>
       <b-col md="9">
         <spinner
@@ -13,9 +35,10 @@
           message="加载中"
           class="mt-5"
         />
+        <div v-else-if="currentTickets === null ? false : currentTickets.length === 0">没有找到</div>
         <template v-else>
           <ticket
-            v-for="ticket in tickets"
+            v-for="ticket in currentTickets"
             :key="ticket.trainTelecode"
             :ticket = "ticket"
             :stationmap = "stationMap"
@@ -30,19 +53,178 @@
 </template>
 
 <script>
+import TicketUtils from '../utils.js'
 import axios from 'axios'
 import Ticket from './Ticket'
 import TicketInputPanel from './TicketInputPanel'
 import Spinner from 'vue-simple-spinner'
+import vSelect from 'vue-select'
+
+import fontawesome from '@fortawesome/fontawesome'
+import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
+import { faSortUp, faSortDown } from '@fortawesome/fontawesome-free-solid'
+fontawesome.library.add(faSortUp, faSortDown)
+
 export default {
   name: 'TicketList',
   data () {
     return {
+      filters: {
+        keys: ['departureStation', 'arrivalStation', 'trainType', 'seatType'],
+        excludeMap: { // 互排表
+          ANYH: TicketUtils.highSpeedTrainTypes.add('ANYO'),
+          ANYO: TicketUtils.ordinaryTrainTypes.add('ANYH'),
+          ANY: new Set(Object.keys(TicketUtils.seatTypeMap)),
+          ANYS: TicketUtils.sleeperTypes
+        },
+        options: [],
+        order: 2,
+        reversed: false
+      },
+      currentTickets: null,
       tickets: null,
       stationMap: null
     }
   },
+  computed: {
+    filterOptions () {
+      let options = {}
+      for (let key of this.filters.keys) options[key] = new Set()
+      for (let option of this.filters.options) options[option.key].add(option.value) // 把select控件维护的options给转化为sets
+      return options
+    },
+    filterExcludes () {
+      let excludes = new Set()
+      for (let key of this.filters.keys.slice(2, 4)) for (let option of this.filterOptions[key]) if (this.filters.excludeMap[option] !== undefined) excludes = new Set([...excludes, ...this.filters.excludeMap[option]])
+      return excludes
+    },
+    availableOptions () { // 过滤器下拉框中可用的过滤器
+      // 排除tickets或者stationMap为null的情况
+      if (this.tickets === null) return []
+      if (this.stationMap === null) return []
+      let options = {}
+      for (let key of this.filters.keys) options[key] = new Set()
+      let excludes = this.filterExcludes
+
+      // 遍历所有票，在options中添加相应的过滤器
+      for (let ticket of this.tickets) {
+        options.departureStation.add(ticket.departureStation)
+        options.arrivalStation.add(ticket.arrivalStation)
+        let trainType = TicketUtils.typeForTrain(ticket.trainName)
+        if (!excludes.has(trainType)) options.trainType.add(trainType)
+        if (TicketUtils.highSpeedTrainTypes.has(trainType) && !excludes.has('ANYH')) options.trainType.add('ANYH')
+        else if (TicketUtils.ordinaryTrainTypes.has(trainType) && !excludes.has('ANYO')) options.trainType.add('ANYO')
+        // 遍历该票所有的座位, 添加相应过滤器
+        for (let seatType in ticket.seats) {
+          if (!excludes.has(seatType)) options.seatType.add(seatType)
+          if (TicketUtils.sleeperTypes.has(seatType) && !excludes.has('ANYS')) options.seatType.add('ANYS')
+        }
+      }
+      options.seatType.add('ANY')
+      options.departureStation.add('TERMINAL')
+      options.arrivalStation.add('TERMINAL')
+
+      // 把options set转化为array
+      var results = []
+      for (let index in this.filters.keys) {
+        let key = this.filters.keys[index]
+        for (var option of options[key]) {
+          var value
+          if (key === 'departureStation' || key === 'arrivalStation') value = option === 'TERMINAL' ? {'departureStation': '始发站', 'arrivalStation': '目的站'}[key] : this.stationMap[option] // 如果是终端站，则返回“始发站”或者“目的站”， 否则返回中文站名
+          else if (key === 'trainType') value = TicketUtils.trainTypeMap[option]
+          else if (key === 'seatType') value = TicketUtils.seatTypeMap[option]
+          results.push({
+            label: ['出发车站', '目的车站', '列车类型', '有票'][index] + ' - ' + value,
+            key: key,
+            value: option
+          })
+        }
+      }
+
+      // 排序results array
+      results.sort((a, b) => {
+        let aIndex = this.filters.keys.indexOf(a.key)
+        let bIndex = this.filters.keys.indexOf(b.key)
+        if (aIndex !== bIndex) return aIndex > bIndex
+        if (a.value.slice(0, 3) === 'ANY') return false
+        if (b.value.slice(0, 3) === 'ANY') return true
+        return true
+      })
+      return results
+    }
+  },
+  watch: {
+    'filters.options' (newOptions) {
+      let excludes = this.filterExcludes
+      for (let index in newOptions) {
+        if (excludes.has(newOptions[index].value)) {
+          newOptions.splice(index, 1)
+        }
+      }
+      this.rank()
+    }
+  },
   methods: {
+    rankingTypePills (sender) {
+      var element = sender.toElement
+      var newOrder = 0
+      for (var i = 0; i < 5; i++) {
+        if (element.id !== '') {
+          newOrder = element.id
+          break
+        }
+        element = element.parentElement
+      }
+      newOrder = Number(newOrder)
+      if (newOrder === this.filters.order) this.filters.reversed = !this.filters.reversed
+      else this.filters.order = newOrder
+      this.rank()
+    },
+    rank () {
+      if (this.tickets === null) return
+      let tickets = Object.assign([], this.tickets)
+      let options = this.filterOptions
+      tickets = tickets.filter((x) => {
+        let keyMap = {}
+        keyMap[this.filters.keys[0]] = 'originStation'
+        keyMap[this.filters.keys[1]] = 'destinationStation'
+        for (let key of this.filters.keys.slice(0, 2)) {
+          if (options[key].has('TERMINAL') && x[key] !== x[keyMap[key]]) return false // 终端站
+          if (!(
+            options[key].has(x[key]) || // 符合Filter条件
+             options[key].size === 0 || // 没有Filters
+            (options[key].size === 1 && options[key].has('TERMINAL')) // 只有一个终端站filter
+            )) return false
+        }
+
+        // 检查列车种类
+        let trainType = TicketUtils.typeForTrain(x.trainName)
+        var includes = options.trainType
+        if (includes.has('ANYO')) includes = new Set([...TicketUtils.ordinaryTrainTypes, ...includes])
+        else if (includes.has('ANYH')) includes = new Set([...TicketUtils.highSpeedTrainTypes, ...includes])
+        if (!(includes.has(trainType) || options.trainType.size === 0)) return false
+
+        // 检查座位种类
+        includes = options.seatType
+        if (includes.size === 0) return true // 因为这是最后一个test了，所以可以直接返回true
+        if (includes.has('ANY')) includes = new Set([...Object.keys(TicketUtils.seatTypeMap), ...includes])
+        else if (includes.has('ANYS')) includes = new Set([...TicketUtils.sleeperTypes, ...includes])
+        for (let type of includes) if (x.seats[type] !== undefined && x.seats[type] !== false) return true
+        return false
+      })
+      tickets.sort((a, b) => {
+        if (a.status !== 0) return true  // 停运的车永远排在最下面
+        let keyMap = ['', 'departureTime', 'duration', 'arrivalTime']
+        let aTime = a[keyMap[this.filters.order]]
+        let bTime = b[keyMap[this.filters.order]]
+        var result
+        if (aTime.slice(0, 2) === bTime.slice(0, 2)) result = Number(aTime.slice(3, 5)) > Number(bTime.slice(3, 5))
+        else result = Number(aTime.slice(0, 2)) > Number(bTime.slice(0, 2))
+        if (this.filters.reversed) result = !result
+        return result
+      })
+      this.currentTickets = tickets
+    },
     ticketList () {
       axios.get('//api.tra.ink/ticket/list', {
         params: {
@@ -55,6 +237,12 @@ export default {
       .then((response) => {
         this.tickets = response.data['data']
         this.stationMap = response.data['map']
+        this.filters.options = [{
+          label: '有票 - 任意',
+          key: 'seatType',
+          value: 'ANY'
+        }]
+        this.rank()
         console.log(response.data['data'])
       })
       .catch(function (error) {
@@ -76,12 +264,26 @@ export default {
     }
   },
   mounted () {
+    this.filters.excludeMap.ANY.delete('ANY')
     this.ticketList()
   },
   components: {
+    FontAwesomeIcon,
     Ticket,
     TicketInputPanel,
-    Spinner
+    Spinner,
+    vSelect
   }
 }
 </script>
+
+<style scoped>
+  #ticket-input {
+    background-color: #f5f5f5;
+    border-radius: 10px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+</style>
