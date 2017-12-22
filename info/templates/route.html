@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+{% load train %}
+
+
+{% block extra_css %}
+<style type="text/css">
+.route{
+background-color: gray;
+border-radius: 10px;
+}
+.separate-line {
+background-color: black;
+height: 1px;
+margin: 5px 0;
+width: 100%;
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="py-5 text-white text-center" style="background-image: url(&quot;{% static "img/train.jpg" %}&quot;);  background-position: center; background-size:cover;">
+</div>
+
+<div class="container py-5">
+  <div class="row">
+    <div class="col-md-8  text-center">
+      {% for train in results %}
+      <div class="row jumbotron">
+        <div class="col-3">
+          <a href="/info/train?telecode={{train.telecode}}">
+            <h1>{{train.names|combine}}</h1>
+          </a>
+        </div>
+        <div class="col-3">
+          <p>{{train.departureStop.departureTime|timedeltaStr}}</p>
+          <h3>{{train.departureStop.station.name}}</h3>
+        </div>
+        <div class="col-3">
+          {% with duration=train.arrivalStop.arrivalTime|timedeltaMinus:train.departureStop.departureTime %}
+          {{duration|timedeltaComponent:"hours"}}时{{duration|timedeltaComponent:"minutes"}}分
+          {% endwith %}
+          <div class="separate-line"></div>
+        </div>
+        <div class="col-3">
+          <p>{{train.arrivalStop.arrivalTime|timedeltaStr}}</p>
+          <h3>{{train.arrivalStop.station.name}}</h3>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="col-4-md"></div>
+  </div>
+</div>
+
+
+{% endblock content %}

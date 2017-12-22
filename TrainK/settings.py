@@ -26,6 +26,7 @@ SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+INTERNAL_IPS = ('127.0.0.1')
 
 ALLOWED_HOSTS = ['tra.ink', 'localhost']
 
@@ -42,7 +43,7 @@ INSTALLED_APPS = [
 
     'webpack_loader',
 
-    'train',
+    'info',
     'ticket',
 
 

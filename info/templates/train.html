@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+{% load render_bundle from webpack_loader %}
+{% load train %}
+
+{% block css %}
+{{ block.super }}
+{% render_bundle 'info' 'css' %}
+{% endblock css %}
+
+
+{% block content %}
+<div id="entrance">
+  <div class="py-5 text-white text-center" style="background-image: url(&quot;{% static "img/train.jpg" %}&quot;);  background-position: center; background-size:cover;">
+    <h1 class="display-2">{{ names|connect }}</h1>
+    <div class="row" style="max-width: 600px; margin-left: auto; margin-right: auto;">
+      <div class="col-5">
+        {% with stops.0 as stop %}
+        <h1>{{ stop.station.name }}</h1>
+        <h2>{{ stop.departureTime|timedeltaStr }}</h2>
+        {% endwith %}
+      </div>
+      <div class="col-2">
+        <h1><font-awesome-icon icon="long-arrow-alt-right" size="2x"></font-awesome-icon></h1>
+      </div>
+      <div class="col-5">
+        {% with stops|last as stop %}
+        <h1>{{ stop.station.name }}</h1>
+        <h2>{{ stop.arrivalTime|timedeltaStr }}</h2>
+        {% endwith %}
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-md-7">
+        {% for stop in stops %}
+        <div class="row py-1 jumbotron">
+          <div class="col-2 py-1">
+            <h6>{{ stop.arrivalTime|timedeltaStr }}</h6>
+            <h6>{{ stop.departureTime|timedeltaStr }}</h6>
+          </div>
+          <div class="col-5 py-1"><h1>{{ stop.station.name }}</h1></div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="col-md-5">
+        <delay-chart-card telecode="{{telecode}}"></delay-chart-card>
+        {% render_bundle 'info' 'js' %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
