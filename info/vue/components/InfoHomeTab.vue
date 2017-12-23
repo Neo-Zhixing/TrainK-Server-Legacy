@@ -1,22 +1,21 @@
 <template>
-<b-card no-body class="text-center" style="opacity: .95;">
-  <b-tabs card v-model="selectedTab">
-    <b-tab title="行程" active>
-      <route-input v-model="stations" />
-    </b-tab>
-    <b-tab title="车次">
-      <b-form-input class="text-center"
+<b-card class="text-center" style="opacity: .95;">
+  <b-nav fill tabs class="card-header-tabs" slot="header">
+    <b-nav-item :active="selectedTab === 1" id="1" @click="tripTypeTab">行程</b-nav-item>
+    <b-nav-item :active="selectedTab === 2" id="2" @click="tripTypeTab">车次</b-nav-item>
+    <b-nav-item :active="selectedTab === 3" id="3" @click="tripTypeTab">站点</b-nav-item>
+    <b-nav-item disabled :active="selectedTab === 4" id="4" @click="tripTypeTab">线路</b-nav-item>
+  </b-nav>
+  <b-form id="info-form" @submit="submit">
+    <route-input required v-if="selectedTab === 1" v-model="stations" />
+    <station-input required v-else-if="selectedTab === 3" v-model="value" placeholder="选择车站" />
+    <b-form-input required v-else
+      class="text-center"
       v-model="value"
-      placeholder="G1"
+      :placeholder="selectedTab === 2 ? 'G1' : '京津城际'"
       />
-    </b-tab>
-    <b-tab title="车站">
-      <station-input all v-model="value" placeholder="北京南"/>
-    </b-tab>
-    <b-tab disabled title="线路">
-    </b-tab>
-  </b-tabs>
-  <b-button @click="submit" class="my-3 mx-3" variant="primary" size="lg" type="submit">搜索</b-button>
+    <b-button block variant="primary" size="lg" type="submit">搜索</b-button>
+  </b-form>
 </b-card>
 </template>
 
@@ -27,7 +26,7 @@
     name: 'TicketInputPanel',
     data () {
       return {
-        selectedTab: 0,
+        selectedTab: 1,
         value: null,
         stations: {
           departureStation: null,
@@ -45,11 +44,11 @@
       submit (event) {
         event.preventDefault()
         let rootPath = '/info/'
-        if (this.selectedTab === 0) {
+        if (this.selectedTab === 1) {
           window.location = `${rootPath}train?departure_telecode=${this.stations.departureStation}&arrival_telecode=${this.stations.arrivalStation}`
           return
         }
-        let url = this.selectedTab === 1 ? 'train?name=' : (this.selectedTab === 2 ? 'station?telecode=' : 'xxx')
+        let url = this.selectedTab === 2 ? 'train?name=' : (this.selectedTab === 3 ? 'station?telecode=' : 'xxx')
         window.location = rootPath + url + this.value
       }
     },
@@ -58,3 +57,13 @@
     }
   }
 </script>
+
+<style>
+  #info-form > .input-group,
+  #info-form > .form-control,
+  #info-form > .multiselect
+   {
+    margin-bottom: 3rem;
+    margin-top: 1rem;
+  }
+</style>

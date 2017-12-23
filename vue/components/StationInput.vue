@@ -1,5 +1,6 @@
 <template>
   <multiselect
+  :required="required"
   @input="change"
   :value="selectValue"
   :options="options"
@@ -23,6 +24,7 @@ import cachios from 'cachios'
 import Multiselect from 'vue-multiselect'
 export default {
   props: {
+    required: Boolean,
     value: String,
     placeholder: String,
     all: Boolean
@@ -74,5 +76,3 @@ export default {
   }
 }
 </script>
-
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

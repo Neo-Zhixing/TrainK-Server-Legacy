@@ -9,6 +9,8 @@ import NavBar from './components/NavBar'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+import 'vue-multiselect/dist/vue-multiselect.min.css'
+
 import './main.css'
 
 Vue.config.productionTip = false

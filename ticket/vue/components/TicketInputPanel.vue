@@ -13,6 +13,7 @@
   <b-col lg="3" class="my-1">
     <b-input-group id="date">
       <flat-pickr
+      required
       class="form-control"
       placeholder="选择日期"
       v-model="form.date"
@@ -31,11 +32,12 @@
   </b-nav>
   <b-form @submit="submit">
     <b-form-group label="行程" label-for="route">
-      <route-input v-model="form" />
+      <route-input required v-model="form" />
     </b-form-group>
     <b-form-group label="日期" label-for="date">
       <b-input-group id="date">
         <flat-pickr
+        required
         class="form-control"
         placeholder="选择日期"
         v-model="form.date"

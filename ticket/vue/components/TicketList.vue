@@ -24,7 +24,21 @@
         </b-nav>
       </b-col>
       <b-col lg="8">
-        <v-select multiple v-model="filters.options" :options="availableOptions"></v-select>
+        <multiselect multiple
+          v-model="filters.options"
+          :options="availableOptions"
+
+          group-values="value"
+          group-label="label"
+
+          :loading="tickets === null"
+          placeholder="过滤器..."
+
+          track-by="value"
+          label="label"
+          >
+          <template slot="noResult">没有相应的过滤器</template>
+        </multiselect>
       </b-col>
     </b-row>
     <b-row>
@@ -58,7 +72,7 @@ import axios from 'axios'
 import Ticket from './Ticket'
 import TicketInputPanel from './TicketInputPanel'
 import Spinner from 'vue-simple-spinner'
-import vSelect from 'vue-select'
+import Multiselect from 'vue-multiselect'
 
 import fontawesome from '@fortawesome/fontawesome'
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
@@ -128,28 +142,33 @@ export default {
       var results = []
       for (let index in this.filters.keys) {
         let key = this.filters.keys[index]
+        let result = {
+          label: ['出发车站', '目的车站', '列车类型', '坐席有票'][index],
+          value: []
+        }
         for (var option of options[key]) {
           var value
           if (key === 'departureStation' || key === 'arrivalStation') value = option === 'TERMINAL' ? {'departureStation': '始发站', 'arrivalStation': '目的站'}[key] : this.stationMap[option] // 如果是终端站，则返回“始发站”或者“目的站”， 否则返回中文站名
           else if (key === 'trainType') value = TicketUtils.trainTypeMap[option]
           else if (key === 'seatType') value = TicketUtils.seatTypeMap[option]
-          results.push({
-            label: ['出发车站', '目的车站', '列车类型', '有票'][index] + ' - ' + value,
+          result.value.push({
+            label: value,
             key: key,
             value: option
           })
         }
+        results.push(result)
       }
 
       // 排序results array
-      results.sort((a, b) => {
-        let aIndex = this.filters.keys.indexOf(a.key)
-        let bIndex = this.filters.keys.indexOf(b.key)
-        if (aIndex !== bIndex) return aIndex > bIndex
-        if (a.value.slice(0, 3) === 'ANY') return false
-        if (b.value.slice(0, 3) === 'ANY') return true
-        return true
-      })
+      for (let index in results) {
+        results[index].value.sort((a, b) => {
+          if (a.value.slice(0, 3) === 'ANY') return false
+          if (b.value.slice(0, 3) === 'ANY') return true
+          return true
+        })
+      }
+
       return results
     }
   },
@@ -272,7 +291,7 @@ export default {
     Ticket,
     TicketInputPanel,
     Spinner,
-    vSelect
+    Multiselect
   }
 }
 </script>
