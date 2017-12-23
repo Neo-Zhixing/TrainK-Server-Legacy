@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}{{block.super}} 信息查询{% endblock %}
+
+{% block css %}
+	{{ block.super }}
+	{% render_bundle 'info' 'css' %}
+{% endblock css %}
+

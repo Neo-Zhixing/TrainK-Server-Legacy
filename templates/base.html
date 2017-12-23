@@ -7,7 +7,7 @@
 <html lang="{{ LANGUAGE_CODE }}">
   <head>
     {% block head %}
-      <title>{% block title %}{{ site.name }}{% endblock %}</title>
+      <title>{% block title %}TrainK{% endblock %}</title>
       {% block meta %}
         {% include "./meta.html" %}
       {% endblock meta %}
@@ -18,16 +18,16 @@
 
       {% block extra_css %}
       {% endblock extra_css %}
+
+      {% block js %}
+        {% if not debug %}
+          {% render_bundle 'manifest' 'js' %}
+          {% render_bundle 'vendor' 'js' %}
+        {% endif %}
+      {% endblock js %}
     {% endblock head %}
   </head>
   <body>
-    {% block js %}
-      {% if not debug %}
-        {% render_bundle 'manifest' 'js' %}
-        {% render_bundle 'vendor' 'js' %}
-      {% endif %}
-    {% endblock js %}
-
     {% block header %}
       {% include "./header.html" %}
     {% endblock header %}

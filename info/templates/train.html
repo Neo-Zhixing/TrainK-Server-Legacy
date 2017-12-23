@@ -1,13 +1,9 @@
-{% extends "base.html" %}
+{% extends "info_base.html" %}
 {% load static %}
 {% load render_bundle from webpack_loader %}
 {% load train %}
 
-{% block css %}
-{{ block.super }}
-{% render_bundle 'info' 'css' %}
-{% endblock css %}
-
+{% block title %}{{block.super}} 车次{% endblock %}
 
 {% block content %}
 <div id="entrance">

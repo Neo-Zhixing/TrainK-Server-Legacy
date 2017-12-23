@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 INTERNAL_IPS = ('127.0.0.1')
 
 ALLOWED_HOSTS = ['tra.ink', 'localhost']
@@ -187,9 +187,10 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
+_WEBPACK_STAT_FILE_PATH = 'build/webpack-stats.dev.json' if DEBUG else 'build/webpack-stats.prod.json'
 WEBPACK_LOADER = {
     'DEFAULT': {
         'BUNDLE_DIR_NAME': 'dist/',
-        'STATS_FILE': os.path.join(BASE_DIR, 'build/webpack-stats.json'),
+        'STATS_FILE': os.path.join(BASE_DIR, _WEBPACK_STAT_FILE_PATH),
     }
 }

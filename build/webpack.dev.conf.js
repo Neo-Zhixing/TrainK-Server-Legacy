@@ -7,6 +7,7 @@ const baseWebpackConfig = require('./webpack.base.conf')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
+const BundleTracker = require('webpack-bundle-tracker')
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
@@ -41,6 +42,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     },
   },
   plugins: [
+    new BundleTracker({filename: 'build/webpack-stats.dev.json'}),
     new webpack.DefinePlugin({
       'process.env': require('../config/dev.env')
     }),
