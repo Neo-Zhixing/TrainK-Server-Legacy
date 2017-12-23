@@ -40,8 +40,7 @@
   import 'vue-popperjs/dist/css/vue-popper.css'
   import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
   import fontawesome from '@fortawesome/fontawesome'
-  import { faBars, faTrain, faUserCircle } from '@fortawesome/fontawesome-free-solid'
-  import { faTicketAlt, faInfoCircle, faBriefcase, faMap, faComments } from '@fortawesome/fontawesome-free-solid'
+  import { faBars, faTrain, faUserCircle, faTicketAlt, faInfoCircle, faBriefcase, faMap, faComments } from '@fortawesome/fontawesome-free-solid'
   fontawesome.library.add(faBars, faTrain, faUserCircle)
   fontawesome.library.add(faTicketAlt, faInfoCircle, faBriefcase, faMap, faComments)
   export default {
@@ -68,7 +67,7 @@
     },
     components: {
       FontAwesomeIcon, Popper
-    },
+    }
   }
 </script>
 

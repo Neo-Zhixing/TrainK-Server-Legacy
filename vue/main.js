@@ -4,19 +4,16 @@ import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 
+import NavBar from './components/NavBar'
+
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 import './main.css'
 
-
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)
-
-
-import NavBar from './components/NavBar'
-
 
 /* eslint-disable no-new */
 new Vue({

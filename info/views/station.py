@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from django.views.defaults import bad_request
 from .. import models, serializers
 
 
@@ -18,7 +17,10 @@ class StationView(APIView):
 		elif telecode:
 			station = get_object_or_404(models.Station, telecode=telecode)
 		else:
-			return bad_request(request, None)
+			all = request.GET.get('all')
+			stations = models.Station.objects.all()
+			data = dict((station.telecode, station.name) for station in stations if all or station.telecode is not '')
+			return Response(data)
 
 		serializer = serializers.StationSerializer(station)
 		return Response(serializer.data)

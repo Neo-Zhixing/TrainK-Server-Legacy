@@ -9,7 +9,7 @@ import axios from 'axios'
 import { Line } from 'vue-chartjs'
 export default {
   props: ['telecode'],
-  data (){
+  data () {
     return {
       delays: {}
     }
@@ -17,15 +17,15 @@ export default {
   computed: {
     avgDelay () {
       var avgDelay = 0
-      for(let key of Object.values(this.delays)){
-        avgDelay += this.delays[key] 
+      for (let key of Object.values(this.delays)) {
+        avgDelay += this.delays[key]
       }
       return avgDelay / this.delays.length
     },
     titleIndex () {
-      if(this.avgDelay > 90) return 0
-      else if(this.avgDelay > 30) return 1
-      else if(this.avgDelay > 5) return 2
+      if (this.avgDelay > 90) return 0
+      else if (this.avgDelay > 30) return 1
+      else if (this.avgDelay > 5) return 2
       else return 3
     },
     title () {
@@ -35,25 +35,25 @@ export default {
       return ['搭车前请自行调整时钟', '适度迟到是礼貌的一种表现形式', '除非家里有事', '不怕太阳晒，不怕风雪狂'][this.titleIndex]
     }
   },
-  mounted() {
+  mounted () {
     axios.get('/info/record', {
-        params: {
-          'telecode': this.telecode,
-          'recent': '30',
-          'actions': 'analysis'
-        }
-      })
-      .then((response) => {
-        var delays = {}
-        for (let result of response.data.results) delays[result.departureDate] = result.delayAvg
-        this.delays = delays
-      })
-      .catch(function (error) {
-        console.log(error)
-      })
+      params: {
+        'telecode': this.telecode,
+        'recent': '30',
+        'actions': 'analysis'
+      }
+    })
+    .then((response) => {
+      var delays = {}
+      for (let result of response.data.results) delays[result.departureDate] = result.delayAvg
+      this.delays = delays
+    })
+    .catch(function (error) {
+      console.log(error)
+    })
   },
   components: {
-  	DelayChart: {
+    DelayChart: {
       extends: Line,
       props: ['data'],
       watch: {
