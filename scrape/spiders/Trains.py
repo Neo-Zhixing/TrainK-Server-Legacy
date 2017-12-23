@@ -125,6 +125,9 @@ class Spider(scrapy.Spider):
 
 			stops.append(stopDict)
 
+		if len(stops) is 0:
+			self.logger.error("empty stops %s" % jsonData['data']['data'])
+			return
 		stops[0].pop('arrivalTime', None)
 		stops[-1].pop('departureTime', None)
 		train = response.meta['train']

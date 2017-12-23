@@ -1,7 +1,7 @@
 <template>
   <b-card header="正晚点" :title="title" :sub-title="subtitle" >
     <delay-chart :data="delays"></delay-chart>
-    <b-button variant="primary" :href="'/query/record?telecode=' + telecode">查看历史记录</b-button>
+    <b-button variant="primary" :href="'/info/record?telecode=' + telecode">查看历史记录</b-button>
   </b-card>
 </template>
 <script>

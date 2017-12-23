@@ -56,15 +56,14 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='record',
-            name='info',
+            name='train',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='info.Train'),
         ),
         migrations.RunSQL("""
-            CREATE OR REPLACE VIEW train_stop AS
+            CREATE OR REPLACE VIEW info_stop AS
             SELECT
                 info_record.id AS record_id,
-                info_id,
-                station AS station_id,
+                train_id,
                 index,
                 ("departureDate" + "arrivalTime") AT TIME ZONE 'CCT' AS "arrivalTime",
                 "arrivalTimeAnticipated",
