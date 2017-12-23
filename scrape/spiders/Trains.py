@@ -4,7 +4,7 @@ import urllib
 from datetime import timedelta
 from scrapy.exceptions import CloseSpider
 import re
-from scrape.items import Train, Record
+from ..items import Train, Record
 
 
 class Spider(scrapy.Spider):

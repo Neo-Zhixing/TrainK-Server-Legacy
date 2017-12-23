@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import scrapy
-from scrape.items import Station
+from ..items import Station
 
 
 class Spider(scrapy.Spider):

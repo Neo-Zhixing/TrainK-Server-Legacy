@@ -6,7 +6,7 @@ import datetime
 from django.utils import timezone
 from django.utils.dateparse import parse_duration
 from urllib import parse
-from train import models
+from info import models
 
 
 class StatusSpider(scrapy.Spider):
