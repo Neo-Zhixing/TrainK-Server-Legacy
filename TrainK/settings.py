@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 
     'info',
     'ticket',
-
+    'trip',
 
     'rest_framework',
     # Machina related apps:

@@ -7,12 +7,12 @@ import enum
 
 class Station(models.Model):
 	name = models.CharField(max_length=10)
-	telecode = models.CharField(max_length=5, blank=True)
+	telecode = models.CharField(max_length=3, blank=True)
 
 
 class Train(models.Model):
 	names = fields.ArrayField(models.CharField(max_length=10))
-	telecode = models.CharField(max_length=50, primary_key=True)
+	telecode = models.CharField(max_length=12, primary_key=True)
 	stops = fields.JSONField(encoder=DjangoJSONEncoder)
 
 	def __str__(self):
@@ -28,7 +28,7 @@ class Train(models.Model):
 
 class Record(models.Model):
 	departureDate = models.DateField()
-	train = models.ForeignKey(Train, on_delete=models.CASCADE)
+	train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name='records')
 	stops = fields.JSONField(encoder=DjangoJSONEncoder)
 
 
