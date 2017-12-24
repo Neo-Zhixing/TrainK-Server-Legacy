@@ -22,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'N/S))lBlU-P9~${vdDtv"GMfXat%K@:*zILHyPO253?v=>iyR44oZSi<y9:!5h^'
+SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 INTERNAL_IPS = ('127.0.0.1')
 
 ALLOWED_HOSTS = ['tra.ink', 'localhost']
@@ -98,7 +98,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'TrainK',
         'USER': 'TrainK',
-        'PASSWORD': 'YDvXOfp2O1mCmnlCK|HT',
+        'PASSWORD': 'Braungardt4365',
         'HOST': 'localhost',
         'PORT': '',
     }
@@ -143,8 +143,7 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
     'machina_attachments': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
 }
 

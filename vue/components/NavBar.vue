@@ -5,7 +5,7 @@
         <font-awesome-icon icon="train" size="lg" class="mr-1"></font-awesome-icon>
         <b>TrainK</b>
       </b-navbar-brand>
-      <b-button-group v-if="toggleable">
+      <b-button-group class="d-md-none">
         <b-button variant="outline-light" href="">
           <font-awesome-icon icon="user-circle" size="lg" />
         </b-button>
@@ -22,7 +22,7 @@
           <b-nav-item disabled href="/forum"><font-awesome-icon icon="comments" />社区</b-nav-item>
         </b-navbar-nav>
       </b-collapse>
-      <popper trigger="click" v-if="!toggleable">
+      <popper trigger="click" class="d-none d-md-block">
         <div class="popper">
           正在建设中
         </div>
@@ -49,21 +49,8 @@
     },
     data () {
       return {
-        expanded: false,
-        toggleable: window.innerWidth < 768
+        expanded: false
       }
-    },
-    methods: {
-      handleResize (event) {
-        let newToggleable = event.target.innerWidth < 768
-        if (newToggleable !== this.toggleable) this.toggleable = newToggleable
-      }
-    },
-    mounted () {
-      window.addEventListener('resize', this.handleResize)
-    },
-    beforeDestroy () {
-      window.removeEventListener('resize', this.handleResize)
     },
     components: {
       FontAwesomeIcon, Popper
@@ -71,7 +58,7 @@
   }
 </script>
 
-<style scoped>
+<style>
   #nav-collapse ul li a svg {
     margin-right: 0.25rem;
   }
