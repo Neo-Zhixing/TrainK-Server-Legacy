@@ -1,4 +1,47 @@
-<nav-bar id="navbar"
-{% if user.is_authenticated %} authenticated {% endif %}
->
-</nav-bar>
+<nav id="navbar" class="navbar navbar-dark bg-primary navbar-expand-md" id="navbar">
+  <div class="container">
+    <a href="/" class="navbar-brand">
+      <font-awesome-icon icon="train" size="lg" class="mr-1"></font-awesome-icon>
+      <b>TrainK</b>
+    </a>
+    <div role="group" class="d-md-none btn-group">
+      <button type="button" class="btn btn-outline-light">
+        <font-awesome-icon icon="user-circle" size="lg" />
+      </button>
+      <b-button :variant="expanded ? 'light' : 'outline-light'" aria-controls="collapse" :aria-expanded="expanded" @click="expanded = !expanded">
+        <font-awesome-icon icon="bars" />
+      </b-button>
+    </div>
+    <b-collapse is-nav id="nav-collapse" v-model="expanded" class="justify-content-end">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a href="/ticket" class="nav-link"><font-awesome-icon icon="ticket-alt"></font-awesome-icon>购票</a>
+        </li>
+        <li class="nav-item">
+          <a href="/info" class="nav-link"><font-awesome-icon icon="info-circle"></font-awesome-icon>查询</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link disabled"><font-awesome-icon icon="briefcase"></font-awesome-icon>通勤</a>
+        </li>
+        <li class="nav-item">
+          <a href="/map" class="nav-link"><font-awesome-icon icon="map"></font-awesome-icon>地图</a>
+        </li>
+        <li class="nav-item">
+          <a href="/forum" class="nav-link disabled"><font-awesome-icon icon="comments"></font-awesome-icon>社区</a>
+        </li>
+      </ul>
+    </b-collapse>
+    <button id="navbar-popover-trigger" type="button" class="btn btn-outline-light ml-3">
+      <font-awesome-icon icon="user-circle" size="lg" />
+    </button>
+    <b-popover target="navbar-popover-trigger" triggers="click blur" placement="bottomleft">
+      {% if user.is_authenticated %}
+        {% include "components/overview_panel.html" %}
+      {% else %}
+        {% load registration %}
+        {% login_context as context %}
+        {% include "components/login_panel.html" with form=context.form signup_url=context.signup_url redirect_field_name=context.redirect_field_name redirect_field_value=context.redirect_field_name  %}
+      {% endif %}
+    </b-popover>
+  </div>
+</nav>

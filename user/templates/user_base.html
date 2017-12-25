@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}{{block.super}} - 用户{% endblock %}
+
+{% block css %}
+	{{ block.super }}
+	{#{% render_bundle 'user' 'css' %}#}
+{% endblock css %}

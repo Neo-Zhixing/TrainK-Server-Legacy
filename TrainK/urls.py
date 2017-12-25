@@ -19,6 +19,7 @@ from django.contrib import admin
 from machina.app import board
 
 urlpatterns = [
+    path('user/', include('user.urls')),
     path('admin/', admin.site.urls),
     path('ticket/', include('ticket.urls')),
     path('info/', include('info.urls')),

@@ -1,0 +1,25 @@
+{% extends "user_base.html" %}
+
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block title %}{{ block.super }}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="row py-5">
+    <div class="col-4 mx-md-auto">
+      <div class="card">
+      	<div class="card-header">
+          {% trans 'Sign In' %}
+        </div>
+        <div class="card-body">
+          {% include './components/login_panel.html' %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

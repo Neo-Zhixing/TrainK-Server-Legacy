@@ -28,8 +28,8 @@ SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 DEBUG = True
 INTERNAL_IPS = ('127.0.0.1')
 
-ALLOWED_HOSTS = ['tra.ink', 'localhost']
-
+ALLOWED_HOSTS = ['tra.ink', 'localhost', '192.168.1.101']
+SITE_ID = 1
 
 # Application definition
 
@@ -40,14 +40,24 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.weibo',
+    'allauth.socialaccount.providers.weixin',
+    'allauth.socialaccount.providers.baidu',
+    'crispy_forms',
 
     'webpack_loader',
+    'rest_framework',
 
+    'user',
     'info',
     'ticket',
     'trip',
 
-    'rest_framework',
     # Machina related apps:
     'mptt',
     'haystack',
@@ -122,7 +132,12 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -174,7 +189,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
 }
+LOGIN_REDIRECT_URL = '/user'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_FORMS = {
+    'login': 'user.forms.LoginForm'
+}
+ACCOUNT_SIGNUP_FORM_CLASS = 'user.forms.SignupForm'
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_FAIL_SILENTLY = not DEBUG
 
 # Machina
 MACHINA_FORUM_NAME = 'TrainK'
