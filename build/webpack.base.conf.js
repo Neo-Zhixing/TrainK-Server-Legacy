@@ -13,9 +13,7 @@ const createLintingRule = () => ({
   loader: 'eslint-loader',
   enforce: 'pre',
   include: [
-    resolve('ticket/vue'),
-    resolve('info/vue'),
-    resolve('vue'),
+    resolve('src'),
     resolve('test')
     ],
   options: {
@@ -27,9 +25,10 @@ const createLintingRule = () => ({
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    common: './vue/main.js',
-    ticket: './ticket/vue/main.js',
-    info: './info/vue/main.js'
+    common: './src/common.js',
+    user: './src/user.js',
+    ticket: './src/ticket.js',
+    info: './src/info.js'
   },
   output: {
     path: config.build.assetsRoot,

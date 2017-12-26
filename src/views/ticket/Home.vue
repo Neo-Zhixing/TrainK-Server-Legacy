@@ -3,7 +3,7 @@
   <b-container>
     <b-row>
       <b-col md="6">
-        <ticket-input-panel @submit="submit"/>
+        <route-input-panel @submit="submit"/>
       </b-col>
     </b-row>
   </b-container>
@@ -11,7 +11,7 @@
 </template>
 
 <script>
-  import TicketInputPanel from './TicketInputPanel'
+  import RouteInputPanel from '@/components/ticket/RouteInputPanel'
   export default {
     name: 'ticket',
     props: [],
@@ -27,15 +27,12 @@
         })
       }
     },
-    components: {
-      TicketInputPanel
-    }
+    components: { RouteInputPanel }
   }
 </script>
 
 <style scoped>
 #ticket-panel-row {
-  background-image: url("../static/img/features.jpg");
   background-height:100%;
   background-position: center top;
 }

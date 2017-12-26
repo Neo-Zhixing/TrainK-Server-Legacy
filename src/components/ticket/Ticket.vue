@@ -49,12 +49,11 @@
 </template>
 
 <script>
-  import TicketUtils from '../utils'
+  import TicketUtils from '@/utils'
   import axios from 'axios'
   import fontawesome from '@fortawesome/fontawesome'
-  import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
   import { faIdCard, faTag } from '@fortawesome/fontawesome-free-solid'
-  import { EventBus } from '../bus.js'
+  import { EventBus } from '@/bus.js'
   fontawesome.library.add(faIdCard, faTag)
   export default {
     name: 'ticket',
@@ -127,9 +126,6 @@
         // Collapse the ticket details unless this is the sender
         if (this !== sender) this.collapsed = true
       })
-    },
-    components: {
-      FontAwesomeIcon
     }
   }
 </script>

@@ -31,7 +31,7 @@ Vue.use(BootstrapVue)
 
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 
-import './main.css'
+import '@/common.css'
 
 /* eslint-disable no-new */
 new Vue({

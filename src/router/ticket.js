@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import TicketHome from '../components/TicketHome'
-import TicketList from '../components/TicketList'
+import TicketHome from '@/views/ticket/Home'
+import TicketList from '@/views/ticket/List'
 
 Vue.use(Router)
 

@@ -1,5 +1,5 @@
 from importlib import import_module
-from django.urls import path, include
+from django.urls import path, re_path, include
 from django.views.generic import TemplateView
 from .views import session, user
 from allauth import app_settings
@@ -10,6 +10,7 @@ urlpatterns = [
 	path('password/', TemplateView.as_view(), name='account_reset_password'),
 	path('session/', session.SessionView.as_view(), name='account_login'),
 	path('session/', session.SessionView.as_view(), name='account_logout'),
+	re_path('', user.UserView.as_view()),
 ]
 
 

@@ -51,13 +51,12 @@
 </template>
 
 <script>
-import RouteInput from '../../../vue/components/RouteInput'
+import RouteInput from '@/components/RouteInput'
 import flatPickr from 'vue-flatpickr-component'
 import 'flatpickr/dist/themes/airbnb.css'
 import {Mandarin} from 'flatpickr/dist/l10n/zh'
 
 import fontawesome from '@fortawesome/fontawesome'
-import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 import { faArrowsAltH, faCalendarAlt } from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(faArrowsAltH, faCalendarAlt)
 
@@ -98,7 +97,7 @@ export default {
     }
   },
   components: {
-    FontAwesomeIcon, flatPickr, RouteInput
+    flatPickr, RouteInput
   }
 }
 </script>

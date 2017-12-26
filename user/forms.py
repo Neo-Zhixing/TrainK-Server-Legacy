@@ -5,10 +5,6 @@ from crispy_forms.layout import Layout, Field, HTML, Div, Submit
 
 
 class LoginForm(LoginForm):
-	def is_valid(self, *args, **kwargs):
-		a = super(LoginForm, self).is_valid(*args, **kwargs)
-		print(a)
-		return a
 
 	def __init__(self, *args, **kwargs):
 		super(LoginForm, self).__init__(*args, **kwargs)

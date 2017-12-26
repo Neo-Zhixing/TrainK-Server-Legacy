@@ -30,6 +30,7 @@
     "vue-multiselect": "git+https://github.com/Neotoxin4365/vue-multiselect.git",
     "vue-router": "^3.0.1",
     "vue-simple-spinner": "^1.2.8",
+    "vue-text-mask": "^5.2.0",
     "webpack-bundle-tracker": "^0.2.0"
   },
   "devDependencies": {

@@ -20,8 +20,8 @@
 </template>
 
 <script>
-  import RouteInput from '../../../vue/components/RouteInput'
-  import StationInput from '../../../vue/components/StationInput'
+  import RouteInput from '@/components/RouteInput'
+  import StationInput from '@/components/StationInput'
   export default {
     name: 'TicketInputPanel',
     data () {

@@ -1,4 +1,6 @@
+from django.shortcuts import render
 from rest_framework.views import APIView
+
 
 from allauth.account.views import SignupView
 
@@ -10,7 +12,7 @@ class UserView(APIView):
 
 	def get(self, request):
 		if request.user.is_authenticated:
-			return None
+			return render(request._request, 'portal.html')
 		else:
 			signupView.request = request._request
 			return signupView.get(request._request)

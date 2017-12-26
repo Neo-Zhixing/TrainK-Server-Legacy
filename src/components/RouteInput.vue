@@ -11,7 +11,6 @@
 <script>
 import StationInput from './StationInput'
 import fontawesome from '@fortawesome/fontawesome'
-import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 import { faArrowsAltH } from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(faArrowsAltH)
 export default {
@@ -27,7 +26,7 @@ export default {
     }
   },
   components: {
-    FontAwesomeIcon, StationInput
+    StationInput
   }
 }
 </script>

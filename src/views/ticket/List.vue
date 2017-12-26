@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <ticket-input-panel id="ticket-input" horizontal
+    <route-input-panel id="ticket-input" horizontal
     :from="$route.query.from"
     :to="$route.query.to"
     :date="$route.query.date"
@@ -67,15 +67,14 @@
 </template>
 
 <script>
-import TicketUtils from '../utils.js'
+import TicketUtils from '@/utils.js'
 import axios from 'axios'
-import Ticket from './Ticket'
-import TicketInputPanel from './TicketInputPanel'
+import Ticket from '@/components/ticket/Ticket'
+import RouteInputPanel from '@/components/ticket/RouteInputPanel'
 import Spinner from 'vue-simple-spinner'
 import Multiselect from 'vue-multiselect'
 
 import fontawesome from '@fortawesome/fontawesome'
-import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 import { faSortUp, faSortDown } from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(faSortUp, faSortDown)
 
@@ -287,9 +286,8 @@ export default {
     this.ticketList()
   },
   components: {
-    FontAwesomeIcon,
     Ticket,
-    TicketInputPanel,
+    RouteInputPanel,
     Spinner,
     Multiselect
   }
