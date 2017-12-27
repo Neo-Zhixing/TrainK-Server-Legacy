@@ -67,7 +67,7 @@
 </template>
 
 <script>
-import TicketUtils from '@/utils.js'
+import TrainTypeMap from '@/utils/TrainTypeMap'
 import axios from 'axios'
 import Ticket from '@/components/ticket/Ticket'
 import RouteInputPanel from '@/components/ticket/RouteInputPanel'
@@ -85,10 +85,10 @@ export default {
       filters: {
         keys: ['departureStation', 'arrivalStation', 'trainType', 'seatType'],
         excludeMap: { // 互排表
-          ANYH: TicketUtils.highSpeedTrainTypes.add('ANYO'),
-          ANYO: TicketUtils.ordinaryTrainTypes.add('ANYH'),
-          ANY: new Set(Object.keys(TicketUtils.seatTypeMap)),
-          ANYS: TicketUtils.sleeperTypes
+          ANYH: TrainTypeMap.highSpeedTrainTypes.add('ANYO'),
+          ANYO: TrainTypeMap.ordinaryTrainTypes.add('ANYH'),
+          ANY: new Set(Object.keys(TrainTypeMap.seatTypeMap)),
+          ANYS: TrainTypeMap.sleeperTypes
         },
         options: [],
         order: 2,
@@ -123,14 +123,14 @@ export default {
       for (let ticket of this.tickets) {
         options.departureStation.add(ticket.departureStation)
         options.arrivalStation.add(ticket.arrivalStation)
-        let trainType = TicketUtils.typeForTrain(ticket.trainName)
+        let trainType = TrainTypeMap.typeForTrain(ticket.trainName)
         if (!excludes.has(trainType)) options.trainType.add(trainType)
-        if (TicketUtils.highSpeedTrainTypes.has(trainType) && !excludes.has('ANYH')) options.trainType.add('ANYH')
-        else if (TicketUtils.ordinaryTrainTypes.has(trainType) && !excludes.has('ANYO')) options.trainType.add('ANYO')
+        if (TrainTypeMap.highSpeedTrainTypes.has(trainType) && !excludes.has('ANYH')) options.trainType.add('ANYH')
+        else if (TrainTypeMap.ordinaryTrainTypes.has(trainType) && !excludes.has('ANYO')) options.trainType.add('ANYO')
         // 遍历该票所有的座位, 添加相应过滤器
         for (let seatType in ticket.seats) {
           if (!excludes.has(seatType)) options.seatType.add(seatType)
-          if (TicketUtils.sleeperTypes.has(seatType) && !excludes.has('ANYS')) options.seatType.add('ANYS')
+          if (TrainTypeMap.sleeperTypes.has(seatType) && !excludes.has('ANYS')) options.seatType.add('ANYS')
         }
       }
       options.seatType.add('ANY')
@@ -148,8 +148,8 @@ export default {
         for (var option of options[key]) {
           var value
           if (key === 'departureStation' || key === 'arrivalStation') value = option === 'TERMINAL' ? {'departureStation': '始发站', 'arrivalStation': '目的站'}[key] : this.stationMap[option] // 如果是终端站，则返回“始发站”或者“目的站”， 否则返回中文站名
-          else if (key === 'trainType') value = TicketUtils.trainTypeMap[option]
-          else if (key === 'seatType') value = TicketUtils.seatTypeMap[option]
+          else if (key === 'trainType') value = TrainTypeMap.trainTypeMap[option]
+          else if (key === 'seatType') value = TrainTypeMap.seatTypeMap[option]
           result.value.push({
             label: value,
             key: key,
@@ -216,17 +216,17 @@ export default {
         }
 
         // 检查列车种类
-        let trainType = TicketUtils.typeForTrain(x.trainName)
+        let trainType = TrainTypeMap.typeForTrain(x.trainName)
         var includes = options.trainType
-        if (includes.has('ANYO')) includes = new Set([...TicketUtils.ordinaryTrainTypes, ...includes])
-        else if (includes.has('ANYH')) includes = new Set([...TicketUtils.highSpeedTrainTypes, ...includes])
+        if (includes.has('ANYO')) includes = new Set([...TrainTypeMap.ordinaryTrainTypes, ...includes])
+        else if (includes.has('ANYH')) includes = new Set([...TrainTypeMap.highSpeedTrainTypes, ...includes])
         if (!(includes.has(trainType) || options.trainType.size === 0)) return false
 
         // 检查座位种类
         includes = options.seatType
         if (includes.size === 0) return true // 因为这是最后一个test了，所以可以直接返回true
-        if (includes.has('ANY')) includes = new Set([...Object.keys(TicketUtils.seatTypeMap), ...includes])
-        else if (includes.has('ANYS')) includes = new Set([...TicketUtils.sleeperTypes, ...includes])
+        if (includes.has('ANY')) includes = new Set([...Object.keys(TrainTypeMap.seatTypeMap), ...includes])
+        else if (includes.has('ANYS')) includes = new Set([...TrainTypeMap.sleeperTypes, ...includes])
         for (let type of includes) if (x.seats[type] !== undefined && x.seats[type] !== false) return true
         return false
       })

@@ -49,7 +49,7 @@
 </template>
 
 <script>
-  import TicketUtils from '@/utils'
+  import TrainTypeMap from '@/utils/TrainTypeMap'
   import axios from 'axios'
   import fontawesome from '@fortawesome/fontawesome'
   import { faIdCard, faTag } from '@fortawesome/fontawesome-free-solid'
@@ -83,7 +83,7 @@
           let value = this.ticket.seats[index]
           if (value === undefined) continue
           var info = {}
-          info.key = TicketUtils.seatTypeMap[index]
+          info.key = TrainTypeMap.seatTypeMap[index]
           info.price = this.price === null ? null : this.price[index]
 
           info.value = value ? (value === true ? '有' : value) : '无'
