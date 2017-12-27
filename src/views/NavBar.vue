@@ -22,10 +22,15 @@
           <b-nav-item disabled href="/forum"><font-awesome-icon icon="comments" />社区</b-nav-item>
         </b-navbar-nav>
       </b-collapse>
-      <button id="navbar-popover-trigger" type="button" class="btn btn-outline-light ml-3 d-none d-md-block">
+      <b-button id="navbar-popover-trigger" :variant="userPopoverShown ? 'light' : 'outline-light'" class="ml-3 d-none d-md-block">
         <font-awesome-icon icon="user-circle" size="lg" />
-      </button>
-      <b-popover target="navbar-popover-trigger" triggers="click blur" placement="bottomleft">
+      </b-button>
+      <b-popover
+        target="navbar-popover-trigger"
+        triggers="click blur"
+        placement="bottomleft"
+        @show="userPopoverShown=true"
+        @hide="userPopoverShown=false">
         <b-container fluid class="py-2">
           <login-view v-if="!authenticated" @loggedIn="authenticated = true" />
           <glimpse v-else @loggedOut="authenticated = false" />
@@ -59,6 +64,7 @@ export default {
   },
   data () {
     return {
+      userPopoverShown: false,
       expanded: false
     }
   },

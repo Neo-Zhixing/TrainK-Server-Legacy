@@ -1,8 +1,10 @@
+from django.views.generic import TemplateView
 from django.urls import path, re_path
-from .views import session, user
+from . import views
 
 urlpatterns = [
-	path('', user.UserView.as_view()),
-	path('session', session.SessionView.as_view()),
-	re_path('', user.UserView.as_view()),
+	path('', views.UserView.as_view()),
+	path('session/', views.SessionView.as_view()),
+	path('password/', views.PasswordView.as_view()),
+	re_path('setting/', TemplateView.as_view(template_name='settings.html')),
 ]

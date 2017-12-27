@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'rest_auth',
+    'rest_auth.registration',
+    'allauth',
+    'allauth.account',
 
     'user',
     'info',
@@ -179,10 +182,6 @@ REST_FRAMEWORK = {
 LOGIN_REDIRECT_URL = '/user'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
-ACCOUNT_FORMS = {
-    'login': 'user.forms.LoginForm'
-}
-ACCOUNT_SIGNUP_FORM_CLASS = 'user.forms.SignupForm'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 CRISPY_FAIL_SILENTLY = not DEBUG

@@ -7,18 +7,14 @@ Vue.use(Router)
 
 export default new Router({
   mode: 'history',
-  base: '/user',
+  base: '/user/setting',
   routes: [
     {
       path: '/',
-      redirect: '/settings/account'
+      redirect: '/account'
     },
     {
-      path: '/settings',
-      redirect: '/settings/account'
-    },
-    {
-      path: '/settings/account',
+      path: '/account',
       name: 'Account',
       component: Account
     }

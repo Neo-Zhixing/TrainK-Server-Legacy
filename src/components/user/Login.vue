@@ -19,7 +19,7 @@
     </b-form-group>
     <b-button-group class="btn-block">
       <b-button variant="primary" class="col-8" type="submit">
-        登陆
+        登录
         <font-awesome-icon :icon="loading ? 'spinner' : 'sign-in-alt'" :spin="loading" />
       </b-button>
       <a class="btn btn-outline-secondary col-4" href="/user">注册</a>
@@ -54,7 +54,7 @@ export default {
       this.loading = true
       let data = {password: this.form.password}
       data[this.form.username.includes('@') ? 'email' : 'username'] = this.form.username
-      axios.post('/user/session', data)
+      axios.post('/user/session/', data)
       .then((response) => {
         this.loading = false
         this.$emit('loggedIn', response.data.key)

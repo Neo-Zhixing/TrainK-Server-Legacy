@@ -5,12 +5,11 @@
       </b-col>
       <b-col cols="8">
         User Details
-        lka sdfjkq ewfi mkf
-        fdaskl mf qwe klv dsafqwe fdekwrk wreq jkqwkjerqwkdf wa knw afdkfd
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
       </b-col>
     </b-row>
     <b-button-group class="btn-block mt-2">
-      <a class="btn btn-primary col-7" href="/user">用户中心<font-awesome-icon icon="cloud" /></a>
+      <a class="btn btn-primary col-7" href="/user/setting">用户中心<font-awesome-icon icon="cloud" /></a>
       <b-button variant="outline-danger" class="col-5" @click="logout">
         登出
         <font-awesome-icon :icon="loading ? 'spinner' : 'sign-out-alt'" :spin="loading" /></b-button>
@@ -40,7 +39,7 @@ export default {
     logout () {
       this.errorMessage = null
       this.loading = true
-      axios.delete('/user/session')
+      axios.delete('/user/session/')
       .then((response) => {
         this.loading = false
         this.$emit('loggedOut')
