@@ -14,6 +14,7 @@ class Train(models.Model):
 	names = fields.ArrayField(models.CharField(max_length=10))
 	telecode = models.CharField(max_length=12, primary_key=True)
 	stops = fields.JSONField(encoder=DjangoJSONEncoder)
+	since = models.DateField()
 
 	def __str__(self):
 		return self.name

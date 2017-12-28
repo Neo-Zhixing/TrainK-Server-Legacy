@@ -132,4 +132,5 @@ class Spider(scrapy.Spider):
 		stops[-1].pop('departureTime', None)
 		train = response.meta['train']
 		train['stops'] = stops
+		train['since'] = self.date
 		yield train

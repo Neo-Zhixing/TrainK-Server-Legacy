@@ -1,5 +1,5 @@
 from django.views.defaults import bad_request
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.dateparse import parse_duration
 from django.utils.duration import duration_iso_string
 from datetime import timedelta
@@ -32,7 +32,7 @@ def _getStationID(args, name):
 def _getTrain(args):
 	train = None
 	if 'name' in args:
-		train = get_object_or_404(models.Train, names__contains=[args['name']])
+		train = get_list_or_404(models.Train, names__contains=[args['name']]).latest('since')
 	elif 'telecode' in args:
 		train = get_object_or_404(models.Train, telecode=args['telecode'])
 	return train
