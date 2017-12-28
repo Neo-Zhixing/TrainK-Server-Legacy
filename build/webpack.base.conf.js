@@ -28,7 +28,8 @@ module.exports = {
     common: './src/common.js',
     user: './src/user.js',
     ticket: './src/ticket.js',
-    info: './src/info.js'
+    info: './src/info.js',
+    map: './src/map.js'
   },
   output: {
     path: config.build.assetsRoot,

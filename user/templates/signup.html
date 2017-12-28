@@ -9,12 +9,14 @@
   <div class="container">
     <div class="row">
       <div class="col-6 mx-md-auto">
-        <div class="card-header">
-          注册您的TrainK账号
-        </div>
-        <div class="card-body">
+        <div class="card">
+          <div class="card-header">
+            注册您的TrainK账号
+          </div>
+          <div class="card-body">
             <p>已经有账号了？<a href="{{ login_url }}">登录</a></p>
-          {% crispy form %}
+            {% crispy form %}
+          </div>
         </div>
       </div>
     </div>

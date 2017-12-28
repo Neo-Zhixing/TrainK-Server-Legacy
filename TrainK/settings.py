@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
     'crispy_forms',
 
     'user',
@@ -111,6 +112,7 @@ DATABASES = {
     }
 }
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
