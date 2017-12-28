@@ -15,11 +15,11 @@
       </b-button-group>
       <b-collapse is-nav id="nav-collapse" v-model="expanded" class="justify-content-end">
         <b-navbar-nav>
-          <b-nav-item href="/ticket"><font-awesome-icon icon="ticket-alt"></font-awesome-icon>购票</b-nav-item>
-          <b-nav-item href="/info"><font-awesome-icon icon="info-circle" />查询</b-nav-item>
+          <b-nav-item href="/ticket" :active="location === 'ticket'"><font-awesome-icon icon="ticket-alt"></font-awesome-icon>购票</b-nav-item>
+          <b-nav-item href="/info" :active="location === 'info'"><font-awesome-icon icon="info-circle" />查询</b-nav-item>
           <b-nav-item disabled href="#"><font-awesome-icon icon="briefcase" />通勤</b-nav-item>
-          <b-nav-item href="/map"><font-awesome-icon icon="map" />地图</b-nav-item>
-          <b-nav-item disabled href="/forum"><font-awesome-icon icon="comments" />社区</b-nav-item>
+          <b-nav-item href="/map" :active="location === 'map'"><font-awesome-icon icon="map" />地图</b-nav-item>
+          <b-nav-item disabled href="/forum" :active="location === 'forum'"><font-awesome-icon icon="comments" />社区</b-nav-item>
         </b-navbar-nav>
       </b-collapse>
       <b-button id="navbar-popover-trigger" :variant="userPopoverShown ? 'light' : 'outline-light'" class="ml-3 d-none d-md-block">
@@ -66,6 +66,11 @@ export default {
     return {
       userPopoverShown: false,
       expanded: false
+    }
+  },
+  computed: {
+    location () {
+      return window.location.pathname.split('/')[1]
     }
   },
   components: { LoginView, Glimpse }
