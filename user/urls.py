@@ -5,6 +5,6 @@ from . import views
 urlpatterns = [
 	path('', views.UserView.as_view(), name='account_signup'),
 	path('session/', views.SessionView.as_view(), name='account_login'),
-	path('password/', views.PasswordView.as_view()),
+	path('password/', views.PasswordView.as_view(), name='account_reset_password'),
 	re_path('setting/', TemplateView.as_view(template_name='settings.html'), name="account_settings"),
 ]

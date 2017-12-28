@@ -5,10 +5,21 @@
 {% block title %}{{block.super}}{% trans "Signup" %}{% endblock %}
 
 {% block content %}
-<h1>{% trans "Sign Up" %}</h1>
+<div class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-6 mx-md-auto">
+        <div class="card-header">
+          注册您的TrainK账号
+        </div>
+        <div class="card-body">
+            <p>已经有账号了？<a href="{{ login_url }}">登录</a></p>
+          {% crispy form %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
-
-{% crispy form %}
 
 {% endblock %}

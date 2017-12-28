@@ -1,7 +1,7 @@
 {% extends "user_base.html" %}
 
 {% load i18n %}
-{% load account socialaccount %}
+{% load crispy_forms_tags %}
 
 {% block title %}{{ block.super }}{% trans "Sign In" %}{% endblock %}
 
@@ -14,7 +14,7 @@
           {% trans 'Sign In' %}
         </div>
         <div class="card-body">
-          {% include './components/login_panel.html' %}
+          {% crispy form %}
         </div>
       </div>
     </div>
