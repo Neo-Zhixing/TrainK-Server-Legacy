@@ -11,9 +11,6 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
-from machina import get_apps as get_machina_apps
-from machina import MACHINA_MAIN_TEMPLATE_DIR, MACHINA_MAIN_STATIC_DIR
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -56,12 +53,7 @@ INSTALLED_APPS = [
     'info',
     'ticket',
     'trip',
-
-    # Machina related apps:
-    'mptt',
-    'haystack',
-    'widget_tweaks',
-] + get_machina_apps()
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -80,7 +72,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(BASE_DIR, "templates"),
-            MACHINA_MAIN_TEMPLATE_DIR,
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -89,7 +80,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'machina.core.context_processors.metadata',
             ],
         },
     },
@@ -155,15 +145,11 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
-    'machina_attachments': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
 }
 
 
 STATIC_URL = '/web/'
 STATICFILES_DIRS = (
-    MACHINA_MAIN_STATIC_DIR,
     os.path.join(BASE_DIR, "static"),
     os.path.join(BASE_DIR, 'dist'),
 )
@@ -198,16 +184,6 @@ ACCOUNT_FORMS = {
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 CRISPY_FAIL_SILENTLY = not DEBUG
-
-# Machina
-MACHINA_FORUM_NAME = 'TrainK'
-MACHINA_BASE_TEMPLATE_NAME = 'base.html'
-# Django-haystack settings
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': 'haystack.backends.simple_backend.SimpleEngine',
-    },
-}
 
 _WEBPACK_STAT_FILE_PATH = 'build/webpack-stats.dev.json' if DEBUG else 'build/webpack-stats.prod.json'
 WEBPACK_LOADER = {
