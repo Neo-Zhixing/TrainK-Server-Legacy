@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
+    'django_celery_beat',
+
     'webpack_loader',
     'rest_framework',
     'rest_framework.authtoken',
@@ -53,6 +55,7 @@ INSTALLED_APPS = [
     'info',
     'ticket',
     'trip',
+    'scrape',
 ]
 
 MIDDLEWARE = [

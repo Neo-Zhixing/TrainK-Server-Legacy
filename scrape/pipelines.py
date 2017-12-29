@@ -30,7 +30,8 @@ class DjangoDatabaseSavePipeline(object):
 				msg = ''
 				if hasattr(item, 'duplicatedWillDiscard'):
 					msg = item.duplicatedWillDiscard()
-				raise DropItem("Duplicate item found. %s" % msg)
+				self.logger.debug("Duplicate item %s found. " % msg)
+				return
 
 		if hasattr(item, 'itemWillCreate'):
 			item.itemWillCreate()

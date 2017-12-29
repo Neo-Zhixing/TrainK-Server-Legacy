@@ -21,3 +21,5 @@ selenium-debug.log
 *.ntvs*
 *.njsproj
 *.sln
+
+celerybeat.pid

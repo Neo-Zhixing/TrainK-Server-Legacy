@@ -60,22 +60,17 @@ class Spider(scrapy.Spider):
 					telecodes[telecode] = [name]
 		return telecodes
 
-	def parseRecords(self, content):
-		for (telecode, names) in content.items():
-				record = Record(
-					departureDate=self.date,
-					telecode=telecode,
-				)
-				yield record
-
-	def parseSchedules(self, content):
+	# Called when train list page was scraped.
+	# Create trains and records for the selected day.
+	def parse(self, response):
+		content = self.pre_parse(response.body)
 		for (telecode, names) in content.items():
 			train = Train(
 				names=names,
 				telecode=telecode
 			)
 			if train.duplicated:
-				yield train
+				self.logger.debug('Duplicated Train {} will be discarded')
 			else:
 				parameters = {
 					'train_no': telecode,
@@ -84,19 +79,19 @@ class Spider(scrapy.Spider):
 					'depart_date': self.date,
 				}
 				url = 'https://kyfw.12306.cn/otn/czxx/queryByTrainNo?' + urllib.parse.urlencode(parameters)
-				request = scrapy.Request(url, callback=self.parseTrainSchedule)
+				request = scrapy.Request(url, callback=self.parseSchedule)
 				request.meta['train'] = train
 				request.meta['dont_redirect'] = True
 				yield request
 
-	def parse(self, response):
-		content = self.pre_parse(response.body)
-		# Create Records for each day
-		parser = self.parseRecords if self.createRecords else self.parseSchedules
-		for i in parser(content):
-			yield i
+			if self.createRecords:
+				record = Record(
+					departureDate=self.date,
+					telecode=telecode,
+				)
+				yield record
 
-	def parseTrainSchedule(self, response):
+	def parseSchedule(self, response):
 		jsonData = json.loads(response.body.decode('utf-8'))
 		stops = []
 		lastTime = timedelta()
