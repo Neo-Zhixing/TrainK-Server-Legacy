@@ -8,6 +8,8 @@ import enum
 class Station(models.Model):
 	name = models.CharField(max_length=10)
 	telecode = models.CharField(max_length=3, blank=True)
+	abbreviation = models.CharField(max_length=10)
+	spell = models.CharField(max_length=30)
 
 
 class Train(models.Model):

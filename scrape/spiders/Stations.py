@@ -14,22 +14,22 @@ class Spider(scrapy.Spider):
 		data += '@'
 
 		for i in range(0, data.count("@")):
-			# abbriviation1 = data[:data.index('|')]
-			data = data[data.index("|") + 1:]  # bjb
+			# abbreviation1 = data[:data.index('|')]
+			data = data[data.index("|") + 1:]  # wln some unknown telecode.
 
 			name = data[:data.index('|')]
-			data = data[data.index("|") + 1:]  # the chinese name
+			data = data[data.index("|") + 1:]  # 乌鲁木齐南
 
 			telecode = data[:data.index('|')]
-			data = data[data.index("|") + 1:]  # VAP
+			data = data[data.index("|") + 1:]  # WMR
 
-			# spell = data[:data.index('|')]
-			data = data[data.index("|") + 1:]  # beijingbei
+			spell = data[:data.index('|')]
+			data = data[data.index("|") + 1:]  # wulumuqinan
 
-			# abbriviation2 = data[:data.index('|')]
-			data = data[data.index("|") + 1:]  # bjb
+			abbreviation = data[:data.index('|')]
+			data = data[data.index("|") + 1:]  # wlmqn
 
 			# number = data[:data.index('@')]
 			data = data[data.index('@') + 1:]
 
-			yield Station(name=name, telecode=telecode)
+			yield Station(name=name, telecode=telecode, spell=spell, abbreviation=abbreviation)

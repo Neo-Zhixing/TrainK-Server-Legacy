@@ -9,7 +9,15 @@ class Station(DjangoItem):
 
 	@property
 	def duplicated(self):
-		return models.Station.objects.filter(name=self['name'], telecode=self['telecode']).exists()
+		return models.Station.objects.filter(name=self['name']).exists()
+
+	def duplicatedWillDiscard(self):
+		originalStation = models.Station.objects.get(name=self['name'])
+		if originalStation.telecode == '' and self['telecode'] != '':
+			originalStation.telecode = self['telecode']
+			originalStation.spell = self['spell']
+			originalStation.abbreviation = self['abbreviation']
+			return 'Updated station %s telecode to %s' % (originalStation.name)
 
 	def __str__(self):
 		return self['name']

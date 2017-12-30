@@ -9,7 +9,7 @@ from urllib import parse
 from info import models
 
 
-class StatusSpider(scrapy.Spider):
+class Spider(scrapy.Spider):
 	name = 'Status'
 	allowed_domains = ['12306.cn']
 
