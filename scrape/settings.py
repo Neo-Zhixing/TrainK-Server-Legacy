@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'scrape.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'TrainK (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/604.4.7 (KHTML, like Gecko) Version/11.0.2 Safari/604.4.7'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -39,10 +39,9 @@ ROBOTSTXT_OBEY = False
 TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-#}
+DEFAULT_REQUEST_HEADERS = {
+	'Accept-Encoding': 'gzip, deflate',
+}
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
@@ -65,9 +64,9 @@ TELNETCONSOLE_ENABLED = False
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'scrape.pipelines.DjangoDatabaseSavePipeline': 300,
+	'scrape.pipelines.DjangoDatabaseSavePipeline': 300,
 }
-
+ 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
@@ -90,9 +89,8 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 # Django Intergration
-
 import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'TrainK.settings'
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "TrainK.settings")
 
 import django
 django.setup()

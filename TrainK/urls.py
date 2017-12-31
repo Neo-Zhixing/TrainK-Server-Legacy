@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.urls import path, include
 from django.views.generic import TemplateView
-from django.contrib import admin
+from baton.autodiscover import admin
 
 urlpatterns = [
     path('user/', include('user.urls')),
+    path('admin/baton-', include('baton.urls')),
     path('admin/', admin.site.urls),
     path('ticket/', include('ticket.urls')),
     path('info/', include('info.urls')),

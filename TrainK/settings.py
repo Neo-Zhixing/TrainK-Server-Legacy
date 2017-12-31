@@ -31,6 +31,7 @@ SITE_ID = 1
 # Application definition
 
 INSTALLED_APPS = [
+    'baton',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,6 +57,8 @@ INSTALLED_APPS = [
     'ticket',
     'trip',
     'scrape',
+
+    'baton.autodiscover',
 ]
 
 MIDDLEWARE = [
@@ -146,24 +149,54 @@ USE_TZ = True
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'redis_cache.RedisCache',
+        'LOCATION': 'localhost:6379',
+        'OPTIONS': {
+            'DB': 0,
+            'PASSWORD': 'Braungardt4365',
+        },
     },
 }
-
-
 STATIC_URL = '/web/'
+STATIC_ROOT = '/static/'
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
     os.path.join(BASE_DIR, 'dist'),
 )
-STATICFILES_STORAGE = 'aliyun_oss2_storage.backends.AliyunStaticStorage'
-DEFAULT_FILE_STORAGE = 'aliyun_oss2_storage.backends.AliyunMediaStorage'
-ACCESS_KEY_ID = "LTAIP3L1SzIaldrp"
-ACCESS_KEY_SECRET = "hUf7QPw1TL7tM18QfMw74fpRCSo5G8"
-END_POINT = "oss-cn-hangzhou.aliyuncs.com"  # OSS存储节点
-BUCKET_NAME = "traink"
-ALIYUN_OSS_CNAME = "https://static.tra.ink"
-BUCKET_ACL_TYPE = "public-read"  # private, public-read, public-read-write
+
+if not DEBUG:
+    STATICFILES_STORAGE = 'aliyun_oss2_storage.backends.AliyunStaticStorage'
+    DEFAULT_FILE_STORAGE = 'aliyun_oss2_storage.backends.AliyunMediaStorage'
+    ACCESS_KEY_ID = "LTAIP3L1SzIaldrp"
+    ACCESS_KEY_SECRET = "hUf7QPw1TL7tM18QfMw74fpRCSo5G8"
+    END_POINT = "oss-cn-hangzhou.aliyuncs.com"  # OSS存储节点
+    BUCKET_NAME = "traink"
+    ALIYUN_OSS_CNAME = "https://static.tra.ink"
+    BUCKET_ACL_TYPE = "public-read"  # private, public-read, public-read-write
+
+
+BATON = {
+    'SITE_HEADER': 'TrainK Admin',
+    'SITE_TITLE': 'TrainK',
+    'INDEX_TITLE': 'Site administration',
+    'SUPPORT_HREF': '',
+    'COPYRIGHT': 'Copyright © 2017 <a href="//begin.studio">begin Studio</a>', # noqa
+    'POWERED_BY': '<a href="https://www.otto.to.it">Otto srl</a>',
+    'MENU': (
+        {'type': 'title', 'label': 'Basic', 'apps': ('sites', )},
+        {'type': 'model', 'label': 'Sites', 'name': 'site', 'app': 'sites'},
+        {'type': 'app', 'name': 'django_celery_beat', 'label': 'Periodic Tasks', 'icon': 'fa fa-lock'},
+
+        {'type': 'title', 'label': 'Users', 'apps': ('auth', )},
+        {'type': 'app', 'name': 'auth', 'label': 'Authentication', 'icon': 'fa fa-lock'},
+        {'type': 'model', 'label': 'Tokens', 'name': 'token', 'app': 'authtoken', 'icon': 'fa fa-envelope'},
+        {'type': 'app', 'name': 'socialaccount', 'label': 'Social Auth', 'icon': 'fa fa-weibo'},
+        {'type': 'model', 'label': 'Emails', 'name': 'emailaddress', 'app': 'account', 'icon': 'fa fa-envelope'},
+
+        {'type': 'title', 'label': 'Info', 'apps': ('info', )},
+        {'type': 'app', 'name': 'info', 'label': 'Train Info', 'icon': 'fa fa-info'},
+        {'type': 'free', 'label': 'Custom Link', 'url': '/admin/tasks'},
+    ),
+}
 
 
 REST_FRAMEWORK = {
@@ -195,3 +228,6 @@ WEBPACK_LOADER = {
         'STATS_FILE': os.path.join(BASE_DIR, _WEBPACK_STAT_FILE_PATH),
     }
 }
+
+CELERY_worker_hijack_root_logger = False
+CELERY_ENABLE_UTC = False

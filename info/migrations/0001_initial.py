@@ -65,20 +65,18 @@ class Migration(migrations.Migration):
             SELECT
                 info_record.id AS record_id,
                 train_id,
-                index,
+                ordinality-1 as index,
                 ("departureDate" + "arrivalTime") AT TIME ZONE 'CCT' AS "arrivalTime",
                 "arrivalTimeAnticipated",
                 ("departureDate" + "departureTime") AT TIME ZONE 'CCT' AS "departureTime",
                 "departureTimeAnticipated"
-
-            FROM info_record, jsonb_to_recordset(stops)
-            AS x(
+            FROM info_record, ROWS FROM ( jsonb_to_recordset(stops) as (
                 "index" integer,
                 "station" integer,
                 "departureTime" interval,
                 "departureTimeAnticipated" boolean,
                 "arrivalTime" interval,
                 "arrivalTimeAnticipated" boolean
-            )
+            )) WITH ORDINALITY
         """),
     ]

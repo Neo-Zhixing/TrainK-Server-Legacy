@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres import fields
 from django.core.serializers.json import DjangoJSONEncoder
+from django.shortcuts import reverse
 
 import enum
 
@@ -10,6 +11,9 @@ class Station(models.Model):
 	telecode = models.CharField(max_length=3, blank=True)
 	abbreviation = models.CharField(max_length=10)
 	spell = models.CharField(max_length=30)
+
+	def get_absolute_url(self):
+		return reverse('info_station')
 
 
 class Train(models.Model):
@@ -28,11 +32,17 @@ class Train(models.Model):
 			nameStr += name + '/'
 		return nameStr[:-1]
 
+	def get_absolute_url(self):
+		return reverse('info_train')
+
 
 class Record(models.Model):
 	departureDate = models.DateField()
 	train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name='records')
 	stops = fields.JSONField(encoder=DjangoJSONEncoder)
+
+	def get_absolute_url(self):
+		return reverse('info_record')
 
 
 class Stop(models.Model):

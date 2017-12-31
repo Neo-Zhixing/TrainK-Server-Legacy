@@ -1,7 +1,14 @@
 from celery import task
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
+from billiard import Process
 
 
 @task
-def crawl(name):
-	from .crawler import crawl_async
-	crawl_async(name)
+def crawl(*args, **kwargs):
+	crawler = CrawlerProcess(get_project_settings())
+	crawler.crawl(*args, **kwargs)
+	process = Process(target=crawler.start)
+	process.start()
+	process.join()
+	crawler.stop()

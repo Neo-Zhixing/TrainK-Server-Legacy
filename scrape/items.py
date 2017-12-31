@@ -17,7 +17,9 @@ class Station(DjangoItem):
 			originalStation.telecode = self['telecode']
 			originalStation.spell = self['spell']
 			originalStation.abbreviation = self['abbreviation']
-			return 'Updated station %s telecode to %s' % (originalStation.name)
+			originalStation.save()
+			return 'Updated station %s telecode to %s' % (originalStation.name, originalStation.telecode)
+		return 'Discarded'
 
 	def __str__(self):
 		return self['name']

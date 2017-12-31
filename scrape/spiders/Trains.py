@@ -7,11 +7,9 @@ import re
 from ..items import Train, Record
 
 
-class Spider(scrapy.Spider):
-	name = 'Trains'
+class BaseSpider(scrapy.Spider):
 	allowed_domains = ['12306.cn']
 	start_urls = ['https://kyfw.12306.cn/otn/resources/js/query/train_list.js']
-	createRecords = False
 	date = None
 	keys = None
 
@@ -65,46 +63,46 @@ class Spider(scrapy.Spider):
 	def parse(self, response):
 		content = self.pre_parse(response.body)
 		for (telecode, names) in content.items():
-			train = Train(
-				names=names,
-				telecode=telecode
-			)
-			if train.duplicated:
-				self.logger.debug('Duplicated Train {} will be discarded')
-			else:
-				parameters = {
-					'train_no': telecode,
-					'from_station_telecode': 'ABC',
-					'to_station_telecode': 'CBA',
-					'depart_date': self.date,
-				}
-				url = 'https://kyfw.12306.cn/otn/czxx/queryByTrainNo?' + urllib.parse.urlencode(parameters)
-				request = scrapy.Request(url, callback=self.parseSchedule)
-				request.meta['train'] = train
-				request.meta['dont_redirect'] = True
-				yield request
+			item = self.parseItem(telecode, names)
+			if item:
+				yield item
 
-			if self.createRecords:
-				record = Record(
-					departureDate=self.date,
-					telecode=telecode,
-				)
-				yield record
+
+class TrainSpider(BaseSpider):
+	name = 'Trains'
+
+	def parseItem(self, telecode, names):
+		train = Train(
+			names=names,
+			telecode=telecode
+		)
+		if train.duplicated:
+			self.logger.debug('Duplicated Train %s will be discarded' % names)
+		else:
+			parameters = {
+				'train_no': telecode,
+				'from_station_telecode': 'ABC',
+				'to_station_telecode': 'CBA',
+				'depart_date': self.date,
+			}
+			url = 'https://kyfw.12306.cn/otn/czxx/queryByTrainNo?' + urllib.parse.urlencode(parameters)
+			request = scrapy.Request(url, callback=self.parseSchedule)
+			request.meta['train'] = train
+			request.meta['dont_redirect'] = True
+			return request
 
 	def parseSchedule(self, response):
 		jsonData = json.loads(response.body.decode('utf-8'))
 		stops = []
 		lastTime = timedelta()
 
-		index = 0
 		for stop in jsonData['data']['data']:
 			# Parse time string into timedelta objects
 			departureTime = re.match(r'(\d{2}):(\d{2})', stop['start_time'])
 			departureTime = departureTime.groups() if departureTime else None
 			arrivalTime = re.match(r'(\d{2}):(\d{2})', stop['arrive_time'])
 			arrivalTime = arrivalTime.groups() if arrivalTime else None
-			stopDict = {'index': index, 'station': stop['station_name']}
-			index += 1
+			stopDict = {'station': stop['station_name']}
 			if arrivalTime:
 				arrivalTime = timedelta(hours=int(arrivalTime[0]), minutes=int(arrivalTime[1]))
 				if lastTime > arrivalTime:  # Date interpretation
@@ -129,3 +127,13 @@ class Spider(scrapy.Spider):
 		train['stops'] = stops
 		train['since'] = self.date
 		yield train
+
+
+class RecordSpider(BaseSpider):
+	name = 'Records'
+
+	def parseItem(self, telecode, names):
+		return Record(
+			departureDate=self.date,
+			telecode=telecode,
+		)

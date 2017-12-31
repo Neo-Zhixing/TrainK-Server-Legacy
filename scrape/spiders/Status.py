@@ -51,25 +51,23 @@ class Spider(scrapy.Spider):
 		def requestLink(stop, action):
 			# Example: http://dynamic.12306.cn/mapping/kfxt/zwdcx/LCZWD/cx.jsp?cz=%BA%CF%B7%CA&cc=T64&cxlx=0&rq=2017-11-17&czEn=-E5-90-88-E8-82-A5&tp=1510912375233
 			parameters = {
-				'cz': parse.quote(stop.station.name.encode('gbk')),                           # GBK Encoded Station Name
+				'cz': parse.quote(stop.station.name.encode('gbk', errors='replace')),        # GBK Encoded Station Name
 				'cc': stop.train.names[0],                                                    # Train Code
 				'cxlx': action.value,                                                         # Action, StatusSpider.TrainAction
 				'rq': datetime.date.today().isoformat(),                                      # ISO Formatted current date (Not the date of departure)
-				'czEn': parse.quote(stop.station.name.encode('utf-8')).replace('%', '-'),     # UTF-8 Encoded Station Name, replacing % with -
+				'czEn': parse.quote(stop.station.name.encode('utf-8', errors='replace')).replace('%', '-'),  # UTF-8 Encoded Station Name, replacing % with -
 				'tp': int(datetime.datetime.now().timestamp())                                # Current timestamp
 			}
 			return 'http://dynamic.12306.cn/mapping/kfxt/zwdcx/LCZWD/cx.jsp?' + parse.urlencode(parameters)
 
-		for (action, stops) in (
-			(models.TrainAction.Departure, models.Stop.objects.filter(
-				departureTimeAnticipated=True,
-				departureTime__lte=timezone.now(),
-				departureTime__gte=timezone.now() - datetime.timedelta(hours=1))),
-			(models.TrainAction.Arrival, models.Stop.objects.filter(
-				arrivalTimeAnticipated=True,
-				arrivalTime__lte=timezone.now(),
-				arrivalTime__gte=timezone.now() - datetime.timedelta(hours=1))),
-		):
+		for action in (models.TrainAction.Departure, models.TrainAction.Arrival):
+			key = action.name.lower()
+			kwargs = {
+				'%sTimeAnticipated' % key: True,
+				'%sTime__lte' % key: timezone.now(),
+				'%sTime__gte' % key: timezone.now() - datetime.timedelta(hours=1),
+			}
+			stops = models.Stop.objects.filter(**kwargs)
 			for stop in stops:
 				request = scrapy.Request(requestLink(stop, action), callback=self.parse)
 				request.meta['stop'] = stop
@@ -78,16 +76,16 @@ class Spider(scrapy.Spider):
 				yield request
 
 	def parse(self, response):
+		stop = response.meta['stop']
+		action = response.meta['action']
+
 		string = response.body.decode('gbk')
 		string = re.match(r'^\s+(\S+)\s+$', string)
 		if not string:
-			self.logger.warning("scrape %s error, result is empty, can't extract prompt string")
+			self.logger.warning("scrape %s  of %s error, result is empty, can't extract prompt string" % (stop.train.name, stop.station.name))
 			return
 		string = string.group(1)
 		(status, result) = self.parseStr(string)
-
-		stop = response.meta['stop']
-		action = response.meta['action']
 
 		# Result corrections - support for cross-day delays.
 		if result:
