@@ -27,10 +27,7 @@ class Train(models.Model):
 
 	@property
 	def name(self):
-		nameStr = ''
-		for name in self.names:
-			nameStr += name + '/'
-		return nameStr[:-1]
+		return '/'.join(self.names)
 
 	def get_absolute_url(self):
 		return reverse('info_train')
@@ -52,7 +49,7 @@ class Stop(models.Model):
 
 	@property
 	def station(self):
-		stationID = self.train.stops[self.index]['station']
+		stationID = self.scheduledStop['station']
 		return Station.objects.get(pk=stationID)
 
 	@property

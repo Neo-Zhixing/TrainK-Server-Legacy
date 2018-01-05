@@ -2,53 +2,59 @@
 {% load static %}
 {% load train %}
 
-{% block title %}{{block.super}} 正晚点记录{% endblock %}
+{% block title %}{{block.super}}-{{train.name}}次列车正晚点记录{% endblock %}
 
 {% block content %}
 <div class='container-fluid py-5'>
 <table class="table table-hover table-responsive" style="white-space: nowrap;">
-  <caption>{{train.names|connect}}次列车延误记录</caption>
+  <caption>{{train.name}}次列车延误记录</caption>
   <thead class="thead-light">
     <tr>
       <th scope="col"></th>
       <th scope="col"></th>
-      {% for stop in train.stops %}
-      <th scope="col">{{stop.station.name}}</th>
+      {% for record in records %}
+      <th scope="col">{{record.departureDate}}</th>
       {% endfor %}
     </tr>
   </thead>
   <tbody>
-    {% for record in results %}
+    {% for stationID, stops in table.items %}
     <tr>
-      <th scope="row">{{ record.departureDate }}</th>
-      <td>到站<br/>出站</td>
-      {% for stop in record.stops %}
+      {% with station=stationID|station %}
+        <th scope="row">{{ station.name }}</th>
+      {% endwith %}
+      <td>
+        {% if not forloop.first %}到站<br/>{% endif %}
+        {% if not forloop.last %}出站{% endif %}
+      </td>
+      {% for stop in stops %}
       <td>
         {% if 'arrivalTime' in stop %}
-        {{stop.arrivalTime|timedelta}}
-        {% if stop.arrivalDelay == 'P0DT00H00M00S' %}
-        <span class="badge badge-success">正点</span>
-        {% elif stop.arrivalDelay|timedeltaSec < 0 %}
-        <span class="badge badge-success">早点{{stop.arrivalDelay|timedeltaMin}}分</span>
-        {% elif stop.arrivalDelay|timedeltaSec > 900 %}
-        <span class="badge badge-danger">晚点{{stop.arrivalDelay|timedeltaMin}}分</span>
-        {% else %}
-        <span class="badge badge-secondary">晚点{{stop.arrivalDelay|timedeltaMin}}分</span>
-        {% endif %}
+          {{stop.arrivalTime|timedeltaStr }}
+          {% if stop.arrivalDelay == 0 %}
+          <span class="badge badge-success">正点</span>
+          {% elif stop.arrivalDelay < 0 %}
+          <span class="badge badge-success">早点{{stop.arrivalDelay}}分</span>
+          {% elif stop.arrivalDelay > 10 %}
+          <span class="badge badge-danger">晚点{{stop.arrivalDelay}}分</span>
+          {% else %}
+          <span class="badge badge-secondary">晚点{{stop.arrivalDelay}}分</span>
+          {% endif %}
+        <br />
         {% endif  %}
-        <br/>
+        
         {% if 'departureTime' in stop %}
-        {{stop.departureTime|timedelta}}
-        {% if stop.departureDelay == 'P0DT00H00M00S' %}
-        <span class="badge badge-success">正点</span>
-        {% elif stop.departureDelay|timedeltaSec < 0 %}
-        <span class="badge badge-success">早点{{stop.departureDelay|timedeltaMin}}分</span>
-        {% elif stop.departureDelay|timedeltaSec > 900 %}
-        <span class="badge badge-danger">晚点{{stop.departureDelay|timedeltaMin}}分</span>
-        {% else %}
-        <span class="badge badge-secondary">晚点{{stop.departureDelay|timedeltaMin}}分</span>
-        {% endif %}
-        {% endif %}
+          {{stop.departureTime|timedeltaStr }}
+          {% if stop.departureDelay == 0 %}
+          <span class="badge badge-success">正点</span>
+          {% elif stop.departureDelay < 0 %}
+          <span class="badge badge-success">早点{{stop.departureDelay}}分</span>
+          {% elif stop.departureDelay > 10 %}
+          <span class="badge badge-danger">晚点{{stop.departureDelay}}分</span>
+          {% else %}
+          <span class="badge badge-secondary">晚点{{stop.departureDelay}}分</span>
+          {% endif %}
+        {% endif  %}
       </td>
       {% endfor %}
     </tr>

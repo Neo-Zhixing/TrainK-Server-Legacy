@@ -3,27 +3,27 @@
 {% load render_bundle from webpack_loader %}
 {% load train %}
 
-{% block title %}{{block.super}} 车次{% endblock %}
+{% block title %}{{block.super}}-{{ train.name }}次列车{% endblock %}
 
 {% block content %}
 <div id="entrance">
   <div class="py-5 text-white text-center" style="background-image: url(&quot;{% static "img/train.jpg" %}&quot;);  background-position: center; background-size:cover;">
-    <h1 class="display-2">{{ names|connect }}</h1>
+    <h1 class="display-2">{{ train.name }}</h1>
     <div class="row" style="max-width: 600px; margin-left: auto; margin-right: auto;">
       <div class="col-5">
-        {% with stops.0 as stop %}
-        <h1>{{ stop.station.name }}</h1>
-        <h2>{{ stop.departureTime|timedeltaStr }}</h2>
-        {% endwith %}
+        {% with train.stops.0 as stop %}{% with stop.station|station as station %}
+        <h1>{{ station.name }}</h1>
+        <h2>{{ stop.departureTime|timedelta|timedeltaStr }}</h2>
+        {% endwith %}{% endwith %}
       </div>
       <div class="col-2">
         <h1><font-awesome-icon icon="long-arrow-alt-right" size="2x"></font-awesome-icon></h1>
       </div>
       <div class="col-5">
-        {% with stops|last as stop %}
-        <h1>{{ stop.station.name }}</h1>
-        <h2>{{ stop.arrivalTime|timedeltaStr }}</h2>
-        {% endwith %}
+        {% with train.stops|last as stop %}{% with stop.station|station as station %}
+        <h1>{{ station.name }}</h1>
+        <h2>{{ stop.arrivalTime|timedelta|timedeltaStr }}</h2>
+        {% endwith %}{% endwith %}
       </div>
     </div>
   </div>
@@ -31,21 +31,30 @@
   <div class="container py-5">
     <div class="row">
       <div class="col-md-7">
-        {% for stop in stops %}
+        {% for stop in train.stops %}
         <div class="row py-1 jumbotron">
           <div class="col-2 py-1">
-            <h6>{{ stop.arrivalTime|timedeltaStr }}</h6>
-            <h6>{{ stop.departureTime|timedeltaStr }}</h6>
+            <h6>{{ stop.arrivalTime|timedelta|timedeltaStr }}</h6>
+            <h6>{{ stop.departureTime|timedelta|timedeltaStr }}</h6>
           </div>
-          <div class="col-5 py-1"><h1>{{ stop.station.name }}</h1></div>
+          <div class="col-5 py-1">
+            {% with station=stop.station|station %}
+            <h1>{{ station.name }}</h1>
+            {% endwith %}
+          </div>
         </div>
         {% endfor %}
       </div>
       <div class="col-md-5">
-        <delay-chart-card telecode="{{telecode}}"></delay-chart-card>
-        {% render_bundle 'info' 'js' %}
+        <delay-chart-card records="{% url 'info_train_record' train.telecode %}">
+        </delay-chart-card>
       </div>
     </div>
   </div>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+{{ block.super }}
+{% render_bundle 'info' 'js' %}
+{% endblock %}

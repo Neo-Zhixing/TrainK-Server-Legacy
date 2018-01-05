@@ -1,11 +1,11 @@
 {% extends "info_base.html" %}
 {% load static %}
 
-{% block title %}{{block.super}} 车站{% endblock %}
+{% block title %}{{block.super}}-车站{% endblock %}
 
 {% block content %}
 <div class="py-5 text-white text-center" style="background-image: url(&quot;{% static "img/train.jpg" %}&quot;);  background-position: center; background-size:cover;">
-  <h1 class="display-2">{{ name }}</h1>
+  <h1 class="display-2">{{ station.name }}</h1>
 </div>
 
 <div class="container py-5">
