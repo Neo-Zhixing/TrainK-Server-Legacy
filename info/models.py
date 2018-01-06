@@ -43,9 +43,13 @@ class Record(models.Model):
 
 
 class Stop(models.Model):
-	train = models.ForeignKey(Train, on_delete=models.PROTECT)
-	record = models.ForeignKey(Record, on_delete=models.PROTECT)
-	index = models.IntegerField(primary_key=True)
+	id = models.CharField(max_length=16, primary_key=True)
+	index = models.IntegerField()
+	record = models.ForeignKey(Record, on_delete=models.DO_NOTHING, related_name='getStops')
+
+	@property
+	def train(self):
+		return self.record.train
 
 	@property
 	def station(self):
@@ -64,12 +68,13 @@ class Stop(models.Model):
 	# 	Anticipated indicator is True: the delays information is yet to be scraped.
 	# 	Anticipated indicator is False: the information is accurately scraped.
 
-	departureTime = models.DateTimeField()
-	departureTimeAnticipated = models.BooleanField()
-	arrivalTime = models.DateTimeField()
-	arrivalTimeAnticipated = models.BooleanField()
+	departureTime = models.DateTimeField(null=True)
+	arrivalTime = models.DateTimeField(null=True)
+	departureTimeAnticipated = models.NullBooleanField()
+	arrivalTimeAnticipated = models.NullBooleanField()
 
 	class Meta:
+		abstract = True
 		managed = False
 
 	def timeForAction(self, action):

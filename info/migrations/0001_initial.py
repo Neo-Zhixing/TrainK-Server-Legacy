@@ -63,16 +63,14 @@ class Migration(migrations.Migration):
         migrations.RunSQL("""
             CREATE OR REPLACE VIEW info_stop AS
             SELECT
+                info_record.id || '_' || ordinality-1 AS id,
                 info_record.id AS record_id,
-                train_id,
-                ordinality-1 as index,
+                ordinality-1 AS index,
                 ("departureDate" + "arrivalTime") AT TIME ZONE 'CCT' AS "arrivalTime",
                 "arrivalTimeAnticipated",
                 ("departureDate" + "departureTime") AT TIME ZONE 'CCT' AS "departureTime",
                 "departureTimeAnticipated"
-            FROM info_record, ROWS FROM ( jsonb_to_recordset(stops) as (
-                "index" integer,
-                "station" integer,
+            FROM info_record, ROWS FROM ( jsonb_to_recordset(stops) AS (
                 "departureTime" interval,
                 "departureTimeAnticipated" boolean,
                 "arrivalTime" interval,

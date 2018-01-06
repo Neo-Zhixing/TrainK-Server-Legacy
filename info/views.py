@@ -41,7 +41,7 @@ def _getTrain(key, queryset):
 class OptionalPaginationMixin:
 	@property
 	def paginator(self):
-		paginator = super(OptionalPaginationMixin, self).pagination_class
+		paginator = super(OptionalPaginationMixin, self).paginator
 		param = self.request.query_params.get(paginator.page_query_param)
 		if param is None or param is 0:
 			return None
@@ -76,7 +76,7 @@ class StationViewSet(viewsets.ReadOnlyModelViewSet, OptionalPaginationMixin):
 		return super(StationViewSet, self).retrieve(self, request, telecode=telecode)
 
 
-class TrainViewSet(OptionalPaginationMixin, viewsets.ReadOnlyModelViewSet):
+class TrainViewSet(viewsets.ReadOnlyModelViewSet):
 	template_name = 'train.html'
 	queryset = models.Train.objects.all()
 	station_queryset = models.Station.objects.all()
@@ -131,12 +131,14 @@ class RecordView(ListAPIView):
 	def list(self, request, telecode):
 		if not _browserRequest(request):
 			return super(RecordView, self).list(request, telecode)
+
 		train = get_object_or_404(models.Train, telecode=telecode)
 		queryset = self.filter_queryset(self.get_queryset())
 		page = self.paginate_queryset(queryset)
 		if page is None:
 			page = queryset
 		table = OrderedDict()
+		# make horizontal table data
 		for record in page:
 			for index, stop in enumerate(record.stops):
 				stationID = train.stops[index]['station']
@@ -150,7 +152,6 @@ class RecordView(ListAPIView):
 						stop[key + 'Delay'] = delay.seconds / 60 + delay.days * 1440
 						stop[timeKey] = parse_duration(stop[timeKey])
 				table[stationID].append(stop)
-		print(table)
 		return Response({
 			'records': page,
 			'train': train,
