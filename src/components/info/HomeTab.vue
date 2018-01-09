@@ -48,7 +48,7 @@
           window.location = `${rootPath}train?departure_telecode=${this.stations.departureStation}&arrival_telecode=${this.stations.arrivalStation}`
           return
         }
-        let url = this.selectedTab === 2 ? 'train?name=' : (this.selectedTab === 3 ? 'station?telecode=' : 'xxx')
+        let url = this.selectedTab === 2 ? 'train/' : (this.selectedTab === 3 ? 'station/' : 'xxx')
         window.location = rootPath + url + this.value
       }
     },

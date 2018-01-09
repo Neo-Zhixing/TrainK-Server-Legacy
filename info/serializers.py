@@ -5,7 +5,7 @@ from rest_framework import serializers
 class StationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = models.Station
-		fields = ('name', 'telecode', 'id')
+		fields = ('name', 'telecode', 'id', 'abbreviation', 'spell')
 
 
 class TrainSerializer(serializers.ModelSerializer):

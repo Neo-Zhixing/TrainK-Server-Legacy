@@ -1,5 +1,16 @@
+<nav id="navbar">
 <nav-bar
-id="navbar"
 {% if user.is_authenticated %}authenticated{% endif %}
 >
 </nav-bar>
+
+{% if messages %}
+<div>
+    {% for message in messages %}
+    <b-alert show dismissible variant="{{ message.tags }}">
+    	{{ message }}
+    </b-alert>
+    {% endfor %}
+</div>
+{% endif %}
+</nav>

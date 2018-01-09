@@ -3,13 +3,13 @@
   :required="required"
   @input="change"
   :value="selectValue"
-  :options="options"
+  :options="stations"
 
   :loading="stations === null"
   :placeholder="placeholder"
 
-  track-by="value"
-  label="label"
+  track-by="id"
+  label="name"
   
   :showLabels="false"
 
@@ -31,35 +31,22 @@ export default {
   },
   data () {
     return {
-      stations: null
+      stations: []
     }
   },
   computed: {
-    options () {
-      let options = []
-      for (let telecode in this.stations) {
-        options.push({
-          label: this.stations[telecode],
-          value: telecode
-        })
-      }
-      return options
-    },
     selectValue () {
-      if (this.stations === null || this.value === null) return null
-      return {
-        label: this.stations[this.value],
-        value: this.value
-      }
+      if (this.stations === [] || this.value === null) return null
+      for (let station of this.stations) if (station.telecode === this.value) return station
     }
   },
   methods: {
     change (newValue) {
-      if (newValue && newValue.value) this.$emit('input', newValue.value)
+      if (newValue && newValue.telecode) this.$emit('input', newValue.telecode)
     }
   },
   mounted () {
-    cachios.get('/info/station', {
+    cachios.get('/info/station/', {
       params: {
         'all': this.all
       }

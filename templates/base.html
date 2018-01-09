@@ -30,22 +30,22 @@
   <body>
     {% block header %}
       {% include "./header.html" %}
-    {% endblock header %}
+    {% endblock %}
 
     <main>
       {% block body %}
         {% block content %}
         {% endblock content %}
-      {% endblock body %}
+      {% endblock %}
     </main>
 
     {% block footer %}
       {% include "./footer.html" %}
-    {% endblock footer %}
+    {% endblock %}
 
     {% block extra_js %}
       {% render_bundle 'common' 'js' %}
-    {% endblock extra_js %}
+    {% endblock %}
     <div style="display:none">
       <script src="https://s19.cnzz.com/z_stat.php?id=1271548735&web_id=1271548735"></script>
     </div>

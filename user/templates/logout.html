@@ -1,30 +1,19 @@
-{% extends "user_base.html" %}
+{% extends "./panel.html" %}
 
 {% load i18n %}
 
 {% block title %}{{ block.super }}{% trans "Sign Out" %}{% endblock %}
 
-{% block content %}
-
-<div class="container">
-  <div class="row py-5">
-    <div class="col-4 mx-md-auto">
-      <div class="card">
-        <div class="card-header">
-          {% trans 'Sign Out' %}
-        </div>
-        <div class="card-body">
-          <p>{% trans 'Are you sure you want to sign out?' %}</p>
-          <form method="post" action="{% url 'account_login' %}">
-            {% csrf_token %}
-            {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
-            {% endif %}
-            <button type="submit" class="btn btn-danger btn-block">{% trans 'Sign Out' %}</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+{% block card_header %}
+  {% trans 'Sign Out' %}
+{% endblock %}
+{% block card_body %}
+  <p class="card-title">{% trans 'Are you sure you want to sign out?' %}</p>
+  <form method="post" action="{% url 'account_login' %}">
+    {% csrf_token %}
+    {% if redirect_field_value %}
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+    {% endif %}
+    <button type="submit" class="btn btn-danger btn-block">{% trans 'Sign Out' %}</button>
+  </form>
 {% endblock %}

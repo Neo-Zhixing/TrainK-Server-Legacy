@@ -1,5 +1,5 @@
 <template>
-  <b-navbar toggleable="md" variant="primary" type="dark">
+  <b-navbar tag="div" toggleable="md" variant="primary" type="dark">
     <b-container>
       <b-navbar-brand href="/">
         <font-awesome-icon icon="train" size="lg" class="mr-1"></font-awesome-icon>
@@ -32,8 +32,8 @@
         @show="userPopoverShown=true"
         @hide="userPopoverShown=false">
         <b-container fluid class="py-2">
-          <login-view v-if="!authenticated" @loggedIn="authenticated = true" />
-          <glimpse v-else @loggedOut="authenticated = false" />
+          <login-view v-if="!loggedIn" @loggedIn="loggedIn = true" />
+          <glimpse v-else @loggedOut="loggedIn = false" />
         </b-container>
       </b-popover>
     </b-container>
@@ -64,9 +64,13 @@ export default {
   },
   data () {
     return {
+      loggedIn: false,
       userPopoverShown: false,
       expanded: false
     }
+  },
+  mounted () {
+    this.loggedIn = this.authenticated
   },
   computed: {
     location () {

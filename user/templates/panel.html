@@ -1,0 +1,20 @@
+{% extends './base.html' %}
+
+{% block content %}
+<div class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-{% block card_width %}4{% endblock %} mx-md-auto">
+        <div class="card">
+          <div class="card-header">
+            {% block card_header %}{% endblock %}
+          </div>
+          <div class="card-body">
+            {% block card_body %}{% endblock %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

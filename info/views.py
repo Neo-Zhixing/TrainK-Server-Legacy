@@ -48,7 +48,7 @@ class OptionalPaginationMixin:
 		return paginator
 
 
-class StationViewSet(viewsets.ReadOnlyModelViewSet, OptionalPaginationMixin):
+class StationViewSet(OptionalPaginationMixin, viewsets.ReadOnlyModelViewSet):
 	template_name = 'station.html'
 	queryset = models.Station.objects.all()
 	serializer_class = serializers.StationSerializer

@@ -16,7 +16,7 @@ class LoginForm(LoginForm):
 		self.helper.layout = Layout(
 			Field('login', autocomplete='username'),
 			Field('password', autocomplete='current-password'),
-			HTML('<a class="float-right" href="{% url "account_reset_password" %}">忘记密码</a>'),
+			HTML('<a class="float-right card-link" href="{% url "account_reset_password" %}">忘记密码</a>'),
 			Field('remember'),
 			HTML('{% if redirect_field_value %}<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />{% endif %}'),
 			Div(
