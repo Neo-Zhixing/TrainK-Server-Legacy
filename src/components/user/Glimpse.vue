@@ -2,10 +2,11 @@
   <div>
     <b-row>
       <b-col cols="4">
+        <b-img :src="avatar" />
       </b-col>
       <b-col cols="8">
-        User Details
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        {{name}}
+        {{email}}
       </b-col>
     </b-row>
     <b-button-group class="btn-block mt-2">
@@ -29,10 +30,20 @@ import fontawesome from '@fortawesome/fontawesome'
 fontawesome.library.add(faSignOutAlt, faCloud, faSpinner)
 
 export default {
+  props: {
+    email: String,
+    hash: String,
+    name: String
+  },
   data () {
     return {
       loading: false,
       errorMessage: null
+    }
+  },
+  computed: {
+    avatar () {
+      return `https://www.gravatar.com/avatar/${this.hash}`
     }
   },
   methods: {

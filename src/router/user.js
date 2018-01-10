@@ -3,6 +3,7 @@ import Router from 'vue-router'
 
 import Account from '@/views/user/Account.vue'
 import Security from '@/views/user/Security.vue'
+import CR12306 from '@/views/user/CR12306.vue'
 Vue.use(Router)
 
 export default new Router({
@@ -10,7 +11,7 @@ export default new Router({
   base: '/user/setting',
   routes: [
     {
-      path: '/',
+      path: '',
       redirect: '/account'
     },
     {
@@ -22,6 +23,11 @@ export default new Router({
       path: '/security',
       name: 'Security',
       component: Security
+    },
+    {
+      path: '/12306',
+      name: 'CR12306',
+      component: CR12306
     }
   ]
 })

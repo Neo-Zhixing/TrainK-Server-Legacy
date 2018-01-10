@@ -33,7 +33,7 @@
         @hide="userPopoverShown=false">
         <b-container fluid class="py-2">
           <login-view v-if="!loggedIn" @loggedIn="loggedIn = true" />
-          <glimpse v-else @loggedOut="loggedIn = false" />
+          <glimpse v-else @loggedOut="loggedIn = false" :email="email" :hash="hash" :name="name" />
         </b-container>
       </b-popover>
     </b-container>
@@ -60,7 +60,10 @@ fontawesome.library.add(faTicketAlt, faInfoCircle, faBriefcase, faMap, faComment
 
 export default {
   props: {
-    authenticated: Boolean
+    authenticated: Boolean,
+    email: String,
+    hash: String,
+    name: String
   },
   data () {
     return {

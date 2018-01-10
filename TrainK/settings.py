@@ -23,7 +23,7 @@ SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-INTERNAL_IPS = ('127.0.0.1')
+INTERNAL_IPS = ('127.0.0.1', '192.168.1.237', '192.168.1.101')
 
 ALLOWED_HOSTS = ['tra.ink', 'localhost', '192.168.1.101']
 SITE_ID = 1
@@ -222,13 +222,16 @@ REST_FRAMEWORK = {
 }
 OLD_PASSWORD_FIELD_ENABLED = True
 LOGIN_REDIRECT_URL = '/user/'
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_SIGNUP_FORM_CLASS = 'user.forms.SignupForm'
 ACCOUNT_FORMS = {
     'login': 'user.forms.LoginForm'
 }
-
+REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'user.serializers.UserDetailsSerializer'
+}
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 CRISPY_FAIL_SILENTLY = not DEBUG

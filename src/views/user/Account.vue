@@ -2,7 +2,7 @@
 <div>
   <b-card class="mb-4">
     <b-form @submit.prevent="submit">
-      <b-form-group horizontal
+      <b-form-group class="mb-4" horizontal
       label="基本信息"
       label-size="lg">
         <b-form-group label="用户名:" label-for="username-field">
@@ -27,12 +27,25 @@
             </b-form-input>
           </b-input-group>
         </b-form-group>
+        <b-button type="submit" variant="primary" class="float-right">
+          <font-awesome-icon :icon="loading ? 'spinner' : 'save'" :spin="loading" />
+          保存
+        </b-button>
       </b-form-group>
-      <b-button type="submit" variant="primary" class="float-right">
-        保存
-        <font-awesome-icon :icon="loading ? 'spinner' : 'save'" :spin="loading" />
-      </b-button>
+
     </b-form>
+    <b-form-group horizontal label="个人资料" label-size="lg">
+      <b-form-group label="地址:" label-for="address">
+        <b-form-input readonly class="bg-white" :value="profile.currentLocation" />
+      </b-form-group>
+      <b-form-group label="关于我:" label-for="address">
+        <b-form-textarea readonly class="bg-white" rows="3" :value="profile.aboutMe" />
+      </b-form-group>
+      <b-form-group label="头像:" horizontal label-for="address">
+        <b-img :src="profile.thumbnailUrl" />
+      </b-form-group>
+      <a class="btn btn-primary float-right" :href="profile.profileUrl">在Gravatar编辑</a>
+    </b-form-group>
   </b-card>
   
   <b-card class="my-4">
@@ -85,6 +98,7 @@
 
 <script>
 import axios from '@/utils/axios'
+import axiosJsonp from 'axios-jsonp'
 import MaskedInput from 'vue-text-mask'
 import fontawesome from '@fortawesome/fontawesome'
 import { faPlus, faSpinner, faSave, faMinus, faRedo, faArrowUp, faEnvelope } from '@fortawesome/fontawesome-free-solid'
@@ -94,19 +108,20 @@ export default {
     return {
       loading: false,
       emails: [],
+      profile: {},
       newEmail: '',
-      form: {
-        username: null,
-        first_name: null,
-        last_name: null
-      }
+      form: {}
     }
   },
   mounted () {
     axios.get('/user/')
     .then((response) => {
-      this.form = response.data
-      delete this.form.email
+      for (let key of ['username', 'first_name', 'last_name']) this.form[key] = response.data[key]
+      return axios.get(`https://en.gravatar.com/${response.data.hash}.json`, {adapter: axiosJsonp})
+    })
+    .then((response) => {
+      console.log(response.data.entry[0])
+      this.profile = response.data.entry[0]
     })
 
     axios.get('/user/email/')

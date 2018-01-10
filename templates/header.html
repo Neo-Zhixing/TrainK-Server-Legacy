@@ -1,6 +1,12 @@
+{% load user %}
 <nav id="navbar">
 <nav-bar
-{% if user.is_authenticated %}authenticated{% endif %}
+{% if user.is_authenticated %}
+authenticated
+email="{{user.email}}"
+hash="{{user.email|hash}}"
+name="{{user.get_full_name}}"
+{% endif %}
 >
 </nav-bar>
 
