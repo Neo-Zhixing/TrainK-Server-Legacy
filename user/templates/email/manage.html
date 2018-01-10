@@ -1,6 +1,7 @@
 {% extends "../panel.html" %}
 
 {% load i18n %}
+{% load crispy_forms_tags %}
 
 {% block title %}{{block.super}}-{% trans "Emails" %}{% endblock %}
 
@@ -14,68 +15,55 @@
 {% block card_body %}
   {% if user.emailaddress_set.all %}
     <p class="card-text">{% trans 'The following e-mail addresses are associated with your account:' %}</p>
-    <form action="{% url 'account_email' %}" class="email_list" method="post">
+    <form action="{% url 'email-list' %}" method="post">
       {% csrf_token %}
-      <fieldset>
-        {% for emailaddress in user.emailaddress_set.all %}
-          <div class="input-group">
-            <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">
-            <div class="input-group-append">
-              <button class="btn btn-outline-secondary" type="button">Button</button>
+      {% for emailaddress in user.emailaddress_set.all %}
+      <fieldset role="group" class="b-form-group form-group">
+        <div role="group" class="">
+          <div role="group" class="input-group">
+            <input type="email" readonly="readonly" class="form-control{% if emailaddress.verified %} bg-white{% endif %}" value="{{ emailaddress.email }}">
+            {% if emailaddress.primary %}
+            <div title="" class="input-group-addon" data-original-title="主邮箱">
+              <svg aria-hidden="true" data-fa-processed="" data-prefix="fas" data-icon="envelope" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-envelope fa-w-16">
+                <path fill="currentColor" d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z" class=""></path>
+              </svg>
             </div>
-          </div>
-          <div>
-            <label for="email_radio_{{forloop.counter}}" class="{% if emailaddress.primary %}primary_email{%endif%}">
-            <input id="email_radio_{{forloop.counter}}" type="radio" name="email" {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked="checked"{%endif %} value="{{emailaddress.email}}"/>
-            {{ emailaddress.email }}
-            {% if emailaddress.verified %}
-            <span class="verified">{% trans "Verified" %}</span>
-            {% else %}
-            <span class="unverified">{% trans "Unverified" %}</span>
+            {% else%}
+            <div class="input-group-btn">
+              {% if emailaddress.verified %}
+              <button type="submit" class="btn btn-success" name="action_primary">
+                <svg aria-hidden="true" data-fa-processed="" data-prefix="fas" data-icon="arrow-up" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-arrow-up fa-w-14">
+                  <path fill="currentColor" d="M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z" class=""></path>
+                </svg>
+              </button>
+              {% else %}
+              <button type="submit" class="btn btn-warning" name="action_send">
+                <svg aria-hidden="true" data-fa-processed="" data-prefix="fas" data-icon="redo" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="text-white svg-inline--fa fa-redo fa-w-16">
+                  <path fill="currentColor" d="M500.333 0h-47.411c-6.853 0-12.314 5.729-11.986 12.574l3.966 82.759C399.416 41.899 331.672 8 256.001 8 119.34 8 7.899 119.526 8 256.187 8.101 393.068 119.096 504 256 504c63.926 0 122.202-24.187 166.178-63.908 5.113-4.618 5.354-12.561.482-17.433l-33.971-33.971c-4.466-4.466-11.64-4.717-16.38-.543C341.308 415.448 300.606 432 256 432c-97.267 0-176-78.716-176-176 0-97.267 78.716-176 176-176 60.892 0 114.506 30.858 146.099 77.8l-101.525-4.865c-6.845-.328-12.574 5.133-12.574 11.986v47.411c0 6.627 5.373 12 12 12h200.333c6.627 0 12-5.373 12-12V12c0-6.627-5.373-12-12-12z" class=""></path>
+                </svg>
+              </button>
+              {% endif %}
+              <button type="submit" class="btn btn-danger" name="action_remove">
+                <svg aria-hidden="true" data-fa-processed="" data-prefix="fas" data-icon="minus" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-minus fa-w-14">
+                  <path fill="currentColor" d="M424 318.2c13.3 0 24-10.7 24-24v-76.4c0-13.3-10.7-24-24-24H24c-13.3 0-24 10.7-24 24v76.4c0 13.3 10.7 24 24 24h400z" class="">
+                  </path>
+                </svg>
+              </button>
+            </div>
             {% endif %}
-            {% if emailaddress.primary %}<span class="primary">{% trans "Primary" %}</span>{% endif %}
-            </label>
           </div>
-          {% endfor %}
-
-<div class="buttonHolder">
-      <button class="secondaryAction" type="submit" name="action_primary" >{% trans 'Make Primary' %}</button>
-      <button class="secondaryAction" type="submit" name="action_send" >{% trans 'Re-send Verification' %}</button>
-      <button class="primaryAction" type="submit" name="action_remove" >{% trans 'Remove' %}</button>
-</div>
-
-</fieldset>
-</form>
-
-{% else %}
-<p><strong>{% trans 'Warning:'%}</strong> {% trans "You currently do not have any e-mail address set up. You should really add an e-mail address so you can receive notifications, reset your password, etc." %}</p>
-
-{% endif %}
-
-
-    <h2>{% trans "Add E-mail Address" %}</h2>
-
-    <form method="post" action="{% url 'account_email' %}" class="add_email">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button name="action_add" type="submit">{% trans "Add E-mail" %}</button>
+        </div>
+      </fieldset>
+      {% endfor %}
     </form>
+  {% else %}
+  <p><strong>{% trans 'Warning:'%}</strong> {% trans "You currently do not have any e-mail address set up. You should really add an e-mail address so you can receive notifications, reset your password, etc." %}</p>
+  {% endif %}
 
-{% endblock %}
+  <form method="post" action="{% url 'email-list' %}">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <button name="action_add" class="btn btn-success" type="submit">{% trans "Add E-mail" %}</button>
+  </form>
 
-
-{% block extra_body %}
-<script type="text/javascript">
-(function() {
-  var message = "{% trans 'Do you really want to remove the selected e-mail address?' %}";
-  var actions = document.getElementsByName('action_remove');
-  if (actions.length) {
-    actions[0].addEventListener("click", function(e) {
-      if (! confirm(message)) {
-        e.preventDefault();
-      }
-    });
-  }
-})();
-</script>
 {% endblock %}

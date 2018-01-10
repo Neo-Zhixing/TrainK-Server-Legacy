@@ -24,6 +24,7 @@ def BrowserRequest(request):
 	# The lack of accepted renderer indicates that the content negotiation failed,
 	# in which case the rest framework will always use the first renderer, TemplateHTMLRenderer.
 	# That's why we directly return True here.
+	print(request)
 	if not hasattr(request, 'accepted_renderer'):
 		return True
 	return isinstance(request.accepted_renderer, TemplateHTMLRenderer)
@@ -89,7 +90,7 @@ class UserView(auth_views.UserDetailsView, reg_views.RegisterView):
 class PasswordView(auth_views.PasswordChangeView, auth_views.PasswordResetView, auth_views.PasswordResetConfirmView):
 	def _browser_view(self, request, *args, **kwargs):
 		view = passwordChangeView if request.user.is_authenticated else passwordResetView
-		return view(request, *args, **kwargs)
+		return view(request._request, *args, **kwargs)
 
 	def get(self, request, *args, **kwargs):
 		return self._browser_view(request, *args, **kwargs)
@@ -97,8 +98,10 @@ class PasswordView(auth_views.PasswordChangeView, auth_views.PasswordResetView, 
 	def post(self, request, *args, **kwargs):
 		if BrowserRequest(request):
 			return self._browser_view(request, *args, **kwargs)
-		view = auth_views.PasswordChangeView if request.user.is_authenticated else auth_views.PasswordResetView
-		return view.post(self, request, *args, **kwargs)
+		return auth_views.PasswordResetConfirmView.post(self, request, *args, **kwargs)
+
+	def put(self, request, *args, **kwargs):
+		return auth_views.PasswordChangeView.post(self, request, *args, **kwargs)
 
 	def check_permissions(self, request):
 		if request.method is 'POST' or request.method is 'GET':
@@ -110,6 +113,7 @@ class PasswordView(auth_views.PasswordChangeView, auth_views.PasswordResetView, 
 
 
 class EmailViewSet(ModelViewSet):
+	template_name = 'email/manage.html'
 	serializer_class = EmailSerializer
 	pagination_class = None
 
@@ -124,15 +128,10 @@ class EmailViewSet(ModelViewSet):
 	def get_object(self):
 		return get_object_or_404(self.get_queryset(), pk=self.kwargs['pk'])
 
-	def get(self, request, *args, **kwargs):
+	def list(self, request, *args, **kwargs):
 		if BrowserRequest(request):
 			return emailManagementView(request._request)
-		return super(EmailViewSet, self).get(self, request, *args, **kwargs)
-
-	def post(self, request, *args, **kwargs):
-		if BrowserRequest(request):
-			return emailManagementView(request._request)
-		return super(EmailViewSet, self).post(self, request, *args, **kwargs)
+		return super(EmailViewSet, self).list(self, request, *args, **kwargs)
 
 
 class SettingView(APIView):

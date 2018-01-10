@@ -1,6 +1,7 @@
 <template>
-  <b-form @submit.prevent="submit">
-    <b-card class="mb-4">
+<div>
+  <b-card class="mb-4">
+    <b-form @submit.prevent="submit">
       <b-form-group horizontal
       label="基本信息"
       label-size="lg">
@@ -27,8 +28,15 @@
           </b-input-group>
         </b-form-group>
       </b-form-group>
-    </b-card>
-    <b-card class="my-4">
+      <b-button type="submit" variant="primary" class="float-right">
+        保存
+        <font-awesome-icon :icon="loading ? 'spinner' : 'save'" :spin="loading" />
+      </b-button>
+    </b-form>
+  </b-card>
+  
+  <b-card class="my-4">
+    <b-form :validated="true">
       <b-form-group horizontal label="邮箱" label-size="lg">
         <b-form-group v-for="email in sortedEmails" :key="email.id">
           <b-input-group>
@@ -58,30 +66,21 @@
             </b-input-group-button>
           </b-input-group>
         </b-form-group>
-
-        <b-form @sumbit.prevent :validated="true">
-          <b-form-group label="添加邮箱：">
-            <b-input-group>
-              <b-form-input type="email" name="email" v-validate="'required|email'" v-model="newEmail" />
-              <b-input-group-button>
-                <b-button variant="success" @click="addEmail" :disabled="errors.has('email')">
-                  <font-awesome-icon icon="plus" />
-                </b-button>
-              </b-input-group-button>
-            </b-input-group>
-            <b-form-invalid-feedback>请输入正确的邮箱</b-form-invalid-feedback>
-          </b-form-group>
-        </b-form>
-
+        <b-form-group label="添加邮箱：">
+          <b-input-group>
+            <b-form-input type="email" name="add-email" v-validate="'required|email'" v-model="newEmail" />
+            <b-input-group-button>
+              <b-button :variant="errors.has('add-email') ? 'danger' : 'success'" :disabled="errors.has('add-email')" @click="addEmail">
+                <font-awesome-icon icon="plus" />
+              </b-button>
+            </b-input-group-button>
+          </b-input-group>
+          <b-form-invalid-feedback>请输入正确的邮箱</b-form-invalid-feedback>
+        </b-form-group>
       </b-form-group>
-
-      
-    </b-card>
-    <b-button type="submit" variant="primary" size="lg" class="float-right">
-      保存
-      <font-awesome-icon :icon="loading ? 'spinner' : 'save'" :spin="loading" />
-    </b-button>
-  </b-form>
+    </b-form>
+  </b-card>
+</div>
 </template>
 
 <script>
@@ -172,7 +171,7 @@ export default {
   },
   computed: {
     sortedEmails () {
-      return this.emails.sort((a, b) => !a.primary)
+      return this.emails.sort((a, b) => a.primary ? false : (b.primary ? true : b.verified))
     }
   },
   components: {
