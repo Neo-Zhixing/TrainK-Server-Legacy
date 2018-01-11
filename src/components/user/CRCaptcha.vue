@@ -1,15 +1,16 @@
 <template>
 <div style="position: relative;" ref="captchawrapper">
-  <b-img fluid-grow draggable="false" :src="captchaImageURL" ref="captcha" @click="addCursor" @click.right.prevent />
+  <b-img fluid-grow style="user-drag: none; user-select: none;" :src="captchaImageURL" ref="captcha" @click="addCursor" @click.right.prevent />
   <b-button class="captcha-component" size="sm" variant="outline-secondary" style="right: 0; top: 0;" @click="reloadCaptcha">
     <font-awesome-icon icon="sync-alt" />
     刷新
   </b-button>
   <font-awesome-icon icon="bullseye"
   class="captcha-component"
-  v-for="cursor in cursors"
-  :id="cursor.id"
-  :key="cursor.id"
+  v-for="(cursor, index) in cursors"
+  :data-index="index"
+  :id="'cr-captcha-cursor-' + index"
+  :key="cursor.x + '-' + cursor.y"
   :style="{left: `calc(${cursor.x*100}% - 8px)`, top: `calc(${cursor.y*100}% - 8px)`}"
   @click.right.prevent="removeCursor" />
 </div>
@@ -24,16 +25,23 @@ export default {
   data () {
     return {
       captchaImageURL: null,
-      cursorID: 0,
       cursors: []
     }
   },
   mounted () {
     this.reloadCaptcha()
   },
+  computed: {
+    value () {
+      if (this.cursors.length === 0) return null
+      let str = ''
+      for (let cursor of this.cursors) str += `${Math.round(cursor.x * 293)},${Math.round(cursor.y * 190)},`
+      return str.slice(0, -1)
+    }
+  },
   methods: {
     addCursor (event) {
-      this.cursorID ++
+      if (this.cursors.length >= 8) this.cursors.shift()
       let rect = event.target.getBoundingClientRect()
       let offsetX = event.clientX - rect.left
       let offsetY = event.clientY - rect.top
@@ -47,10 +55,11 @@ export default {
       let target = event.target
       if (target.tagName !== 'svg') target = target.parentElement
       console.log(target.id)
-      this.cursors = this.cursors.filter((a) => String(a.id) !== target.id)
+      this.cursors.splice(target.id.slice(-1), 1)
     },
     reloadCaptcha () {
       this.captchaImageURL = `//kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand&${Math.random()}`
+      this.cursors = []
     }
   }
 }
