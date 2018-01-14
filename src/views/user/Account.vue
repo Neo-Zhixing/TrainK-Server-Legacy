@@ -47,9 +47,9 @@
       <a class="btn btn-primary float-right" :href="profile.profileUrl">在Gravatar编辑</a>
     </b-form-group>
   </b-card>
-  
+
   <b-card class="my-4">
-    <b-form :validated="true">
+    <b-form novalidate>
       <b-form-group horizontal label="邮箱" label-size="lg">
         <b-form-group v-for="email in sortedEmails" :key="email.id">
           <b-input-group>
@@ -81,14 +81,21 @@
         </b-form-group>
         <b-form-group label="添加邮箱：">
           <b-input-group>
-            <b-form-input type="email" name="add-email" v-validate="'required|email'" v-model="newEmail" />
+            <b-form-input type="email" name="add-email"
+              :class="{'is-invalid': errors.has('add-email') }"
+              v-validate="'required|email'"
+              v-model="newEmail"
+            />
             <b-input-group-button>
-              <b-button :variant="errors.has('add-email') ? 'danger' : 'success'" :disabled="errors.has('add-email')" @click="addEmail">
+              <b-button
+                :variant="errors.has('add-email') ? 'danger' : 'success'"
+                :disabled="errors.has('add-email')"
+                @click="addEmail"
+              >
                 <font-awesome-icon icon="plus" />
               </b-button>
             </b-input-group-button>
           </b-input-group>
-          <b-form-invalid-feedback>请输入正确的邮箱</b-form-invalid-feedback>
         </b-form-group>
       </b-form-group>
     </b-form>
