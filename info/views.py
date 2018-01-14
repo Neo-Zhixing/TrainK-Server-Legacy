@@ -35,7 +35,10 @@ def _getStation(key, queryset):
 def _getTrain(key, queryset):
 	if queryset.filter(telecode=key).exists():
 		return queryset.get(telecode=key)
-	return queryset.filter(names__contains=[key]).latest('since')
+	train = queryset.filter(names__contains=[key])
+	if train.exists():
+		return train.latest('since')
+	return NotFound()
 
 
 class OptionalPaginationMixin:
@@ -85,6 +88,11 @@ class TrainViewSet(viewsets.ReadOnlyModelViewSet):
 	def get_object(self):
 		return _getTrain(self.kwargs[self.lookup_field], self.queryset)
 
+	def get_serializer(self, *args, **kwargs):
+		if self.action == 'retrieve':
+			kwargs['expandNested'] = True
+		return super(TrainViewSet, self).get_serializer(*args, **kwargs)
+
 	def get_queryset(self):
 		queryset = super(TrainViewSet, self).get_queryset()
 		if 'station' in self.request.query_params:
@@ -107,7 +115,8 @@ class TrainViewSet(viewsets.ReadOnlyModelViewSet):
 			return results
 		return queryset
 
-	def retrieve(self, request, pk=None):
+	def retrieve(self, request, *args, **kwargs):
+		pk = kwargs.pop('pk')
 		if pk and _browserRequest(request):
 			train = self.get_object()
 			if pk in train.names:
@@ -115,7 +124,7 @@ class TrainViewSet(viewsets.ReadOnlyModelViewSet):
 			return Response({
 				'train': train
 			})
-		return super(TrainViewSet, self).retrieve(self, request, pk=pk)
+		return super(TrainViewSet, self).retrieve(self, request, *args, **kwargs)
 
 
 class RecordView(ListAPIView):

@@ -29,6 +29,7 @@ module.exports = {
     user: './src/user.js',
     ticket: './src/ticket.js',
     info: './src/info.js',
+    trip: './src/trip.js',
     map: './src/map.js'
   },
   output: {

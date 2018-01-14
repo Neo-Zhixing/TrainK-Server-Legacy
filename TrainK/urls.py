@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/baton-', include('baton.urls')),
     path('admin/', admin.site.urls),
     path('ticket/', include('ticket.urls')),
+    path('trip/', include('trip.urls')),
     path('info/', include('info.urls')),
     path('', TemplateView.as_view(template_name='home.html')),
     path('map/', TemplateView.as_view(template_name='map.html')),
