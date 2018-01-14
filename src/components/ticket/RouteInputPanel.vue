@@ -53,7 +53,6 @@
 <script>
 import RouteInput from '@/components/RouteInput'
 import flatPickr from 'vue-flatpickr-component'
-import 'flatpickr/dist/themes/airbnb.css'
 import {Mandarin} from 'flatpickr/dist/l10n/zh'
 
 import fontawesome from '@fortawesome/fontawesome'

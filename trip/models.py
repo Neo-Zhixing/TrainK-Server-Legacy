@@ -11,6 +11,7 @@ class Trip(models.Model):
 	record = models.ForeignKey(Record, db_index=True, on_delete=models.CASCADE, related_name='trips')
 	departureIndex = models.IntegerField()
 	arrivalIndex = models.IntegerField()
+	seat = models.CharField(max_length=15)
 	boardingGate = models.CharField(max_length=30, null=True)
 
 	relatedTrips = models.ManyToManyField('self')

@@ -13,6 +13,7 @@ import BootstrapVue from 'bootstrap-vue'
 Vue.use(BootstrapVue)
 
 import 'vue-multiselect/dist/vue-multiselect.min.css'
+import 'flatpickr/dist/themes/airbnb.css'
 
 import NavBar from '@/views/NavBar'
 import '@/common.css'

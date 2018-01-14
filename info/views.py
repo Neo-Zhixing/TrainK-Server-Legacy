@@ -38,7 +38,7 @@ def _getTrain(key, queryset):
 	train = queryset.filter(names__contains=[key])
 	if train.exists():
 		return train.latest('since')
-	return NotFound()
+	raise NotFound()
 
 
 class OptionalPaginationMixin:

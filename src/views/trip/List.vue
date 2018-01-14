@@ -47,15 +47,18 @@
           img-top>
           <b-form>
             <b-form-group label="车次">
-              <b-form-input v-model='addForm.train'/>
+              <b-form-input v-model='train'/>
             </b-form-group>
             <b-form-group label="日期">
-              <b-form-input v-model='addForm.date' />
+              <flat-pickr
+                class="form-control"
+                placeholder="选择日期"
+                v-model="date"
+                v-validate="'required'"
+              />
             </b-form-group>
-            <b-button block v-b-modal.addTrip variant="primary">添加</b-button>
-            <b-modal lazy id="addTrip" size="lg" title="添加行程">
-              <trip-add-view v-model='addForm' />
-            </b-modal>
+            <b-button block variant="primary" @click="openAddModal">添加</b-button>
+            <trip-add-view ref="tripAddView" />
           </b-form>
         </b-card>
       </b-col>
@@ -64,18 +67,23 @@
 </template>
 <script>
 import TripAddView from './Add.vue'
+import flatPickr from 'vue-flatpickr-component'
 export default {
   data () {
     return {
-      addForm: {
-        train: '',
-        date: ''
-      },
-      addModalShow: false
+      train: '',
+      date: ''
+    }
+  },
+  methods: {
+    openAddModal () {
+      this.$refs.tripAddView.value.train = this.train
+      this.$refs.tripAddView.value.date = this.date
+      this.$refs.tripAddView.toggle(true)
     }
   },
   components: {
-    TripAddView
+    TripAddView, flatPickr
   }
 }
 </script>
