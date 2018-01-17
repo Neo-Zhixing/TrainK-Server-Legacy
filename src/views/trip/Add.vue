@@ -2,8 +2,8 @@
 <b-modal lazy size="lg" title="添加行程"
   ref="addModal"
   :ok-disabled="formInvalid"
-  @shown="trainInput"
   @ok.prevent="submit"
+  @shown="trainInput"
 >
   <b-container fluid>
     <b-row>
@@ -14,7 +14,7 @@
               id="train" name="train"
               :class="{'is-invalid': errors.has('train') }"
               v-validate="'required'"
-              v-model='value.train'
+              v-model='trainName'
               @blur.native="trainInput"
               @keyup.enter.native="trainInput"
             />
@@ -25,7 +25,7 @@
               name="date"
               class="form-control"
               placeholder="选择日期"
-              v-model="value.date"
+              v-model="date"
               v-validate="'required'"
             />
           </b-form-group>
@@ -64,9 +64,10 @@ export default {
   data () {
     return {
       stops: null,
+      trainName: null,
+      date: null,
       value: {
-        train: '',
-        date: '',
+        recordId: null,
         seat: null,
         boardingGate: null,
         departureIndex: null,
@@ -74,12 +75,17 @@ export default {
       }
     }
   },
+  watch: {
+    date () {
+      this.trainInput()
+    }
+  },
   computed: {
     formInvalid () {
       return Object.keys(this.fields).some(key => this.fields[key].invalid) ||
       !this.value.departureIndex ||
       !this.value.arrivalIndex ||
-      !this.value.train
+      !this.value.recordId
     }
   },
   methods: {
@@ -91,22 +97,27 @@ export default {
       return conformedValue.toUpperCase()
     },
     trainInput () {
+      this.errors.clear()
       this.value.departureIndex = null
       this.value.arrivalIndex = null
       this.value.seat = ''
-      if (!this.value.train) return
-      axios.get(`/info/train/${this.value.train}/`)
+      this.value.recordId = false
+      if (!this.trainName || !this.date) return
+      axios.get(`/info/train/${this.trainName}/record/${this.date}/`)
       .then((response) => {
-        this.stops = response.data.stops
+        this.value.recordId = response.data.id
+        this.stops = response.data.train.stops
       })
       .catch((error) => {
         this.stops = null
-        if (error.response) this.errors.add('train', error.response.data.detail)
+        if (error.response) {
+          this.errors.add('train', error.response.data.detail)
+        }
       })
     },
     mask () {
-      if (!this.value.train) return []
-      switch (this.value.train.charAt(0)) {
+      if (!this.trainName) return []
+      switch (this.trainName.charAt(0)) {
         case 'G':
         case 'C':
         case 'D':
@@ -118,8 +129,13 @@ export default {
     submit () {
       this.$validator.validateAll().then((result) => {
         if (result) {
-          console.log(this.value)
+          if (this.value.seat === '') this.value.seat = null
+          return axios.post('/trip/', this.value)
         }
+      })
+      .then((response) => {
+        this.$emit('add', response.data)
+        this.toggle(false)
       })
     }
   },

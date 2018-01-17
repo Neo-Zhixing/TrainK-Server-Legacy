@@ -9,9 +9,6 @@ class StationSerializer(serializers.ModelSerializer):
 
 
 class TrainSerializer(serializers.ModelSerializer):
-	def __init__(self, *args, **kwargs):
-		self.expandNested = kwargs.pop('expandNested', False)
-		super(TrainSerializer, self).__init__(*args, **kwargs)
 
 	class Meta:
 		model = models.Train
@@ -19,9 +16,6 @@ class TrainSerializer(serializers.ModelSerializer):
 
 	def to_representation(self, obj):
 		data = super(TrainSerializer, self).to_representation(obj)
-
-		if not self.expandNested:
-			return data
 		for stop in data['stops']:
 			station = models.Station.objects.get(id=stop['station'])
 			stop['station'] = StationSerializer(station).data
@@ -30,6 +24,15 @@ class TrainSerializer(serializers.ModelSerializer):
 
 
 class RecordSerializer(serializers.ModelSerializer):
+	train = TrainSerializer()
+
+	def __init__(self, *args, **kwargs):
+		self.unnest = kwargs.pop('unnest', False)
+		super(RecordSerializer, self).__init__(*args, **kwargs)
+
+		if not self.unnest:
+			self.fields.pop('stops')
+
 	class Meta:
 		model = models.Record
-		fields = ('departureDate', 'stops')
+		fields = ('id', 'departureDate', 'train', 'stops')

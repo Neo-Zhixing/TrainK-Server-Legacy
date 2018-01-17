@@ -1,6 +1,5 @@
 from collections import OrderedDict
 from rest_framework.renderers import TemplateHTMLRenderer
-from rest_framework.generics import ListAPIView
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
@@ -90,7 +89,7 @@ class TrainViewSet(viewsets.ReadOnlyModelViewSet):
 
 	def get_serializer(self, *args, **kwargs):
 		if self.action == 'retrieve':
-			kwargs['expandNested'] = True
+			kwargs['unnest'] = True
 		return super(TrainViewSet, self).get_serializer(*args, **kwargs)
 
 	def get_queryset(self):
@@ -127,21 +126,26 @@ class TrainViewSet(viewsets.ReadOnlyModelViewSet):
 		return super(TrainViewSet, self).retrieve(self, request, *args, **kwargs)
 
 
-class RecordView(ListAPIView):
+class RecordViewSet(viewsets.ReadOnlyModelViewSet):
 	template_name = 'record.html'
 	queryset = models.Record.objects.all()
+	lookup_field = 'departureDate'
 	serializer_class = serializers.RecordSerializer
 
 	def get_queryset(self):
-		queryset = super(RecordView, self).get_queryset()
-		queryset = queryset.filter(train__telecode=self.kwargs['telecode']).order_by('-departureDate')
-		return queryset
+		train = _getTrain(self.kwargs['pk'], models.Train.objects)
+		return super(RecordViewSet, self).get_queryset().filter(train__names=train.names).order_by('-departureDate')
 
-	def list(self, request, telecode):
+	def get_serializer(self, *args, **kwargs):
+		if self.action == 'retrieve':
+			kwargs['unnest'] = True
+		return super(RecordViewSet, self).get_serializer(*args, **kwargs)
+
+	def list(self, request, *args, **kwargs):
 		if not _browserRequest(request):
-			return super(RecordView, self).list(request, telecode)
+			return super(RecordViewSet, self).list(request, *args, **kwargs)
 
-		train = get_object_or_404(models.Train, telecode=telecode)
+		train = _getTrain(self.kwargs['pk'], models.Train.objects)
 		queryset = self.filter_queryset(self.get_queryset())
 		page = self.paginate_queryset(queryset)
 		if page is None:

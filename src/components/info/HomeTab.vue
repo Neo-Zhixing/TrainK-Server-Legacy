@@ -6,7 +6,7 @@
     <b-nav-item :active="selectedTab === 3" id="3" @click="tripTypeTab">站点</b-nav-item>
     <b-nav-item disabled :active="selectedTab === 4" id="4" @click="tripTypeTab">线路</b-nav-item>
   </b-nav>
-  <b-form id="info-form" @submit="submit">
+  <b-form id="info-form" @submit.prevent="submit">
     <route-input required v-if="selectedTab === 1" v-model="stations" />
     <station-input required v-else-if="selectedTab === 3" v-model="value" placeholder="选择车站" />
     <b-form-input required v-else
@@ -36,13 +36,12 @@
     },
     methods: {
       tripTypeTab (sender) {
-        this.selectedTab = Number(sender.toElement.parentElement.id)
+        this.selectedTab = Number(sender.target.parentElement.id)
         this.value = null
         this.stations.departureStation = null
         this.stations.arrivalStation = null
       },
       submit (event) {
-        event.preventDefault()
         let rootPath = '/info/'
         if (this.selectedTab === 1) {
           window.location = `${rootPath}train?departure_telecode=${this.stations.departureStation}&arrival_telecode=${this.stations.arrivalStation}`

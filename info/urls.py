@@ -5,11 +5,11 @@ from . import views
 
 urlpatterns = [
 	path('', TemplateView.as_view(template_name='info.html'), name='info_home'),
-	path('train/<telecode>/record/', views.RecordView.as_view(), name='info_train_record'),
 ]
 
 
 router = routers.DefaultRouter()
 router.register('station', views.StationViewSet)
 router.register('train', views.TrainViewSet)
+router.register('train/(?P<pk>[^/.]+)/record', views.RecordViewSet)
 urlpatterns += router.urls
