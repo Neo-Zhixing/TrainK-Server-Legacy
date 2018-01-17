@@ -22,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 INTERNAL_IPS = ('127.0.0.1', '192.168.1.237', '192.168.1.101')
 
-ALLOWED_HOSTS = ['tra.ink', 'localhost', '192.168.1.101']
+ALLOWED_HOSTS = ['tra.ink', 'localhost', '192.168.1.101', '192.168.1.10', 'home.zhangzhixing.cn']
 SITE_ID = 1
 
 # Application definition
@@ -110,7 +110,16 @@ DATABASES = {
     }
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtpdm.aliyun.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'notification@robot.tra.ink'
+EMAIL_HOST_PASSWORD = 'aB7EZRVqo0Kbl4b3UOaM'
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = 'notification@robot.tra.ink'
+SERVER_EMAIL = 'notification@robot.tra.ink'
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -152,7 +161,7 @@ USE_TZ = True
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.dummy.DummyCache' if DEBUG else 'redis_cache.RedisCache',
-        'LOCATION': '192.168.1.10:6379',
+        'LOCATION': 'localhost:6379',
         'OPTIONS': {
             'DB': 0,
             'PASSWORD': 'Braungardt4365',
