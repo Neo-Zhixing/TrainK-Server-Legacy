@@ -77,14 +77,14 @@ class UserView(auth_views.UserDetailsView, reg_views.RegisterView):
 			if request.user.is_authenticated:
 				return redirect('account_settings')
 
-			return signupView(request._request, args, kwargs)
+			return signupView(request._request, *args, **kwargs)
 
-		return super(UserView, self).get(request, args, kwargs)
+		return super(UserView, self).get(request, *args, **kwargs)
 
 	def post(self, request, *args, **kwargs):
 		if BrowserRequest(request):
 			return signupView(request._request)
-		return super(UserView, self).post(request, args, kwargs)
+		return super(UserView, self).post(request, *args, **kwargs)
 
 
 class PasswordView(auth_views.PasswordChangeView, auth_views.PasswordResetView, auth_views.PasswordResetConfirmView):

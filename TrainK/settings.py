@@ -105,7 +105,7 @@ DATABASES = {
         'NAME': 'TrainK',
         'USER': 'TrainK',
         'PASSWORD': 'Braungardt4365',
-        'HOST': 'localhost',
+        'HOST': '192.168.1.10',
         'PORT': '',
     }
 }
