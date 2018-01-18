@@ -117,8 +117,8 @@ EMAIL_HOST_USER = 'notification@robot.tra.ink'
 EMAIL_HOST_PASSWORD = 'aB7EZRVqo0Kbl4b3UOaM'
 EMAIL_USE_SSL = True
 
-DEFAULT_FROM_EMAIL = 'notification@robot.tra.ink'
-SERVER_EMAIL = 'notification@robot.tra.ink'
+DEFAULT_FROM_EMAIL = 'TrainK <notification@robot.tra.ink>'
+SERVER_EMAIL = 'TrainK <notification@robot.tra.ink>'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 # Password validation

@@ -74,7 +74,6 @@ class Stop(models.Model):
 	arrivalTimeAnticipated = models.NullBooleanField()
 
 	class Meta:
-		abstract = True
 		managed = False
 
 	def timeForAction(self, action):
