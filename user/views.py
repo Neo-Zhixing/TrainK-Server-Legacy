@@ -31,6 +31,10 @@ def BrowserRequest(request):
 
 
 class SessionView(auth_views.LoginView, auth_views.LogoutView):
+	@never_cache
+	def dispatch(self, *args, **kwargs):
+		return super(EmailViewSet, self).dispatch(*args, **kwargs)
+
 	def _request_view(self, request, *args, **kwargs):
 		view = logoutView if request.user.is_authenticated else loginView
 		return view(request._request, *args, **kwargs)
@@ -67,6 +71,10 @@ class UserView(auth_views.UserDetailsView, reg_views.RegisterView):
 	# POST direct to RegisterView
 	# Activation for unauthenticated users not implemented. WHERE TO PUT?
 
+	@never_cache
+	def dispatch(self, *args, **kwargs):
+		return super(EmailViewSet, self).dispatch(*args, **kwargs)
+
 	def check_permissions(self, request):
 		if request.method is 'POST' or request.method is 'GET':
 			return
@@ -88,6 +96,10 @@ class UserView(auth_views.UserDetailsView, reg_views.RegisterView):
 
 
 class PasswordView(auth_views.PasswordChangeView, auth_views.PasswordResetView, auth_views.PasswordResetConfirmView):
+	@never_cache
+	def dispatch(self, *args, **kwargs):
+		return super(EmailViewSet, self).dispatch(*args, **kwargs)
+
 	def _browser_view(self, request, *args, **kwargs):
 		view = passwordChangeView if request.user.is_authenticated else passwordResetView
 		return view(request._request, *args, **kwargs)
@@ -119,7 +131,6 @@ class EmailViewSet(ModelViewSet):
 
 	@never_cache
 	def dispatch(self, *args, **kwargs):
-		# Disable browser cache
 		return super(EmailViewSet, self).dispatch(*args, **kwargs)
 
 	def get_queryset(self):
