@@ -24,14 +24,6 @@ class TrainSerializer(serializers.ModelSerializer):
 
 
 class RecordSerializer(serializers.ModelSerializer):
-	train = TrainSerializer()
-
-	def __init__(self, *args, **kwargs):
-		self.unnest = kwargs.pop('unnest', False)
-		super(RecordSerializer, self).__init__(*args, **kwargs)
-
-		if not self.unnest:
-			self.fields.pop('stops')
 
 	class Meta:
 		model = models.Record

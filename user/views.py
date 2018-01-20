@@ -33,7 +33,7 @@ def BrowserRequest(request):
 class SessionView(auth_views.LoginView, auth_views.LogoutView):
 	@never_cache
 	def dispatch(self, *args, **kwargs):
-		return super(EmailViewSet, self).dispatch(*args, **kwargs)
+		return super(SessionView, self).dispatch(*args, **kwargs)
 
 	def _request_view(self, request, *args, **kwargs):
 		view = logoutView if request.user.is_authenticated else loginView
@@ -73,7 +73,7 @@ class UserView(auth_views.UserDetailsView, reg_views.RegisterView):
 
 	@never_cache
 	def dispatch(self, *args, **kwargs):
-		return super(EmailViewSet, self).dispatch(*args, **kwargs)
+		return super(UserView, self).dispatch(*args, **kwargs)
 
 	def check_permissions(self, request):
 		if request.method is 'POST' or request.method is 'GET':
@@ -98,7 +98,7 @@ class UserView(auth_views.UserDetailsView, reg_views.RegisterView):
 class PasswordView(auth_views.PasswordChangeView, auth_views.PasswordResetView, auth_views.PasswordResetConfirmView):
 	@never_cache
 	def dispatch(self, *args, **kwargs):
-		return super(EmailViewSet, self).dispatch(*args, **kwargs)
+		return super(PasswordView, self).dispatch(*args, **kwargs)
 
 	def _browser_view(self, request, *args, **kwargs):
 		view = passwordChangeView if request.user.is_authenticated else passwordResetView

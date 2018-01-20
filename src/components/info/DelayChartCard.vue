@@ -1,14 +1,14 @@
 <template>
   <b-card header="正晚点" :title="title" :sub-title="subtitle" >
     <delay-chart :data="delays"></delay-chart>
-    <b-button variant="primary" :href="records">查看历史记录</b-button>
+    <slot name="footer" />
   </b-card>
 </template>
 <script>
 import axios from 'axios'
 import { Line } from 'vue-chartjs'
 export default {
-  props: ['records'],
+  props: ['telecode'],
   data () {
     return {
       delays: {}
@@ -36,7 +36,7 @@ export default {
     }
   },
   mounted () {
-    axios.get(this.records)
+    axios.get(`/info/train/${this.telecode}/record/`)
     .then((response) => {
       var delays = {}
       for (let result of response.data.results) delays[result.departureDate] = result.delayAvg

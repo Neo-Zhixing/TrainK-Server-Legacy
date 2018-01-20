@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'ticket',
     'trip',
     'scrape',
+    'utils',
 
     'baton.autodiscover',
 ]

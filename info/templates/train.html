@@ -46,8 +46,11 @@
         {% endfor %}
       </div>
       <div class="col-md-5">
-        <delay-chart-card records="{% url 'info_train_record' train.telecode %}">
+        {% if train.telecode %}
+        <delay-chart-card telecode="{{train.telecode}}">
+          <a slot="footer" class="btn btn-primary" href="{% url 'record-list' train.telecode %}">查看历史记录</a>
         </delay-chart-card>
+        {% endif %}
       </div>
     </div>
   </div>

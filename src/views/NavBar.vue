@@ -6,7 +6,7 @@
         <b>TrainK</b>
       </b-navbar-brand>
       <b-button-group class="d-md-none">
-        <b-button variant="outline-light" href="">
+        <b-button variant="outline-light" :href="loggedIn ? '/user/' : '/user/session/'">
           <font-awesome-icon icon="user-circle" size="lg" />
         </b-button>
         <b-button :variant="expanded ? 'light' : 'outline-light'" aria-controls="collapse" :aria-expanded="expanded" @click="expanded = !expanded">

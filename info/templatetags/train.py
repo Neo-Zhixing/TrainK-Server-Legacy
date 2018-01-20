@@ -30,4 +30,4 @@ def timedeltaStr(value):
 
 @register.filter
 def station(value):
-	return models.Station.objects.get(pk=value)
+	return models.Station.objects.get(pk=value) if isinstance(value, int) else None

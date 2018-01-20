@@ -1,24 +1,12 @@
 from collections import OrderedDict
-from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from django.shortcuts import get_object_or_404, get_list_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from . import models, serializers
+from utils.mixins import VersatileViewMixin
 
-from django.views.defaults import bad_request
+from django.views.generic import ListView, DetailView
 from django.utils.dateparse import parse_duration
-from django.utils.duration import duration_iso_string
-from datetime import timedelta
-
-
-def _browserRequest(request):
-	# The lack of accepted renderer indicates that the content negotiation failed,
-	# in which case the rest framework will always use the first renderer, TemplateHTMLRenderer.
-	# That's why we directly return True here.
-	if not hasattr(request, 'accepted_renderer'):
-		return True
-	return isinstance(request.accepted_renderer, TemplateHTMLRenderer)
 
 
 def _getStation(key, queryset):
@@ -50,47 +38,73 @@ class OptionalPaginationMixin:
 		return paginator
 
 
-class StationViewSet(OptionalPaginationMixin, viewsets.ReadOnlyModelViewSet):
+class StationDetailTemplateView(DetailView):
 	template_name = 'station.html'
+	model = models.Station
+
+	def get_object(self, queryset=None):
+		if queryset is None:
+			queryset = self.get_queryset()
+		return _getStation(self.kwargs[self.pk_url_kwarg], queryset)
+
+	def get(self, request, *args, **kwargs):
+		pk = self.kwargs[self.pk_url_kwarg]
+		station = self.get_object()
+		if station.name == pk:  # Query based on station name
+			return redirect('station-detail', pk=station.id if station.telecode == '' else station.telecode, permanent=True)
+		if pk.isnumeric() and station.telecode != '':  # Rediret id based queries when the station has a telecode
+			return redirect('station-detail', pk=station.telecode, permanent=True)
+		self.object = station
+		context = self.get_context_data(object=self.object)
+		return self.render_to_response(context)
+
+
+class StationViewSet(OptionalPaginationMixin, VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 	queryset = models.Station.objects.all()
 	serializer_class = serializers.StationSerializer
-	lookup_field = 'telecode'
+	template_views = {
+		'retrieve': StationDetailTemplateView.as_view()
+	}
 
 	def get_queryset(self):
 		queryset = super(StationViewSet, self).get_queryset()
-		if 'all' in self.request.query_params and self.request.query_params['all'] == 'true':
+		if 'all' in self.request.query_params and self.request.query_params['all'].lower() == 'true':
 			return queryset
 		return queryset.exclude(telecode='')
 
 	def get_object(self):
 		return _getStation(self.kwargs[self.lookup_field], self.queryset)
 
-	def retrieve(self, request, telecode=None):
-		if telecode and _browserRequest(request):
-			station = self.get_object()
-			if station.name == telecode:  # Query based on station name
-				return redirect('station-detail', telecode=station.id if station.telecode == '' else station.telecode, permanent=True)
-			if telecode.isnumeric() and station.telecode != '':  # Rediret id based queries when the station has a telecode
-				return redirect('station-detail', telecode=station.telecode, permanent=True)
-			return Response({
-				'station': station
-			})
-		return super(StationViewSet, self).retrieve(self, request, telecode=telecode)
 
-
-class TrainViewSet(viewsets.ReadOnlyModelViewSet):
+class TrainDetailTemplateView(DetailView):
 	template_name = 'train.html'
+	model = models.Train
+
+	def get_object(self, queryset=None):
+		if queryset is None:
+			queryset = self.get_queryset()
+		return _getTrain(self.kwargs[self.pk_url_kwarg], queryset)
+
+	def get(self, request, *args, **kwargs):
+		pk = self.kwargs[self.pk_url_kwarg]
+		train = self.get_object()
+		if pk in train.names:
+			return redirect('train-detail', pk=train.telecode, permanent=True)
+		self.object = train
+		context = self.get_context_data(object=self.object)
+		return self.render_to_response(context)
+
+
+class TrainViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 	queryset = models.Train.objects.all()
 	station_queryset = models.Station.objects.all()
 	serializer_class = serializers.TrainSerializer
+	template_views = {
+		'retrieve': TrainDetailTemplateView.as_view()
+	}
 
 	def get_object(self):
 		return _getTrain(self.kwargs[self.lookup_field], self.queryset)
-
-	def get_serializer(self, *args, **kwargs):
-		if self.action == 'retrieve':
-			kwargs['unnest'] = True
-		return super(TrainViewSet, self).get_serializer(*args, **kwargs)
 
 	def get_queryset(self):
 		queryset = super(TrainViewSet, self).get_queryset()
@@ -104,55 +118,38 @@ class TrainViewSet(viewsets.ReadOnlyModelViewSet):
 			trains = queryset.filter(stops__contains=[{'station': fromStation.pk}, {'station': toStation.pk}])
 			results = trains
 			for train in trains:
+				departureIndex = None
+				arrivalIndex = None
 				for index, stop in enumerate(train.stops):
 					if stop['station'] == fromStation.pk:
 						departureIndex = index
 					elif stop['station'] == toStation.pk:
 						arrivalIndex = index
-				if departureIndex > arrivalIndex:
+				if departureIndex and arrivalIndex and departureIndex > arrivalIndex:
 					results = results.exclude(telecode=train.telecode)
 			return results
 		return queryset
 
-	def retrieve(self, request, *args, **kwargs):
-		pk = kwargs.pop('pk')
-		if pk and _browserRequest(request):
-			train = self.get_object()
-			if pk in train.names:
-				return redirect('train-detail', pk=train.telecode, permanent=True)
-			return Response({
-				'train': train
-			})
-		return super(TrainViewSet, self).retrieve(self, request, *args, **kwargs)
 
-
-class RecordViewSet(viewsets.ReadOnlyModelViewSet):
+class RecordListTemplateView(ListView):
 	template_name = 'record.html'
-	queryset = models.Record.objects.all()
-	lookup_field = 'departureDate'
-	serializer_class = serializers.RecordSerializer
+	model = models.Record
+
+	@property
+	def train(self):
+		if not hasattr(self, '_train'):
+			self._train = _getTrain(self.kwargs['pk'], models.Train.objects)
+		return self._train
 
 	def get_queryset(self):
-		train = _getTrain(self.kwargs['pk'], models.Train.objects)
-		return super(RecordViewSet, self).get_queryset().filter(train__names=train.names).order_by('-departureDate')
+		return super(RecordListTemplateView, self).get_queryset().filter(train__names=self.train.names).order_by('-departureDate')
 
-	def get_serializer(self, *args, **kwargs):
-		if self.action == 'retrieve':
-			kwargs['unnest'] = True
-		return super(RecordViewSet, self).get_serializer(*args, **kwargs)
-
-	def list(self, request, *args, **kwargs):
-		if not _browserRequest(request):
-			return super(RecordViewSet, self).list(request, *args, **kwargs)
-
-		train = _getTrain(self.kwargs['pk'], models.Train.objects)
-		queryset = self.filter_queryset(self.get_queryset())
-		page = self.paginate_queryset(queryset)
-		if page is None:
-			page = queryset
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		train = self.train
 		table = OrderedDict()
 		# make horizontal table data
-		for record in page:
+		for record in context['object_list']:
 			for index, stop in enumerate(record.stops):
 				stationID = train.stops[index]['station']
 				plannedStop = train.stops[index]
@@ -161,12 +158,23 @@ class RecordViewSet(viewsets.ReadOnlyModelViewSet):
 				for key in ('departure', 'arrival'):
 					timeKey = key + 'Time'
 					if timeKey in plannedStop and timeKey in stop:
-						delay = parse_duration(plannedStop[timeKey]) - parse_duration(stop[timeKey])
+						delay = parse_duration(stop[timeKey]) - parse_duration(plannedStop[timeKey])
 						stop[key + 'Delay'] = delay.seconds / 60 + delay.days * 1440
 						stop[timeKey] = parse_duration(stop[timeKey])
 				table[stationID].append(stop)
-		return Response({
-			'records': page,
-			'train': train,
-			'table': table
-		})
+		context['train'] = train
+		context['table'] = table
+		return context
+
+
+class RecordViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
+	queryset = models.Record.objects.all()
+	lookup_field = 'departureDate'
+	serializer_class = serializers.RecordSerializer
+	template_views = {
+		'list': RecordListTemplateView.as_view()
+	}
+
+	def get_queryset(self):
+		train = _getTrain(self.kwargs['pk'], models.Train.objects)
+		return super(RecordViewSet, self).get_queryset().filter(train__names=train.names).order_by('-departureDate')
