@@ -23,8 +23,20 @@ class TrainSerializer(serializers.ModelSerializer):
 		return data
 
 
-class RecordSerializer(serializers.ModelSerializer):
-
+class RecordListSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = models.Record
-		fields = ('id', 'departureDate', 'train', 'stops')
+		fields = ('id', 'departureDate', 'train', 'delay')
+
+
+class RecordSerializer(serializers.ModelSerializer):
+	train = TrainSerializer()
+
+	class Meta(RecordListSerializer.Meta):
+		pass
+
+
+class RecordDetailSerializer(RecordSerializer):
+
+	class Meta(RecordSerializer.Meta):
+		fields = ('id', 'departureDate', 'train', 'delay', 'stops')

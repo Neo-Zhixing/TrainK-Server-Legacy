@@ -86,6 +86,7 @@ class TrainDetailTemplateView(DetailView):
 		return _getTrain(self.kwargs[self.pk_url_kwarg], queryset)
 
 	def get(self, request, *args, **kwargs):
+		# Redirect queries using train names
 		pk = self.kwargs[self.pk_url_kwarg]
 		train = self.get_object()
 		if pk in train.names:
@@ -134,11 +135,12 @@ class TrainViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 class RecordListTemplateView(ListView):
 	template_name = 'record.html'
 	model = models.Record
+	train_url_kwarg = 'pk'
 
 	@property
 	def train(self):
 		if not hasattr(self, '_train'):
-			self._train = _getTrain(self.kwargs['pk'], models.Train.objects)
+			self._train = _getTrain(self.kwargs[self.train_url_kwarg], models.Train.objects)
 		return self._train
 
 	def get_queryset(self):
@@ -155,7 +157,8 @@ class RecordListTemplateView(ListView):
 				plannedStop = train.stops[index]
 				if stationID not in table:
 					table[stationID] = []
-				for key in ('departure', 'arrival'):
+				for action in models.TrainAction:
+					key = action.name.lower()
 					timeKey = key + 'Time'
 					if timeKey in plannedStop and timeKey in stop:
 						delay = parse_duration(stop[timeKey]) - parse_duration(plannedStop[timeKey])
@@ -166,14 +169,21 @@ class RecordListTemplateView(ListView):
 		context['table'] = table
 		return context
 
+	def get(self, request, *args, **kwargs):
+		if self.kwargs[self.train_url_kwarg] in self.train.names:
+			return redirect('record-list', pk=self.train.telecode, permanent=True)
+		return super(RecordListTemplateView, self).get(request, *args, **kwargs)
+
 
 class RecordViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 	queryset = models.Record.objects.all()
 	lookup_field = 'departureDate'
-	serializer_class = serializers.RecordSerializer
 	template_views = {
 		'list': RecordListTemplateView.as_view()
 	}
+
+	def get_serializer_class(self):
+		return serializers.RecordListSerializer if self.action == 'list' else serializers.RecordDetailSerializer
 
 	def get_queryset(self):
 		train = _getTrain(self.kwargs['pk'], models.Train.objects)
