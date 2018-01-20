@@ -21,7 +21,7 @@ class VersatileViewMixin:
                     handler = None
                 if not handler:
                     raise NotAcceptable()
-                response = handler(request, *args, **kwargs)
+                response = handler(request._request, *args, **kwargs)
             else:
                 # Get the appropriate handler method
                 if request.method.lower() in self.http_method_names:

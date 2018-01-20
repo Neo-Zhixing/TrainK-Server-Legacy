@@ -1,54 +1,27 @@
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import reverse, get_object_or_404
+from django.views.generic.base import RedirectView
 from django.views.decorators.cache import never_cache
 from rest_auth import views as auth_views
 from rest_auth.registration import views as reg_views
 from allauth.account import views
-from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from rest_framework import mixins
+from utils.mixins import VersatileViewMixin
 from .serializers import EmailSerializer
 
-loginView = views.LoginView.as_view(template_name='login.html')
-logoutView = views.LogoutView.as_view(template_name='logout.html')
-signupView = views.SignupView.as_view(template_name='signup.html')
-passwordChangeView = views.PasswordChangeView.as_view()
-passwordSetView = views.PasswordSetView.as_view()
-passwordResetView = views.PasswordResetView.as_view(template_name='password/reset.html')
-emailManagementView = views.EmailView.as_view(template_name='email/manage.html')
 
-
-def BrowserRequest(request):
-	# The lack of accepted renderer indicates that the content negotiation failed,
-	# in which case the rest framework will always use the first renderer, TemplateHTMLRenderer.
-	# That's why we directly return True here.
-	print(request)
-	if not hasattr(request, 'accepted_renderer'):
-		return True
-	return isinstance(request.accepted_renderer, TemplateHTMLRenderer)
-
-
-class SessionView(auth_views.LoginView, auth_views.LogoutView):
+class SessionView(VersatileViewMixin, auth_views.LoginView, auth_views.LogoutView):
 	@never_cache
 	def dispatch(self, *args, **kwargs):
 		return super(SessionView, self).dispatch(*args, **kwargs)
 
-	def _request_view(self, request, *args, **kwargs):
-		view = logoutView if request.user.is_authenticated else loginView
-		return view(request._request, *args, **kwargs)
-
-	def get(self, request, *args, **kwargs):
-		if BrowserRequest(request):
-			return self._request_view(request)
-		# TODO: Session Info JSON Return.
-
-	# Logging in.
-	def post(self, request, *args, **kwargs):
-		if BrowserRequest(request):
-			return self._request_view(request)
-		return auth_views.LoginView.post(self, request, args, kwargs)
+	@property
+	def template_view(self):
+		return views.LogoutView.as_view(template_name='logout.html') \
+			if self.request.user.is_authenticated \
+			else views.LoginView.as_view(template_name='login.html')
 
 	# Refresh session info.
 	# Basically log you out and then relog you in using the request info you provided.
@@ -61,7 +34,7 @@ class SessionView(auth_views.LoginView, auth_views.LogoutView):
 		return auth_views.LogoutView.post(self, request, args, kwargs)
 
 
-class UserView(auth_views.UserDetailsView, reg_views.RegisterView):
+class UserView(VersatileViewMixin, auth_views.UserDetailsView, reg_views.RegisterView):
 	# Browser Requests:
 	# Authenticated Users redirect to settings page
 	# Anonymous Users get Allauth Signup page
@@ -75,41 +48,32 @@ class UserView(auth_views.UserDetailsView, reg_views.RegisterView):
 	def dispatch(self, *args, **kwargs):
 		return super(UserView, self).dispatch(*args, **kwargs)
 
+	@property
+	def template_view(self):
+		return RedirectView.as_view(url=reverse('account_settings'), permanent=True) \
+			if self.request.user.is_authenticated \
+			else views.SignupView.as_view(template_name='signup.html')
+
 	def check_permissions(self, request):
 		if request.method is 'POST' or request.method is 'GET':
 			return
 		super(UserView, self).check_permissions
 
-	def get(self, request, *args, **kwargs):
-		if BrowserRequest(request):  # Browser Accessing
-			if request.user.is_authenticated:
-				return redirect('account_settings')
 
-			return signupView(request._request, *args, **kwargs)
-
-		return super(UserView, self).get(request, *args, **kwargs)
-
-	def post(self, request, *args, **kwargs):
-		if BrowserRequest(request):
-			return signupView(request._request)
-		return super(UserView, self).post(request, *args, **kwargs)
-
-
-class PasswordView(auth_views.PasswordChangeView, auth_views.PasswordResetView, auth_views.PasswordResetConfirmView):
+class PasswordView(VersatileViewMixin, auth_views.PasswordChangeView, auth_views.PasswordResetView, auth_views.PasswordResetConfirmView):
 	@never_cache
 	def dispatch(self, *args, **kwargs):
 		return super(PasswordView, self).dispatch(*args, **kwargs)
 
-	def _browser_view(self, request, *args, **kwargs):
-		view = passwordChangeView if request.user.is_authenticated else passwordResetView
-		return view(request._request, *args, **kwargs)
-
-	def get(self, request, *args, **kwargs):
-		return self._browser_view(request, *args, **kwargs)
+	@property
+	def template_view(self):
+		if not self.request.user.is_authenticated:
+			return views.PasswordResetView.as_view(template_name='password/reset.html')
+		return views.PasswordChangeView.as_view() \
+			if self.request.user.has_usable_password() \
+			else views.PasswordSetView.as_view()
 
 	def post(self, request, *args, **kwargs):
-		if BrowserRequest(request):
-			return self._browser_view(request, *args, **kwargs)
 		return auth_views.PasswordResetConfirmView.post(self, request, *args, **kwargs)
 
 	def put(self, request, *args, **kwargs):
@@ -124,10 +88,13 @@ class PasswordView(auth_views.PasswordChangeView, auth_views.PasswordResetView, 
 		return auth_views.PasswordResetView.post(self, request, *args, **kwargs)
 
 
-class EmailViewSet(ModelViewSet):
-	template_name = 'email/manage.html'
+class EmailViewSet(VersatileViewMixin, ModelViewSet):
 	serializer_class = EmailSerializer
 	pagination_class = None
+	permission_classes = (IsAuthenticated,)
+	template_views = {
+		'list': views.EmailView.as_view(template_name='email/manage.html')
+	}
 
 	@never_cache
 	def dispatch(self, *args, **kwargs):
@@ -138,11 +105,6 @@ class EmailViewSet(ModelViewSet):
 
 	def get_object(self):
 		return get_object_or_404(self.get_queryset(), pk=self.kwargs['pk'])
-
-	def list(self, request, *args, **kwargs):
-		if BrowserRequest(request):
-			return emailManagementView(request._request)
-		return super(EmailViewSet, self).list(self, request, *args, **kwargs)
 
 
 class SettingView(APIView):
