@@ -107,7 +107,7 @@ DATABASES = {
         'USER': 'TrainK',
         'PASSWORD': 'Braungardt4365',
         'HOST': '192.168.1.10',
-        'PORT': '',
+        'PORT': '5432',
     }
 }
 
@@ -139,7 +139,7 @@ AUTHENTICATION_BACKENDS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-cn'
 
 TIME_ZONE = 'Asia/Shanghai'
 
@@ -152,29 +152,14 @@ USE_TZ = True
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache' if DEBUG else 'redis_cache.RedisCache',
-        'LOCATION': '192.168.1.10:6379',
-        'OPTIONS': {
-            'DB': 0,
-            'PASSWORD': 'Braungardt4365',
-        },
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
     },
 }
-STATIC_URL = '/web/'
-STATIC_ROOT = '/static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'dist'),
 )
-
-if not DEBUG:
-    STATICFILES_STORAGE = 'aliyun_oss2_storage.backends.AliyunStaticStorage'
-    DEFAULT_FILE_STORAGE = 'aliyun_oss2_storage.backends.AliyunMediaStorage'
-    ACCESS_KEY_ID = "LTAIP3L1SzIaldrp"
-    ACCESS_KEY_SECRET = "hUf7QPw1TL7tM18QfMw74fpRCSo5G8"
-    END_POINT = "oss-cn-hangzhou.aliyuncs.com"  # OSS存储节点
-    BUCKET_NAME = "traink"
-    ALIYUN_OSS_CNAME = "https://static.tra.ink"
-    BUCKET_ACL_TYPE = "public-read"  # private, public-read, public-read-write
 
 
 BATON = {
@@ -237,11 +222,10 @@ REST_AUTH_SERIALIZERS = {
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 CRISPY_FAIL_SILENTLY = not DEBUG
 
-_WEBPACK_STAT_FILE_PATH = 'build/webpack-stats.dev.json' if DEBUG else 'build/webpack-stats.prod.json'
 WEBPACK_LOADER = {
     'DEFAULT': {
         'BUNDLE_DIR_NAME': 'dist/',
-        'STATS_FILE': os.path.join(BASE_DIR, _WEBPACK_STAT_FILE_PATH),
+        'STATS_FILE': os.path.join(BASE_DIR, 'build/webpack-stats.dev.json'),
     }
 }
 
