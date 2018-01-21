@@ -3,14 +3,14 @@
 {% load render_bundle from webpack_loader %}
 {% load train %}
 
-{% block title %}{{block.super}}-{{ train.name }}次列车{% endblock %}
+{% block title %}{{block.super}}-{{ train.name }}次{% endblock %}
 
 {% block content %}
 <div id="entrance">
   <div class="py-5 text-white text-center" style="background-image: url(&quot;{% static "img/train.jpg" %}&quot;);  background-position: center; background-size:cover;">
     <h1 class="display-2">{{ train.name }}</h1>
-    <div class="row" style="max-width: 600px; margin-left: auto; margin-right: auto;">
-      <div class="col-5">
+    <div class="row justify-content-center">
+      <div class="col text-right">
         {% with train.stops.0 as stop %}{% with stop.station|station as station %}
         <h1>{{ station.name }}</h1>
         <h2>{{ stop.departureTime|timedelta|timedeltaStr }}</h2>
@@ -19,7 +19,7 @@
       <div class="col-2">
         <h1><font-awesome-icon icon="long-arrow-alt-right" size="2x"></font-awesome-icon></h1>
       </div>
-      <div class="col-5">
+      <div class="col text-left">
         {% with train.stops|last as stop %}{% with stop.station|station as station %}
         <h1>{{ station.name }}</h1>
         <h2>{{ stop.arrivalTime|timedelta|timedeltaStr }}</h2>
@@ -46,8 +46,11 @@
         {% endfor %}
       </div>
       <div class="col-md-5">
-        <delay-chart-card records="{% url 'info_train_record' train.telecode %}">
+        {% if train.telecode %}
+        <delay-chart-card telecode="{{train.telecode}}">
+          <a slot="footer" class="btn btn-primary" href="{% url 'record-list' train.telecode %}">查看历史记录</a>
         </delay-chart-card>
+        {% endif %}
       </div>
     </div>
   </div>

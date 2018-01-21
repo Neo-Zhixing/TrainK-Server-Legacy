@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.postgres import fields
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import reverse
-
+from django.utils.dateparse import parse_duration
+from datetime import timedelta
 import enum
 
 
@@ -14,6 +15,11 @@ class Station(models.Model):
 
 	def get_absolute_url(self):
 		return reverse('info_station')
+
+
+class TrainAction(enum.Enum):
+	Departure = 1
+	Arrival = 0
 
 
 class Train(models.Model):
@@ -37,6 +43,21 @@ class Record(models.Model):
 	departureDate = models.DateField()
 	train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name='records')
 	stops = fields.JSONField(encoder=DjangoJSONEncoder)
+
+	@property
+	def delay(self):
+		grossDelay = timedelta()
+		count = 0
+		for index, stop in enumerate(self.stops):
+			plannedStop = self.train.stops[index]
+			for action in TrainAction:
+				key = action.name.lower() + 'Time'
+				if key not in stop or key not in plannedStop or stop[key + 'Anticipated']:
+					continue
+				count += 1
+				delay = abs(parse_duration(stop[key]) - parse_duration(plannedStop[key]))
+				grossDelay += delay
+		return grossDelay / count / 60
 
 	def get_absolute_url(self):
 		return reverse('info_record')
@@ -90,8 +111,3 @@ class Stop(models.Model):
 			self.record.stops[self.index][key] = anticipated
 			setattr(self, key, anticipated)
 		self.record.save()
-
-
-class TrainAction(enum.Enum):
-		Departure = 1
-		Arrival = 0

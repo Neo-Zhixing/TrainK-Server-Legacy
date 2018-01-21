@@ -6,7 +6,7 @@
         <b>TrainK</b>
       </b-navbar-brand>
       <b-button-group class="d-md-none">
-        <b-button variant="outline-light" href="">
+        <b-button variant="outline-light" :href="user ? '/user/' : '/user/session/'">
           <font-awesome-icon icon="user-circle" size="lg" />
         </b-button>
         <b-button :variant="expanded ? 'light' : 'outline-light'" aria-controls="collapse" :aria-expanded="expanded" @click="expanded = !expanded">
@@ -32,8 +32,8 @@
         @show="userPopoverShown=true"
         @hide="userPopoverShown=false">
         <b-container fluid class="py-2">
-          <login-view v-if="!loggedIn" @loggedIn="loggedIn = true" />
-          <glimpse v-else @loggedOut="loggedIn = false" :email="email" :hash="hash" :name="name" />
+          <glimpse v-if="user" @loggedOut="user = null" :email="user.email" :hash="user.hash" :name="user.username" />
+          <login-view v-else @loggedIn="login" />
         </b-container>
       </b-popover>
     </b-container>
@@ -41,6 +41,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import LoginView from '@/components/user/Login'
 import Glimpse from '@/components/user/Glimpse'
 import {
@@ -61,19 +62,39 @@ fontawesome.library.add(faTicketAlt, faInfoCircle, faBriefcase, faMap, faComment
 export default {
   props: {
     authenticated: Boolean,
+    id: Number,
     email: String,
     hash: String,
-    name: String
+    username: String,
+    firstname: String,
+    lastname: String
   },
   data () {
     return {
-      loggedIn: false,
+      user: null,
       userPopoverShown: false,
       expanded: false
     }
   },
   mounted () {
-    this.loggedIn = this.authenticated
+    if (this.authenticated) {
+      this.user = {
+        'email': this.email,
+        'hash': this.hash,
+        'username': this.username,
+        'first_name': this.firstname,
+        'last_name': this.lastname,
+        'id': this.id
+      }
+    }
+  },
+  methods: {
+    login () {
+      axios.get('/user/')
+      .then((response) => {
+        this.user = response.data
+      })
+    }
   },
   computed: {
     location () {

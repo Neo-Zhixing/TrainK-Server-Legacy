@@ -3,6 +3,7 @@
   ref="addModal"
   :ok-disabled="formInvalid"
   @ok.prevent="submit"
+  @hidden="resetValue"
   @shown="trainInput"
 >
   <b-container fluid>
@@ -89,6 +90,16 @@ export default {
     }
   },
   methods: {
+    resetValue () {
+      this.stops = null
+      this.value = {
+        recordId: null,
+        seat: null,
+        boardingGate: null,
+        departureIndex: null,
+        arrivalIndex: null
+      }
+    },
     toggle (value) {
       if (value) this.$refs.addModal.show()
       else this.$refs.addModal.hide()
@@ -98,10 +109,7 @@ export default {
     },
     trainInput () {
       this.errors.clear()
-      this.value.departureIndex = null
-      this.value.arrivalIndex = null
-      this.value.seat = ''
-      this.value.recordId = false
+      this.resetValue()
       if (!this.trainName || !this.date) return
       axios.get(`/info/train/${this.trainName}/record/${this.date}/`)
       .then((response) => {
@@ -135,6 +143,7 @@ export default {
       })
       .then((response) => {
         this.$emit('add', response.data)
+        this.resetValue()
         this.toggle(false)
       })
     }

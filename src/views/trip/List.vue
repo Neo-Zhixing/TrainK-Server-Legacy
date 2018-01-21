@@ -6,16 +6,16 @@
           <b-list-group-item v-for="trip in trips" key="trip.id">
             <b-row class="py-2">
               <b-col sm="4">
-                <h3>{{trip.record.train.stops[trip.departureIndex].station.name}}</h3>
-                <h1>{{time(trip.record.train.stops[trip.departureIndex].departureTime)}}</h1>
+                <h3>{{trip.departure.station.name}}</h3>
+                <h1>{{time(trip.departure.departureTime)}}</h1>
               </b-col>
               <b-col sm="4">
                 <p>{{trip.record.departureDate}}</p>
                 <h3 class="separate-line">{{trip.record.train.names.join('/')}}</h3>
               </b-col>
               <b-col sm="4">
-                <h3>{{trip.record.train.stops[trip.arrivalIndex].station.name}}</h3>
-                <h1>{{time(trip.record.train.stops[trip.arrivalIndex].arrivalTime)}}</h1>
+                <h3>{{trip.arrival.station.name}}</h3>
+                <h1>{{time(trip.arrival.arrivalTime)}}</h1>
               </b-col>
             </b-row>
           </b-list-group-item>

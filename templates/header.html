@@ -5,7 +5,10 @@
 authenticated
 email="{{user.email}}"
 hash="{{user.email|hash}}"
-name="{{user.get_full_name}}"
+username="{{user.username}}"
+firstname="{{user.first_name}}"
+lastname="{{user.last_name}}"
+:id="{{user.pk}}"
 {% endif %}
 >
 </nav-bar>

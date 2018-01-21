@@ -12,7 +12,7 @@
     <tr>
       <th scope="col"></th>
       <th scope="col"></th>
-      {% for record in records %}
+      {% for record in record_list %}
       <th scope="col">{{record.departureDate}}</th>
       {% endfor %}
     </tr>
@@ -34,11 +34,11 @@
           {% if stop.arrivalDelay == 0 %}
           <span class="badge badge-success">正点</span>
           {% elif stop.arrivalDelay < 0 %}
-          <span class="badge badge-success">早点{{stop.arrivalDelay}}分</span>
+          <span class="badge badge-success">早点{{stop.arrivalDelay|abs}}分</span>
           {% elif stop.arrivalDelay > 10 %}
-          <span class="badge badge-danger">晚点{{stop.arrivalDelay}}分</span>
+          <span class="badge badge-danger">晚点{{stop.arrivalDelay|abs}}分</span>
           {% else %}
-          <span class="badge badge-secondary">晚点{{stop.arrivalDelay}}分</span>
+          <span class="badge badge-secondary">晚点{{stop.arrivalDelay|abs}}分</span>
           {% endif %}
         <br />
         {% endif  %}
@@ -48,11 +48,11 @@
           {% if stop.departureDelay == 0 %}
           <span class="badge badge-success">正点</span>
           {% elif stop.departureDelay < 0 %}
-          <span class="badge badge-success">早点{{stop.departureDelay}}分</span>
+          <span class="badge badge-success">早点{{stop.departureDelay|abs}}分</span>
           {% elif stop.departureDelay > 10 %}
-          <span class="badge badge-danger">晚点{{stop.departureDelay}}分</span>
+          <span class="badge badge-danger">晚点{{stop.departureDelay|abs}}分</span>
           {% else %}
-          <span class="badge badge-secondary">晚点{{stop.departureDelay}}分</span>
+          <span class="badge badge-secondary">晚点{{stop.departureDelay|abs}}分</span>
           {% endif %}
         {% endif  %}
       </td>

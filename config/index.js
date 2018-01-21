@@ -55,7 +55,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: '',
-    assetsPublicPath: '//static.tra.ink/web/',
+    assetsPublicPath: '/static/',
 
     /**
      * Source Maps

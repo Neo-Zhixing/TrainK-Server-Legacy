@@ -1,26 +1,25 @@
 <template>
   <b-card header="正晚点" :title="title" :sub-title="subtitle" >
     <delay-chart :data="delays"></delay-chart>
-    <b-button variant="primary" :href="records">查看历史记录</b-button>
+    <slot name="footer" />
   </b-card>
 </template>
 <script>
 import axios from 'axios'
 import { Line } from 'vue-chartjs'
 export default {
-  props: ['records'],
+  props: ['telecode'],
   data () {
     return {
-      delays: {}
+      delays: null
     }
   },
   computed: {
     avgDelay () {
+      if (this.delays === null) return 0
       var avgDelay = 0
-      for (let key of Object.values(this.delays)) {
-        avgDelay += this.delays[key]
-      }
-      return avgDelay / this.delays.length
+      for (let value of this.delays.values()) avgDelay += value
+      return avgDelay / this.delays.size
     },
     titleIndex () {
       if (this.avgDelay > 90) return 0
@@ -29,6 +28,7 @@ export default {
       else return 3
     },
     title () {
+      console.log(this.avgDelay)
       return ['不在一个时区', '生活习惯问题', '一般不会迟到', '小嘛小火车'][this.titleIndex]
     },
     subtitle () {
@@ -36,10 +36,10 @@ export default {
     }
   },
   mounted () {
-    axios.get(this.records)
+    axios.get(`/info/train/${this.telecode}/record/`)
     .then((response) => {
-      var delays = {}
-      for (let result of response.data.results) delays[result.departureDate] = result.delayAvg
+      var delays = new Map()
+      for (let result of response.data.results) delays.set(result.departureDate, result.delay)
       this.delays = delays
     })
     .catch(function (error) {
@@ -52,11 +52,13 @@ export default {
       props: ['data'],
       watch: {
         data () {
+          if (this.data === null) return
           var dates = []
           var delays = []
-          for (let key in this.data) {
+          console.log(this.data)
+          for (let [key, value] of this.data) {
             dates.push(key)
-            delays.push(this.data[key])
+            delays.push(value)
           }
           this.renderChart({
             labels: dates,

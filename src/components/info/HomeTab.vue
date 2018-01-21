@@ -44,7 +44,7 @@
       submit (event) {
         let rootPath = '/info/'
         if (this.selectedTab === 1) {
-          window.location = `${rootPath}train?departure_telecode=${this.stations.departureStation}&arrival_telecode=${this.stations.arrivalStation}`
+          window.location = `${rootPath}train?from=${this.stations.departureStation}&to=${this.stations.arrivalStation}`
           return
         }
         let url = this.selectedTab === 2 ? 'train/' : (this.selectedTab === 3 ? 'station/' : 'xxx')
