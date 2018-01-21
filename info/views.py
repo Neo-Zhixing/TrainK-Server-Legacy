@@ -99,10 +99,12 @@ class TrainDetailTemplateView(DetailView):
 class TrainViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 	queryset = models.Train.objects.all()
 	station_queryset = models.Station.objects.all()
-	serializer_class = serializers.TrainSerializer
 	template_views = {
 		'retrieve': TrainDetailTemplateView.as_view()
 	}
+
+	def get_serializer_class(self):
+		return serializers.TrainListSerializer if self.action == 'list' else serializers.TrainDetailSerializer
 
 	def get_object(self):
 		return _getTrain(self.kwargs[self.lookup_field], self.queryset)
@@ -162,7 +164,7 @@ class RecordListTemplateView(ListView):
 					timeKey = key + 'Time'
 					if timeKey in plannedStop and timeKey in stop:
 						delay = parse_duration(stop[timeKey]) - parse_duration(plannedStop[timeKey])
-						stop[key + 'Delay'] = delay.seconds / 60 + delay.days * 1440
+						stop[key + 'Delay'] = round(delay.total_seconds() / 60)
 						stop[timeKey] = parse_duration(stop[timeKey])
 				table[stationID].append(stop)
 		context['train'] = train

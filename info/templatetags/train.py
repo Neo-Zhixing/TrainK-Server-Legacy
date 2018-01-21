@@ -1,4 +1,3 @@
-from datetime import timedelta
 from .. import models
 from django.utils.dateparse import parse_duration
 from django.utils.duration import _get_duration_components as durationComponents
@@ -31,3 +30,8 @@ def timedeltaStr(value):
 @register.filter
 def station(value):
 	return models.Station.objects.get(pk=value) if isinstance(value, int) else None
+
+
+@register.filter(name='abs')
+def num_abs(value):
+	return abs(value)

@@ -8,19 +8,43 @@ class StationSerializer(serializers.ModelSerializer):
 		fields = ('name', 'telecode', 'id', 'abbreviation', 'spell')
 
 
-class TrainSerializer(serializers.ModelSerializer):
+def _unnest_stop(stop):
+	if isinstance(stop['station'], int):
+		station = models.Station.objects.get(id=stop['station'])
+		stop['station'] = StationSerializer(station).data
+	return stop
+
+
+def _get_stop(train, index):
+	if not train.stops:
+		return None
+	return _unnest_stop(train.stops[index])
+
+
+class TrainListSerializer(serializers.ModelSerializer):
+	origin = serializers.SerializerMethodField()
+	destination = serializers.SerializerMethodField()
+
+	def get_origin(self, train):
+		return _get_stop(train, 0)
+
+	def get_destination(self, train):
+		return _get_stop(train, -1)
 
 	class Meta:
 		model = models.Train
-		fields = ('names', 'telecode', 'stops')
+		fields = ('names', 'telecode', 'since', 'origin', 'destination')
 
-	def to_representation(self, obj):
-		data = super(TrainSerializer, self).to_representation(obj)
-		for stop in data['stops']:
-			station = models.Station.objects.get(id=stop['station'])
-			stop['station'] = StationSerializer(station).data
 
-		return data
+class TrainDetailSerializer(serializers.ModelSerializer):
+	stops = serializers.SerializerMethodField()
+
+	def get_stops(self, train):
+		return [_unnest_stop(stop) for stop in train.stops] if train.stops else None
+
+	class Meta:
+		model = models.Train
+		fields = ('names', 'telecode', 'since', 'stops')
 
 
 class RecordListSerializer(serializers.ModelSerializer):
@@ -29,14 +53,15 @@ class RecordListSerializer(serializers.ModelSerializer):
 		fields = ('id', 'departureDate', 'train', 'delay')
 
 
-class RecordSerializer(serializers.ModelSerializer):
-	train = TrainSerializer()
+class RecordSerializer(RecordListSerializer):
+	train = TrainListSerializer()
 
 	class Meta(RecordListSerializer.Meta):
 		pass
 
 
-class RecordDetailSerializer(RecordSerializer):
+class RecordDetailSerializer(RecordListSerializer):
+	train = TrainDetailSerializer()
 
-	class Meta(RecordSerializer.Meta):
+	class Meta(RecordListSerializer.Meta):
 		fields = ('id', 'departureDate', 'train', 'delay', 'stops')

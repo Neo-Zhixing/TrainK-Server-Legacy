@@ -45,7 +45,8 @@ export default {
       return 'light'
     },
     buttonDisabled (index) {
-      return this.value.departureIndex !== null && this.value.arrivalIndex === null && index <= this.value.departureIndex
+      if (this.value.departureIndex !== null && this.value.arrivalIndex === null) return index <= this.value.departureIndex
+      return index === this.stops.length - 1
     }
   }
 }

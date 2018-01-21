@@ -1,4 +1,3 @@
-from django.views.generic import TemplateView
 from django.urls import path, re_path
 from rest_framework import routers
 from allauth.account import views as allauth_views
