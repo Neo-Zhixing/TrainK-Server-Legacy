@@ -1,1 +1,0 @@
-This directory is the static root of the django project. DONT PUT ANYTHING HERE as the collectstatic command may delete anything here.

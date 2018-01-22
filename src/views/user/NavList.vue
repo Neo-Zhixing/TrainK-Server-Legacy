@@ -33,7 +33,6 @@ export default {
     .then((response) => {
       this.count = response.data.count
       this.nextTrip = response.data.results[0]
-      console.log(this.nextTrip.record)
     })
   }
 }

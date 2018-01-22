@@ -3,6 +3,7 @@
 *.pyc
 *.sublime-project
 *.sublime-workspace
+/static/
 
 node_modules/
 /dist/
