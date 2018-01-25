@@ -57,6 +57,8 @@ class Record(models.Model):
 				count += 1
 				delay = abs(parse_duration(stop[key]) - parse_duration(plannedStop[key]))
 				grossDelay += delay
+		if count == 0:
+			return 0
 		return grossDelay / count / 60
 
 	def get_absolute_url(self):

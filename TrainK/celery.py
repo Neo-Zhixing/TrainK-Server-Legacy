@@ -5,12 +5,7 @@ from celery import Celery
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'TrainK.settings')
 
-redisURL = 'redis://:Braungardt4365@192.168.1.10:6379/'
-app = Celery(
-	'TrainK',
-	broker=redisURL + '1',
-	backend=redisURL + '2'
-)
+app = Celery('TrainK')
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

@@ -106,7 +106,7 @@ DATABASES = {
         'NAME': 'TrainK',
         'USER': 'TrainK',
         'PASSWORD': 'Braungardt4365',
-        'HOST': '192.168.1.10',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
@@ -161,6 +161,11 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'dist'),
 )
 
+CELERY_WORKER_REDIRECT_STDOUTS = False
+CELERY_ENABLE_UTC = False
+CELERY_BROKER_URL = 'redis://:Braungardt4365@localhost:6379/1'
+CELERY_RESULT_BACKEND = 'redis://:Braungardt4365@localhost:6379/2'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 BATON = {
     'SITE_HEADER': 'TrainK Admin',
@@ -228,6 +233,3 @@ WEBPACK_LOADER = {
         'STATS_FILE': os.path.join(BASE_DIR, 'build/webpack-stats.dev.json'),
     }
 }
-
-CELERY_worker_hijack_root_logger = False
-CELERY_ENABLE_UTC = False

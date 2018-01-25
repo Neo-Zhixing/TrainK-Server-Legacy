@@ -16,7 +16,7 @@ import 'vue-multiselect/dist/vue-multiselect.min.css'
 import 'flatpickr/dist/themes/airbnb.css'
 
 import NavBar from '@/views/NavBar'
-import '@/common.css'
+import './common.css'
 
 /* eslint-disable no-new */
 new Vue({

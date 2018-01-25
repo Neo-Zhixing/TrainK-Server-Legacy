@@ -1,4 +1,4 @@
-{% extends "info_base.html" %}
+{% extends "./info_base.html" %}
 {% load static %}
 {% load render_bundle from webpack_loader %}
 {% load train %}
@@ -31,19 +31,27 @@
   <div class="container py-5">
     <div class="row">
       <div class="col-md-7">
-        {% for stop in train.stops %}
-        <div class="row py-1 jumbotron">
-          <div class="col-2 py-1">
-            <h6>{{ stop.arrivalTime|timedelta|timedeltaStr }}</h6>
-            <h6>{{ stop.departureTime|timedelta|timedeltaStr }}</h6>
-          </div>
-          <div class="col-5 py-1">
+        <div class="position-relative">
+          <div class="border border-dark position-absolute h-100" style="width: 0.4rem; left: 5rem; z-index: 2; background-image: repeating-linear-gradient(to bottom, black, black 1.3rem, white 1.3rem, white 2.6rem);"></div>
+          <div class="list-group">
+            {% for stop in train.stops %}
             {% with station=stop.station|station %}
-            <h1>{{ station.name }}</h1>
+              <a href="{% url 'station-detail' station.id %}" class="list-group-item list-group-item-action d-flex flex-row align-items-center">
+                <div class="mr-2 d-flex flex-column" style="width: 2.5rem;">
+                  <h6 class="my-1">{{ stop.arrivalTime|timedelta|timedeltaStr }}</h6>
+                  <h6 class="my-1">{{ stop.departureTime|timedelta|timedeltaStr }}</h6>
+                </div>
+                <span {% if False %}class="rounded border border-dark bg-white"{% endif %} style="width: 1.5rem; height: 1.5rem; z-index: 3;">
+                  {% if False %}
+                  <font-awesome-icon icon="university" class="w-100 h-100"></font-awesome-icon>
+                  {% endif %}
+                </span>
+                <h1 class="my-0 mx-4">{{ station.name }}</h1>
+              </a>
             {% endwith %}
+            {% endfor %}
           </div>
         </div>
-        {% endfor %}
       </div>
       <div class="col-md-5">
         {% if train.telecode %}

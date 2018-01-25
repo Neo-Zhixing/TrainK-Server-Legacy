@@ -23,6 +23,8 @@ def timedeltaComp(value, key):
 
 @register.filter
 def timedeltaStr(value):
+	if not value:
+		return ''
 	days, hours, minutes, seconds, miliseconds = durationComponents(value)
 	return '{:02d}:{:02d}'.format(hours, minutes)
 

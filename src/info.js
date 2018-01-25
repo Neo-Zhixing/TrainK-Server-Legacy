@@ -7,8 +7,8 @@ Vue.config.productionTip = false
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 import fontawesome from '@fortawesome/fontawesome'
-import { faLongArrowAltRight } from '@fortawesome/fontawesome-free-solid'
-fontawesome.library.add(faLongArrowAltRight)
+import { faLongArrowAltRight, faUniversity } from '@fortawesome/fontawesome-free-solid'
+fontawesome.library.add(faLongArrowAltRight, faUniversity)
 
 import BootstrapVue from 'bootstrap-vue'
 Vue.use(BootstrapVue)

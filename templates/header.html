@@ -1,25 +1,25 @@
 {% load user %}
-<nav id="navbar">
-<nav-bar
-{% if user.is_authenticated %}
-authenticated
-email="{{user.email}}"
-hash="{{user.email|hash}}"
-username="{{user.username}}"
-firstname="{{user.first_name}}"
-lastname="{{user.last_name}}"
-:id="{{user.pk}}"
-{% endif %}
->
-</nav-bar>
+<nav id="navbar" class="sticky-top">
+  <nav-bar
+    {% if user.is_authenticated %}
+      authenticated
+      email="{{user.email}}"
+      hash="{{user.email|hash}}"
+      username="{{user.username}}"
+      firstname="{{user.first_name}}"
+      lastname="{{user.last_name}}"
+      :id="{{user.pk}}"
+    {% endif %}
+  >
+  </nav-bar>
 
-{% if messages %}
-<div>
-    {% for message in messages %}
-    <b-alert show dismissible variant="{{ message.tags }}">
-    	{{ message }}
-    </b-alert>
-    {% endfor %}
-</div>
-{% endif %}
+  {% if messages %}
+    <div>
+      {% for message in messages %}
+        <b-alert show dismissible class="my-0" variant="{{ message.tags }}">
+        	{{ message }}
+        </b-alert>
+      {% endfor %}
+    </div>
+  {% endif %}
 </nav>
