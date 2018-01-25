@@ -50,7 +50,7 @@
 
 <script>
   import TrainTypeMap from '@/utils/TrainTypeMap'
-  import axios from 'axios'
+  import axios from '@/utils/axios'
   import fontawesome from '@fortawesome/fontawesome'
   import { faIdCard, faTag } from '@fortawesome/fontawesome-free-solid'
   import { EventBus } from '@/bus.js'
@@ -100,17 +100,17 @@
         if (this.collapsed) {
           EventBus.$emit('ticket-expand', this)
           if (this.price === null) {
-            axios.get('//api.tra.ink/ticket/price', {
+            axios.get('https://cr.api.tra.ink/otn/leftTicket/queryTicketPrice', {
               params: {
-                'telecode': this.ticket.trainTelecode,
-                'from': this.ticket.departureIndex,
-                'to': this.ticket.arrivalIndex,
+                'train_no': this.ticket.trainTelecode,
+                'from_station_no': this.ticket.departureIndex < 10 ? '0' + this.ticket.departureIndex : this.ticket.departureIndex,
+                'to_station_no': this.ticket.arrivalIndex < 10 ? '0' + this.ticket.arrivalIndex : this.ticket.arrivalIndex,
                 'seat_types': this.ticket.seat_types,
-                'date': this.querydate
+                'train_date': this.querydate
               }
             })
             .then((response) => {
-              if (response.data !== {}) this.price = response.data
+              this.price = response.data.data
             })
             .catch(function (error) {
               console.log(error)

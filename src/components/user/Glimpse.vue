@@ -43,7 +43,7 @@ export default {
   },
   computed: {
     avatar () {
-      return `https://www.gravatar.com/avatar/${this.hash}`
+      return `//gravatar.tra.ink/avatar/${this.hash}`
     }
   },
   methods: {

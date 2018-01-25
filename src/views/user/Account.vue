@@ -124,7 +124,7 @@ export default {
     axios.get('/user/')
     .then((response) => {
       for (let key of ['username', 'first_name', 'last_name']) this.form[key] = response.data[key]
-      return axios.get(`https://en.gravatar.com/${response.data.hash}.json`, {adapter: axiosJsonp})
+      return axios.get(`//en.gravatar.com/${response.data.hash}.json`, {adapter: axiosJsonp})
     })
     .then((response) => {
       console.log(response.data.entry[0])
