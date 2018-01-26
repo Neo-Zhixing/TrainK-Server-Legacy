@@ -34,7 +34,7 @@
       </b-form-group>
 
     </b-form>
-    <b-form-group horizontal label="个人资料" label-size="lg">
+    <b-form-group horizontal label="个人资料" label-size="lg" v-if="profile">
       <b-form-group label="地址:" label-for="address">
         <b-form-input readonly class="bg-white" :value="profile.currentLocation" />
       </b-form-group>
@@ -115,7 +115,7 @@ export default {
     return {
       loading: false,
       emails: [],
-      profile: {},
+      profile: null,
       newEmail: '',
       form: {}
     }

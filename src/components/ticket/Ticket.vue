@@ -84,7 +84,7 @@
           if (value === undefined) continue
           var info = {}
           info.key = TrainTypeMap.seatTypeMap[index]
-          info.price = this.price === null ? null : this.price[index]
+          info.price = this.price ? this.price[index] : null
 
           info.value = value ? (value === true ? '有' : value) : '无'
           info.badge = value ? (value === true ? 'success' : 'primary') : 'danger'

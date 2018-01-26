@@ -32,11 +32,14 @@ export default {
     this.reloadCaptcha()
   },
   computed: {
-    value () {
+    stringValue () {
       if (this.cursors.length === 0) return null
-      let str = ''
-      for (let cursor of this.cursors) str += `${Math.round(cursor.x * 293)},${Math.round(cursor.y * 190)},`
-      return str.slice(0, -1)
+      let points = []
+      for (let cursor of this.cursors) {
+        points.push(Math.round(cursor.x * 293))
+        points.push(Math.round(cursor.y * 190 - 30))
+      }
+      return points.join()
     }
   },
   methods: {
@@ -50,16 +53,19 @@ export default {
         y: offsetY / this.$refs.captchawrapper.clientHeight,
         id: this.cursorID
       })
+      this.$emit('input', this.stringValue)
     },
     removeCursor (event) {
       let target = event.target
       if (target.tagName !== 'svg') target = target.parentElement
       console.log(target.id)
       this.cursors.splice(target.id.slice(-1), 1)
+      this.$emit('input', this.stringValue)
     },
     reloadCaptcha () {
       this.captchaImageURL = `//kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand&${Math.random()}`
       this.cursors = []
+      this.$emit('input', null)
     }
   }
 }
