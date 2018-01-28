@@ -1,5 +1,5 @@
 <template>
-<div style="position: relative;" ref="captchawrapper">
+<div class="position-relative" ref="captchawrapper">
   <b-img fluid-grow style="user-drag: none; user-select: none;" :src="captchaImageURL" ref="captcha" @click="addCursor" @click.right.prevent />
   <b-button class="captcha-component" size="sm" variant="outline-secondary" style="right: 0; top: 0;" @click="reloadCaptcha">
     <font-awesome-icon icon="sync-alt" />
@@ -37,7 +37,7 @@ export default {
       let points = []
       for (let cursor of this.cursors) {
         points.push(Math.round(cursor.x * 293))
-        points.push(Math.round(cursor.y * 190 - 30))
+        points.push(Math.round(cursor.y * 190 - 35))
       }
       return points.join()
     }
@@ -63,7 +63,7 @@ export default {
       this.$emit('input', this.stringValue)
     },
     reloadCaptcha () {
-      this.captchaImageURL = `//kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand&${Math.random()}`
+      this.captchaImageURL = `/cr/user/session/?${Math.random()}`
       this.cursors = []
       this.$emit('input', null)
     }

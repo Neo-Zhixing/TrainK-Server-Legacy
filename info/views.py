@@ -9,7 +9,7 @@ from django.views.generic import ListView, DetailView
 from django.utils.dateparse import parse_duration
 
 
-def _getStation(key, queryset):
+def GetStation(key, queryset=models.Station.objects):
 	if key.isnumeric():
 		return get_object_or_404(queryset, id=key)
 
@@ -19,7 +19,7 @@ def _getStation(key, queryset):
 	return get_object_or_404(queryset, name=key)
 
 
-def _getTrain(key, queryset):
+def GetTrain(key, queryset=models.Train.objects):
 	if queryset.filter(telecode=key).exists():
 		return queryset.get(telecode=key)
 	train = queryset.filter(names__contains=[key])
@@ -45,7 +45,7 @@ class StationDetailTemplateView(DetailView):
 	def get_object(self, queryset=None):
 		if queryset is None:
 			queryset = self.get_queryset()
-		return _getStation(self.kwargs[self.pk_url_kwarg], queryset)
+		return GetStation(self.kwargs[self.pk_url_kwarg], queryset)
 
 	def get(self, request, *args, **kwargs):
 		pk = self.kwargs[self.pk_url_kwarg]
@@ -73,7 +73,7 @@ class StationViewSet(OptionalPaginationMixin, VersatileViewMixin, viewsets.ReadO
 		return queryset.exclude(telecode='')
 
 	def get_object(self):
-		return _getStation(self.kwargs[self.lookup_field], self.queryset)
+		return GetStation(self.kwargs[self.lookup_field], self.queryset)
 
 
 class TrainDetailTemplateView(DetailView):
@@ -83,7 +83,7 @@ class TrainDetailTemplateView(DetailView):
 	def get_object(self, queryset=None):
 		if queryset is None:
 			queryset = self.get_queryset()
-		return _getTrain(self.kwargs[self.pk_url_kwarg], queryset)
+		return GetTrain(self.kwargs[self.pk_url_kwarg], queryset)
 
 	def get(self, request, *args, **kwargs):
 		# Redirect queries using train names
@@ -98,7 +98,6 @@ class TrainDetailTemplateView(DetailView):
 
 class TrainViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 	queryset = models.Train.objects.all()
-	station_queryset = models.Station.objects.all()
 	template_views = {
 		'retrieve': TrainDetailTemplateView.as_view()
 	}
@@ -107,17 +106,17 @@ class TrainViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 		return serializers.TrainListSerializer if self.action == 'list' else serializers.TrainDetailSerializer
 
 	def get_object(self):
-		return _getTrain(self.kwargs[self.lookup_field], self.queryset)
+		return GetTrain(self.kwargs[self.lookup_field], self.queryset)
 
 	def get_queryset(self):
 		queryset = super(TrainViewSet, self).get_queryset()
 		if 'station' in self.request.query_params:
-			station = _getStation(self.request.query_params['station'], self.station_queryset)
+			station = GetStation(self.request.query_params['station'])
 			return queryset.filter(stops__contains=[{'station': station.pk}])
 
 		if 'from' in self.request.query_params and 'to' in self.request.query_params:
-			fromStation = _getStation(self.request.query_params['from'], self.station_queryset)
-			toStation = _getStation(self.request.query_params['to'], self.station_queryset)
+			fromStation = GetStation(self.request.query_params['from'])
+			toStation = GetStation(self.request.query_params['to'])
 			trains = queryset.filter(stops__contains=[{'station': fromStation.pk}, {'station': toStation.pk}])
 			results = trains
 			for train in trains:
@@ -142,7 +141,7 @@ class RecordListTemplateView(ListView):
 	@property
 	def train(self):
 		if not hasattr(self, '_train'):
-			self._train = _getTrain(self.kwargs[self.train_url_kwarg], models.Train.objects)
+			self._train = GetTrain(self.kwargs[self.train_url_kwarg])
 		return self._train
 
 	def get_queryset(self):
@@ -188,5 +187,5 @@ class RecordViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 		return serializers.RecordListSerializer if self.action == 'list' else serializers.RecordDetailSerializer
 
 	def get_queryset(self):
-		train = _getTrain(self.kwargs['pk'], models.Train.objects)
+		train = GetTrain(self.kwargs['pk'], models.Train)
 		return super(RecordViewSet, self).get_queryset().filter(train__names=train.names).order_by('-departureDate')
