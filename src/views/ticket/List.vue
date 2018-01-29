@@ -244,81 +244,17 @@ export default {
       this.currentTickets = tickets
     },
     ticketList () {
-      axios.get('https://cr.api.tra.ink/otn/leftTicket/queryZ', {
+      axios.get('/cr/ticket/', {
         params: {
-          'leftTicketDTO.train_date': this.$route.query.date,
-          'leftTicketDTO.from_station': this.$route.query.from,
-          'leftTicketDTO.to_station': this.$route.query.to,
-          'purpose_codes': 'ADULT'
+          'date': this.$route.query.date,
+          'from': this.$route.query.from,
+          'to': this.$route.query.to
         }
       })
       .then((response) => {
-        let data = response.data.data
-        this.stationMap = data.map
-
-        let tickets = []
-        let ticketType = function (value) {
-          if (value === '有') return true
-          if (value === '无') return false
-          if (value === '') return undefined
-          return Number(value)
-        }
-        let keyMap = [
-          { name: 'secret', type: String },
-          { name: 'buttonText', type: String },
-          { name: 'trainTelecode', type: String },
-          { name: 'trainName', type: String },
-          { name: 'originStation', type: String },
-          { name: 'destinationStation', type: String },
-          { name: 'departureStation', type: String },
-          { name: 'arrivalStation', type: String },
-          { name: 'departureTime', type: String },
-          { name: 'arrivalTime', type: String },
-          { name: 'duration', type: String },
-          { name: 'purchasability', type: String },
-          { name: 'yp_info', type: String },
-          { name: 'departureDate', type: String },
-          { name: 'train_seat_feature', type: String },
-          { name: 'locationCode', type: String },
-          { name: 'departureIndex', type: Number },
-          { name: 'arrivalIndex', type: Number },
-          { name: 'IDCardSupported', type: Boolean },
-          { name: 'status', type: Number },
-          { name: 'gg_num', type: ticketType, subpath: 'seats' },
-          { name: 'A6', type: ticketType, subpath: 'seats' },
-          { name: 'MIN', type: ticketType, subpath: 'seats' },
-          { name: 'A4', type: ticketType, subpath: 'seats' },
-          { name: 'A2', type: ticketType, subpath: 'seats' },
-          { name: 'P', type: ticketType, subpath: 'seats' },
-          { name: 'WZ', type: ticketType, subpath: 'seats' },
-          { name: 'yb_num', type: ticketType, subpath: 'seats' },
-          { name: 'A3', type: ticketType, subpath: 'seats' },
-          { name: 'A1', type: ticketType, subpath: 'seats' },
-          { name: 'O', type: ticketType, subpath: 'seats' },
-          { name: 'M', type: ticketType, subpath: 'seats' },
-          { name: 'A9', type: ticketType, subpath: 'seats' },
-          { name: 'F', type: ticketType, subpath: 'seats' },
-          { name: 'yp_ex', type: String },
-          { name: 'seat_types', type: String },
-          { name: 'reward', type: Boolean }
-        ]
-
-        for (let ticketStr of data.result) {
-          let ticketParams = ticketStr.split('|')
-          let ticket = {}
-          for (let paramIndex in ticketParams) {
-            let keyObj = keyMap[paramIndex]
-            let value = keyObj.type(ticketParams[paramIndex])
-            if (keyObj.subpath === undefined) ticket[keyObj.name] = value
-            else {
-              if (ticket[keyObj.subpath] === undefined) ticket[keyObj.subpath] = {}
-              ticket[keyObj.subpath][keyObj.name] = value
-            }
-          }
-          tickets.push(ticket)
-        }
-        console.log(tickets)
-        this.tickets = tickets
+        let data = response.data
+        this.stationMap = data.nameMap
+        this.tickets = data.results
         this.filters.options = [{
           label: '有票 - 任意',
           key: 'seatType',

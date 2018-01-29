@@ -1,7 +1,7 @@
 <template>
 <div class="position-relative" ref="captchawrapper">
   <b-img fluid-grow style="user-drag: none; user-select: none;" :src="captchaImageURL" ref="captcha" @click="addCursor" @click.right.prevent />
-  <b-button class="captcha-component" size="sm" variant="outline-secondary" style="right: 0; top: 0;" @click="reloadCaptcha">
+  <b-button class="captcha-component" size="sm" variant="outline-secondary" style="right: 0px; top: 0px;" @click="reloadCaptcha">
     <font-awesome-icon icon="sync-alt" />
     刷新
   </b-button>
@@ -63,7 +63,7 @@ export default {
       this.$emit('input', this.stringValue)
     },
     reloadCaptcha () {
-      this.captchaImageURL = `/cr/user/session/?${Math.random()}`
+      this.captchaImageURL = `/cr/user/session/captcha?${Math.random()}`
       this.cursors = []
       this.$emit('input', null)
     }
