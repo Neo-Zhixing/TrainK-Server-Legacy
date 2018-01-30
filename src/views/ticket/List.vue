@@ -46,16 +46,16 @@
           class="mt-5"
         />
         <div v-else-if="currentTickets === null ? false : currentTickets.length === 0">没有找到</div>
-        <template v-else>
+        <template  v-else>
           <b-list-group>
-            <b-list-group-item v-for="ticket in currentTickets" :key="ticket.trainTelecode">
-              <ticket
+            <b-list-group-item button :active="currentTicket === ticket" v-for="ticket in currentTickets" :key="ticket.trainTelecode" @click="currentTicket=ticket; $refs.orderModal.show()">
+              <ticket show-seats
                 :ticket = "ticket"
                 :stationmap = "stationMap"
               />
             </b-list-group-item>
           </b-list-group>
-
+          <order-view ref="orderModal" :ticket="currentTicket" :station-map="stationMap" />
         </template>
       </b-col>
       <b-col lg="4" class="order-0 order-lg-1 d-flex flex-column flex-md-row flex-lg-column">
@@ -75,6 +75,7 @@ import TrainTypeMap from '@/utils/TrainTypeMap'
 import axios from 'axios'
 import Ticket from '@/components/ticket/Ticket'
 import RouteInput from '@/components/ticket/RouteInputPanel'
+import OrderView from './Order'
 import Spinner from 'vue-simple-spinner'
 import Multiselect from 'vue-multiselect'
 
@@ -98,6 +99,7 @@ export default {
         order: 2,
         reversed: false
       },
+      currentTicket: null,
       currentTickets: null,
       tickets: null,
       stationMap: null
@@ -243,8 +245,6 @@ export default {
         if (aTime.slice(0, 2) === bTime.slice(0, 2)) result = Number(aTime.slice(3, 5)) > Number(bTime.slice(3, 5))
         else result = Number(aTime.slice(0, 2)) > Number(bTime.slice(0, 2))
         if (this.filters.reversed) result = !result
-
-        console.log(result)
         return result
       })
       this.currentTickets = tickets
@@ -292,6 +292,7 @@ export default {
   },
   components: {
     Ticket,
+    OrderView,
     RouteInput,
     Spinner,
     Multiselect

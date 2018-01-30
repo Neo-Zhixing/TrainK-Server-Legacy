@@ -1,4 +1,5 @@
 import requests
+from datetime import date
 
 
 def ticketType(value):
@@ -23,10 +24,10 @@ keyMap = [
 	('departureTime', str),
 	('arrivalTime', str),
 	('duration', str),
-	('purchasability', str),
+	('purchasability', lambda x: {'Y': True, 'N': False, 'IS_TIME_NOT_BUY': None}.get(x, None)),
 	('yp_info', str),
-	('departureDate', str),
-	('train_seat_feature', int),
+	('departureDate', lambda x: '%s-%s-%s' % (x[0:4], x[4:6], x[6:8])),
+	('train_seat_feature', str),
 	('locationCode', str),
 
 	('departureIndex', int),
@@ -67,9 +68,11 @@ def _parse(values, currentKeyMap=keyMap):
 	return parsedValue
 
 
-def ParseTicketStr(ticket_str):
+def ParseTicketStr(ticket_str, date):
 	values = ticket_str.split('|')
-	return _parse(values)
+	result = _parse(values)
+	result['date'] = date
+	return result
 
 
 class DataManager:
@@ -99,6 +102,10 @@ class DataManager:
 			session.head('https://kyfw.12306.cn/otn/login/init')
 
 		self.session = session
+
+	def get_session(self, referer):
+		self.session.headers['Referer'] = referer
+		return self.session
 
 	def save(self):
 		self.request.session[self.cookie_name] = requests.utils.dict_from_cookiejar(self.session.cookies)
@@ -157,18 +164,19 @@ class DataManager:
 		if int(response['result_code']) != 0:
 			return response
 
-		appID = response['newapptk']
-		self.request.session['CRAppID'] = appID
+		self.session.cookies['tk'] = response['newapptk']
 
-		response = requests.post(self.login_complete_url, data={'tk': appID}).json()
+		response = requests.post(self.login_complete_url, data={'tk': response['newapptk']}).json()
 		self.save()
 
 		return response
 
 	def check_session_status(self):
-		response = self.session.get(self.session_status_url, params={"appid": "otn"})
+		response = self.session.get(self.session_status_url, params={"appid": "otn"}).json()
+		if 'newapptk' in response:
+			self.session.cookies['tk'] = response['newapptk']
 		self.save()
-		return response.json()
+		return response
 
 	ticket_query_url = 'https://kyfw.12306.cn/otn/leftTicket/queryZ'
 
@@ -179,9 +187,41 @@ class DataManager:
 			'leftTicketDTO.to_station': to_station.telecode,
 			'purpose_codes': 'ADULT'
 		})
+		self.save()
 		if response.status_code == requests.codes.moved or response.status_code == requests.codes.found:
-			return
+			return {
+				'code': 1,
+				'detail': 'upstream server refused the connection.'
+			}
 		response = response.json()['data']
 
-		results = [ParseTicketStr(ticketStr) for ticketStr in response['result']]
-		return results, response['map']
+		results = [ParseTicketStr(ticketStr, date) for ticketStr in response['result']]
+		return {
+			'code': 0,
+			'detail': 'Success',
+			'results': results,
+			'nameMap': response['map']
+		}
+
+	user_check_url = 'https://kyfw.12306.cn/otn/login/checkUser'
+	order_url = 'https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest'
+
+	def placeOrder(self, ticket, queryset):
+		response = self.session.post(self.user_check_url).json()
+		print(self.session.cookies)
+		if not response['data']['flag']:
+			return {
+				'code': 1,
+				'detail': 'CR Login Required'
+			}
+		response = self.session.post(self.order_url, data={
+			'secretStr': ticket['secret'],
+			'train_date': ticket['date'],
+			'back_train_date': date.today().isoformat(),
+			'tour_flag': 'dc',  # dc 单程
+			'purpose_codes': 'ADULT',  # adult 成人票
+			'query_from_station_name': queryset.get(telecode=ticket['departureStation']).name,
+			'query_to_station_name': queryset.get(telecode=ticket['arrivalStation']).name
+		})
+		print(response.text)
+		return response.text

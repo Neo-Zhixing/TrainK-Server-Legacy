@@ -4,6 +4,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from info.views import GetStation
+from info.models import Station
 from .managers import DataManager
 from .serializers import ProfileSerializer
 
@@ -80,9 +81,15 @@ class TicketView(APIView, DataManagerMixin):
 			ParseError('Request Params Incomplete')
 		from_station = GetStation(request.GET['from'])
 		to_station = GetStation(request.GET['to'])
-		result, nameMap = self.manager.tickets(
+		result = self.manager.tickets(
 			from_station=from_station,
 			to_station=to_station,
 			date=request.GET['date']
 		)
-		return Response({'results': result, 'nameMap': nameMap})
+		status_codes = [status.HTTP_200_OK, status.HTTP_502_BAD_GATEWAY]
+
+		return Response(result, status=status_codes[result['code']])
+
+	def post(self, request):
+		response = self.manager.placeOrder(request.data, Station.objects)
+		return Response(response)

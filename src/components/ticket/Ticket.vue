@@ -24,7 +24,7 @@
       {{ stationmap[ticket.arrivalStation] }}
       <h2>{{ ticket.status === 0 ? ticket.arrivalTime : '----' }}</h2>
     </div>
-    <div>
+    <div v-if="showSeats">
       <ul class="list-unstyled">
         <li v-for="info in ticketInfo">
           {{info.key}}<b-badge :variant="info.badge">{{info.value}}</b-badge>
@@ -41,7 +41,11 @@ import { faIdCard, faTag, faBed } from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(faIdCard, faTag, faBed)
 export default {
   name: 'ticket',
-  props: ['ticket', 'stationmap'],
+  props: {
+    ticket: Object,
+    stationmap: Object,
+    showSeats: Boolean
+  },
   computed: {
     arrivalDay () {
       var hour = Number(this.ticket.departureTime.substring(0, 2)) + Number(this.ticket.duration.substring(0, 2))
