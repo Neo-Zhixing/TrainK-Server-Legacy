@@ -3,7 +3,7 @@
   <b-container>
     <b-row>
       <b-col md="6">
-        <route-input-panel @submit="submit"/>
+        <route-input @submit="submit"/>
       </b-col>
     </b-row>
   </b-container>
@@ -11,7 +11,7 @@
 </template>
 
 <script>
-  import RouteInputPanel from '@/components/ticket/RouteInputPanel'
+  import RouteInput from '@/components/ticket/RouteInputPanel'
   export default {
     name: 'ticket',
     props: [],
@@ -27,7 +27,7 @@
         })
       }
     },
-    components: { RouteInputPanel }
+    components: { RouteInput }
   }
 </script>
 

@@ -1,170 +1,89 @@
 <template>
-  <b-row class="ticket">
-    <b-col>
-      <b-row :class="{ 'ticket-gist-triggered': !collapsed, 'ticket-available': ticket.status === 0 }" class="ticket-gist text-center" @click="expand">
-        <b-col>
-          <h1>{{ ticket.trainName }}</h1>
-        </b-col>
-        <b-col>
-          <b-badge v-if="ticket.departureStation === ticket.originStation" variant="primary">始</b-badge>
-          <b-badge v-else>过</b-badge>
-          {{ stationmap[ticket.departureStation] }}
-          <h2>{{ ticket.status === 0 ? ticket.departureTime : '----' }}</h2>
-        </b-col>
-        <b-col>
-          <template v-if="ticket.status === 0">
-            {{ticket.duration}}
-            <font-awesome-icon v-if="ticket.IDCardSupported" v-b-tooltip.hover title="支持刷身份证进站" icon="id-card" />
-            <font-awesome-icon v-if="ticket.reward" v-b-tooltip.hover title="可用积分兑换" icon="tag" />
-          </template>
-          <br/>
-          <div class="separate-line"></div>
-          <template v-if="ticket.status === 0">{{arrivalDay}}</template>
-          <template v-else><div class="text-danger">列车停运</div></template>
-        </b-col>
-        <b-col>
-          <b-badge v-if="ticket.arrivalStation === ticket.destinationStation" variant="primary">终</b-badge>
-          <b-badge v-else>过</b-badge>
-          {{ stationmap[ticket.arrivalStation] }}
-          <h2>{{ ticket.status === 0 ? ticket.arrivalTime : '----' }}</h2>
-        </b-col>
-      </b-row>
-      <b-collapse :id="ticket.trainTelecode + '-details'" :visible="!collapsed">
-        <b-row class="py-2">
-          <b-col cols="10" class="text-left">
-            <ul class="ticket-info">
-              <li v-for="info in ticketInfo">
-                {{info.key}}<b-badge :variant="info.badge">{{info.value}}</b-badge>
-                {{info.price}}
-              </li>
-            </ul>
-          </b-col>
-          <b-col cols="2">
-            <b-button variant="primary" size="sm">详情</b-button>
-          </b-col>
-        </b-row>
-      </b-collapse>
-    </b-col>
-  </b-row>
+  <div class="d-flex flex-row text-center justify-content-around align-items-center">
+    <div>
+      <b-badge v-if="ticket.departureStation === ticket.originStation" variant="primary">始</b-badge>
+      <b-badge v-else>过</b-badge>
+      {{ stationmap[ticket.departureStation] }}
+      <h2>{{ ticket.status === 0 ? ticket.departureTime : '----' }}</h2>
+    </div>
+    <div style="width: 10rem;">
+      <template v-if="ticket.status === 0">
+        {{ticket.duration}}
+      </template>
+      <div v-else class="text-danger">列车停运</div>
+      <div class="separate-line"><span class="separate-line-word">{{ ticket.trainName }}</span></div>
+
+      <font-awesome-icon v-if="arrivalDay !== 0" icon="bed" v-b-tooltip.hover :title="['当', '次', '两', '三'][arrivalDay] + '日到达'" />
+      <font-awesome-icon v-if="ticket.IDCardSupported" v-b-tooltip.hover title="支持刷身份证进站" icon="id-card" />
+      <font-awesome-icon v-if="ticket.reward" v-b-tooltip.hover title="可用积分兑换" icon="tag" />
+      <br />
+    </div>
+    <div>
+      <b-badge v-if="ticket.arrivalStation === ticket.destinationStation" variant="primary">终</b-badge>
+      <b-badge v-else>过</b-badge>
+      {{ stationmap[ticket.arrivalStation] }}
+      <h2>{{ ticket.status === 0 ? ticket.arrivalTime : '----' }}</h2>
+    </div>
+    <div>
+      <ul class="list-unstyled">
+        <li v-for="info in ticketInfo">
+          {{info.key}}<b-badge :variant="info.badge">{{info.value}}</b-badge>
+        </li>
+      </ul>
+    </div>
+  </div>
 </template>
 
 <script>
-  import TrainTypeMap from '@/utils/TrainTypeMap'
-  import axios from '@/utils/axios'
-  import fontawesome from '@fortawesome/fontawesome'
-  import { faIdCard, faTag } from '@fortawesome/fontawesome-free-solid'
-  import { EventBus } from '@/bus.js'
-  fontawesome.library.add(faIdCard, faTag)
-  export default {
-    name: 'ticket',
-    props: ['ticket', 'stationmap', 'querydate'],
-    data () {
-      return {
-        collapsed: true,
-        price: null
-      }
-    },
-    computed: {
-      arrivalDay () {
-        var hour = Number(this.ticket.departureTime.substring(0, 2)) + Number(this.ticket.duration.substring(0, 2))
-        var minute = Number(this.ticket.departureTime.substring(3, 5)) + Number(this.ticket.duration.substring(3, 5))
-        if (minute >= 60) hour = hour + 1
+import TrainTypeMap from '@/utils/TrainTypeMap'
+import fontawesome from '@fortawesome/fontawesome'
+import { faIdCard, faTag, faBed } from '@fortawesome/fontawesome-free-solid'
+fontawesome.library.add(faIdCard, faTag, faBed)
+export default {
+  name: 'ticket',
+  props: ['ticket', 'stationmap'],
+  computed: {
+    arrivalDay () {
+      var hour = Number(this.ticket.departureTime.substring(0, 2)) + Number(this.ticket.duration.substring(0, 2))
+      var minute = Number(this.ticket.departureTime.substring(3, 5)) + Number(this.ticket.duration.substring(3, 5))
+      if (minute >= 60) hour += 1
 
-        var matchStr
-        if (hour >= 24 && hour < 48) matchStr = '次'
-        else if (hour >= 48 && hour < 72) matchStr = '两'
-        else if (hour >= 72) matchStr = '三'
-        else matchStr = '当'
-        return matchStr + '日到达'
-      },
-      ticketInfo () {
-        var values = []
-        for (let index in this.ticket.seats) {
-          let value = this.ticket.seats[index]
-          if (value === undefined) continue
-          var info = {}
-          info.key = TrainTypeMap.seatTypeMap[index]
-          info.price = this.price ? this.price[index] : null
+      var matchStr
+      if (hour >= 24 && hour < 48) matchStr = 1
+      else if (hour >= 48 && hour < 72) matchStr = 2
+      else if (hour >= 72) matchStr = 3
+      else matchStr = 0
+      return matchStr
+    },
+    ticketInfo () {
+      var values = []
+      for (let index in this.ticket.seats) {
+        let value = this.ticket.seats[index]
+        if (value === undefined) continue
+        var info = {}
+        info.key = TrainTypeMap.seatTypeMap[index]
 
-          info.value = value ? (value === true ? '有' : value) : '无'
-          info.badge = value ? (value === true ? 'success' : 'primary') : 'danger'
-          values.push(info)
-        }
-        return values
+        info.value = value ? (value === true ? '有' : value) : '无'
+        info.badge = value ? (value === true ? 'success' : 'primary') : 'danger'
+        values.push(info)
       }
-    },
-    methods: {
-      expand () {
-        if (this.ticket.status !== 0) return
-        // Expand/Collapse the ticket details, and if we're expanding, send an event to all of other ticket components.
-        if (this.collapsed) {
-          EventBus.$emit('ticket-expand', this)
-          if (this.price === null) {
-            axios.get('https://cr.api.tra.ink/otn/leftTicket/queryTicketPrice', {
-              params: {
-                'train_no': this.ticket.trainTelecode,
-                'from_station_no': this.ticket.departureIndex < 10 ? '0' + this.ticket.departureIndex : this.ticket.departureIndex,
-                'to_station_no': this.ticket.arrivalIndex < 10 ? '0' + this.ticket.arrivalIndex : this.ticket.arrivalIndex,
-                'seat_types': this.ticket.seat_types,
-                'train_date': this.querydate
-              }
-            })
-            .then((response) => {
-              this.price = response.data.data
-            })
-            .catch(function (error) {
-              console.log(error)
-            })
-          }
-        }
-        this.collapsed = !this.collapsed
-      }
-    },
-    mounted () {
-      // Register EventBus. Listen to the events other ticket components sent.
-      EventBus.$on('ticket-expand', sender => {
-        // Collapse the ticket details unless this is the sender
-        if (this !== sender) this.collapsed = true
-      })
+      return values
     }
   }
+}
 </script>
 
 <style scoped>
 .separate-line {
-  background-color: black;
-  height: 1px;
-  margin: 5px 0;
-  width: 100%;
+  width: 100%; 
+  text-align: center; 
+  border-bottom: 1px solid #000; 
+  line-height: 0.1em;
+  margin: 1rem 0 1rem; 
 }
-
-.ticket {
-  background-color: #f5f5f5;
-  border-radius: 10px;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-}
-.ticket-gist {
-  user-select: none;
-  background-color: #f5f5f5;
-  border-radius: 10px;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  transition: background-color 0.3s;
-}
-.ticket-available{
-  cursor:pointer;
-}
-
-.ticket-available:hover,
-.ticket-gist-triggered {
-  background-color: #DDDDDD;
-}
-.ticket-info {
-  list-style-type: none;
-}
-.ticket-info li {
-  margin-right: 2rem;
-  float: left;
+.separate-line-word {
+  background:#fff; 
+  padding:0 10px;
+  font-size: 1.5em;
 }
 </style>

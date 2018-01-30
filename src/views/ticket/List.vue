@@ -1,48 +1,44 @@
 <template>
   <b-container>
-    <route-input-panel id="ticket-input" horizontal
-    :from="$route.query.from"
-    :to="$route.query.to"
-    :date="$route.query.date"
-    @submit="submit"/>
-    <b-row>
-      <b-col lg="4">
-        <b-nav pills fill class="text-center">
-          <b-nav-item disabled :active="filters.order===0" id="0" @click="rankingTypePills">综合</b-nav-item>
-          <b-nav-item :active="filters.order===1" id="1" @click="rankingTypePills">
-            出发时间
-            <font-awesome-icon v-if="filters.order===1" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
-          </b-nav-item>
-          <b-nav-item :active="filters.order===2" id="2" @click="rankingTypePills">
-            时长
-            <font-awesome-icon v-if="filters.order===2" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
-          </b-nav-item>
-          <b-nav-item :active="filters.order===3" id="3" @click="rankingTypePills">
-            到达时间
-            <font-awesome-icon v-if="filters.order===3" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
-          </b-nav-item>
-        </b-nav>
-      </b-col>
-      <b-col lg="8">
-        <multiselect multiple
-          v-model="filters.options"
-          :options="availableOptions"
+    <b-row class="my-3">
+      <b-col>
+        <b-card body-class="d-flex flex-column flex-md-row">
+          <b-button-group class="m-1 btn-block">
+            <b-button id="0" class="col" :variant="filters.order===0 ? 'primary' : 'outline-primary'" @click="rankingTypePills" disabled>综合</b-button>
+            <b-button id="1" class="col" :variant="filters.order===1 ? 'primary' : 'outline-primary'" @click="rankingTypePills">
+              出发时间
+              <font-awesome-icon v-if="filters.order===1" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
+            </b-button>
+            <b-button id="2" class="col" :variant="filters.order===2 ? 'primary' : 'outline-primary'" @click="rankingTypePills">
+              耗时
+              <font-awesome-icon v-if="filters.order===2" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
+            </b-button>
+            <b-button id="3" class="col" :variant="filters.order===3 ? 'primary' : 'outline-primary'" @click="rankingTypePills">
+              到达时间
+              <font-awesome-icon v-if="filters.order===3" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
+            </b-button>
+          </b-button-group>
+          <multiselect multiple
+            v-model="filters.options"
+            :options="availableOptions"
 
-          group-values="value"
-          group-label="label"
+            group-values="value"
+            group-label="label"
 
-          :loading="tickets === null"
-          placeholder="过滤器..."
+            :loading="tickets === null"
+            placeholder="过滤器..."
 
-          track-by="value"
-          label="label"
+            track-by="value"
+            label="label"
+            class="m-1"
           >
-          <template slot="noResult">没有相应的过滤器</template>
-        </multiselect>
+            <template slot="noResult">没有相应的过滤器</template>
+          </multiselect>
+        </b-card>
       </b-col>
     </b-row>
-    <b-row>
-      <b-col md="9">
+    <b-row class="my-3">
+      <b-col lg="8" class="order-1 order-lg-0">
         <spinner
           v-if="tickets === null"
           size="huge"
@@ -51,16 +47,24 @@
         />
         <div v-else-if="currentTickets === null ? false : currentTickets.length === 0">没有找到</div>
         <template v-else>
-          <ticket
-            v-for="ticket in currentTickets"
-            :key="ticket.trainTelecode"
-            :ticket = "ticket"
-            :stationmap = "stationMap"
-            :querydate = "$route.query.date"
-          />
+          <b-list-group>
+            <b-list-group-item v-for="ticket in currentTickets" :key="ticket.trainTelecode">
+              <ticket
+                :ticket = "ticket"
+                :stationmap = "stationMap"
+              />
+            </b-list-group-item>
+          </b-list-group>
+
         </template>
       </b-col>
-      <b-col md="3">
+      <b-col lg="4" class="order-0 order-lg-1 d-flex flex-column flex-md-row flex-lg-column">
+        <route-input id="ticket-input"
+          :from="$route.query.from"
+          :to="$route.query.to"
+          :date="$route.query.date"
+          @submit="submit"
+        />
       </b-col>
     </b-row>
   </b-container>
@@ -70,7 +74,7 @@
 import TrainTypeMap from '@/utils/TrainTypeMap'
 import axios from 'axios'
 import Ticket from '@/components/ticket/Ticket'
-import RouteInputPanel from '@/components/ticket/RouteInputPanel'
+import RouteInput from '@/components/ticket/RouteInputPanel'
 import Spinner from 'vue-simple-spinner'
 import Multiselect from 'vue-multiselect'
 
@@ -230,15 +234,17 @@ export default {
         for (let type of includes) if (x.seats[type] !== undefined && x.seats[type] !== false) return true
         return false
       })
+      let key = ['', 'departureTime', 'duration', 'arrivalTime'][this.filters.order]
       tickets.sort((a, b) => {
         if (a.status !== 0) return true  // 停运的车永远排在最下面
-        let keyMap = ['', 'departureTime', 'duration', 'arrivalTime']
-        let aTime = a[keyMap[this.filters.order]]
-        let bTime = b[keyMap[this.filters.order]]
+        let aTime = a[key]
+        let bTime = b[key]
         var result
         if (aTime.slice(0, 2) === bTime.slice(0, 2)) result = Number(aTime.slice(3, 5)) > Number(bTime.slice(3, 5))
         else result = Number(aTime.slice(0, 2)) > Number(bTime.slice(0, 2))
         if (this.filters.reversed) result = !result
+
+        console.log(result)
         return result
       })
       this.currentTickets = tickets
@@ -286,20 +292,9 @@ export default {
   },
   components: {
     Ticket,
-    RouteInputPanel,
+    RouteInput,
     Spinner,
     Multiselect
   }
 }
 </script>
-
-<style scoped>
-  #ticket-input {
-    background-color: #f5f5f5;
-    border-radius: 10px;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
-</style>

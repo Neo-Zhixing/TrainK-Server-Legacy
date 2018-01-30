@@ -187,5 +187,5 @@ class RecordViewSet(VersatileViewMixin, viewsets.ReadOnlyModelViewSet):
 		return serializers.RecordListSerializer if self.action == 'list' else serializers.RecordDetailSerializer
 
 	def get_queryset(self):
-		train = GetTrain(self.kwargs['pk'], models.Train)
+		train = GetTrain(self.kwargs['pk'])
 		return super(RecordViewSet, self).get_queryset().filter(train__names=train.names).order_by('-departureDate')

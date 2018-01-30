@@ -31,7 +31,7 @@ keyMap = [
 
 	('departureIndex', int),
 	('arrivalIndex', int),
-	('IDCardSupported', bool),
+	('IDCardSupported', lambda x: x == '1'),
 	('status', int),
 	('seats', [
 		('gg_num', ticketType),
