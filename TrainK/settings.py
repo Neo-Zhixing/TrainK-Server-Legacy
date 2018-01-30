@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'info',
     'ticket',
     'trip',
+    'map',
     'scrape',
     'utils',
     'cr',
