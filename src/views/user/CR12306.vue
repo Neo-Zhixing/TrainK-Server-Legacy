@@ -27,14 +27,14 @@ export default {
   data () {
     return {
       username: null,
-      loggedIn: false
+      loggedIn: true
     }
   },
   mounted () {
     axios.get('/cr/user/session/')
     .then(response => {
       console.log(response.data)
-      this.loggedIn = response.data.code === 0
+      this.loggedIn = response.data.data.flag
     })
   },
   methods: {
