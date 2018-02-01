@@ -34,7 +34,7 @@ export default {
     axios.get('/cr/user/session/')
     .then(response => {
       console.log(response.data)
-      this.loggedIn = response.data.data.flag
+      this.loggedIn = response.data.code === 0
     })
   },
   methods: {

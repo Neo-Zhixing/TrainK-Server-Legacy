@@ -1,28 +1,24 @@
 <template>
-  <b-modal lazy ref="modal" title="车票详情" size="lg">
-  <ticket
-    :ticket="ticket"
-    :stationmap="stationMap"
-  />
-  <div slot="modal-footer">
-    现在购票：
-    <b-button-group>
-      <b-button
-        v-for="seat in seats"
-        :key="seat.key"
-        :variant="seat.value === true ? 'success' : (seat.value === false ? 'danger' : 'primary')"
-        :disabled="seat.value === false"
-        @click="order(seat.index)"
-      >
-        {{seat.key}}
-        <template v-if="seat.value !== true && seat.value !== false">
-          <b-badge variant="light">{{seat.value}}</b-badge>
-        </template>
-        <br />
-        ddddd
-      </b-button>
-    </b-button-group>
-  </div>
+  <b-modal lazy
+    ref="modal"
+    title="车票详情"
+    size="lg"
+    :ok-title="ordering ? '确认' : '购票'"
+    @ok.prevent="(ordering ? submit : showOrderView)()"
+    @show="reset"
+  >
+  <b-card class="mb-3">
+    <ticket
+      :ticket="ticket"
+      :stationmap="stationMap"
+    />
+  </b-card>
+  <template v-if="ordering">
+    <login-panel horizontal v-if="authenticated === false" @login="showOrderView"/>
+  </template>
+  <template v-else>
+    Some Train Details Go Here.
+  </template>
   </b-modal>
 </template>
 
@@ -30,8 +26,15 @@
 import TrainTypeMap from '@/utils/TrainTypeMap'
 import Ticket from '@/components/ticket/Ticket'
 import axios from '@/utils/axios'
+import LoginPanel from '@/components/user/CRLogin'
 export default {
   props: ['ticket', 'stationMap'],
+  data () {
+    return {
+      ordering: false,
+      authenticated: null
+    }
+  },
   computed: {
     seats () {
       if (!this.ticket) return null
@@ -50,13 +53,23 @@ export default {
     show () {
       this.$refs.modal.show()
     },
-    order (seat) {
+    showOrderView () {
+      console.log('sss')
+      this.ordering = true
       axios.post('/cr/ticket/', this.ticket)
       .then(response => {
         console.log(response.data)
+        this.authenticated = response.data.code !== 1
       })
+    },
+    submit () {
+      console.log('aaa')
+    },
+    reset () {
+      this.ordering = false
+      this.authenticated = null
     }
   },
-  components: { Ticket }
+  components: { Ticket, LoginPanel }
 }
 </script>

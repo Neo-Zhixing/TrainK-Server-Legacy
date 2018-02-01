@@ -231,6 +231,7 @@ class DataManager:
 		order_request = re.search(r'var orderRequestDTO=(\{.+\})?', response).group(1)
 		order_request = json.loads(order_request.replace("'", '"'))
 		return {
+			'code': 0,
 			'token': submit_token,
 			'passenger': passenger,
 			'order': order_request
