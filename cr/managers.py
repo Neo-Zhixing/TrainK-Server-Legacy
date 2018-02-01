@@ -1,4 +1,6 @@
 import requests
+import re
+import json
 from datetime import date
 
 
@@ -168,7 +170,7 @@ class DataManager:
 		if int(response['result_code']) != 0:
 			return response
 
-		response = requests.post(self.login_complete_url, data={'tk': response['newapptk']})
+		response = self.session.post(self.login_complete_url, data={'tk': response['newapptk']})
 
 		return response.json()
 
@@ -198,6 +200,7 @@ class DataManager:
 
 	user_check_url = 'https://kyfw.12306.cn/otn/login/checkUser'
 	order_url = 'https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest'
+	order_token_url = 'https://kyfw.12306.cn/otn/confirmPassenger/initDc'
 
 	def check_session_status(self):
 		response = self.session.get(self.user_check_url).json()
@@ -211,12 +214,24 @@ class DataManager:
 				'detail': 'CR Login Required'
 			}
 		response = self.session.post(self.order_url, data={
-			'secretStr': ticket['secret'],
+			'secretStr': requests.utils.unquote(ticket['secret']),
 			'train_date': ticket['date'],
 			'back_train_date': date.today().isoformat(),
 			'tour_flag': 'dc',  # dc 单程
 			'purpose_codes': 'ADULT',  # adult 成人票
 			'query_from_station_name': queryset.get(telecode=ticket['departureStation']).name,
 			'query_to_station_name': queryset.get(telecode=ticket['arrivalStation']).name
-		})
-		return response.text
+		}).json()
+		if not response['status']:
+			return response
+		response = self.session.post(self.order_token_url).text
+		submit_token = re.search(r"var globalRepeatSubmitToken = '(\S+)'", response).group(1)
+		passenger = re.search(r'var ticketInfoForPassengerForm=(\{.+\})?', response).group(1)
+		passenger = json.loads(passenger.replace("'", '"'))
+		order_request = re.search(r'var orderRequestDTO=(\{.+\})?', response).group(1)
+		order_request = json.loads(order_request.replace("'", '"'))
+		return {
+			'token': submit_token,
+			'passenger': passenger,
+			'order': order_request
+		}
