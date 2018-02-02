@@ -1,38 +1,43 @@
 <template>
-  <b-modal lazy
-    ref="modal"
-    title="车票详情"
-    size="lg"
-    :ok-title="ordering ? '确认' : '购票'"
-    @ok.prevent="(ordering ? submit : showOrderView)()"
-    @show="reset"
-  >
-  <b-card class="mb-3">
-    <ticket
-      :ticket="ticket"
-      :stationmap="stationMap"
-    />
+  <b-card no-body header="乘客">
+    <b-list-group flush>
+      <b-list-group-item>
+        <passenger />
+      </b-list-group-item>
+    </b-list-group>
+    <b-card-body v-if="data" class="d-flex flex-row flex-wrap">
+      <template v-for="passenger in data.passengers.normal_passengers">
+      <b-button class="m-2"
+        :id="`passegner-add-btn-${passenger.code}`"
+        vanrant="outline-primary">
+        {{passenger.passenger_name}}
+        </b-button>
+      <b-popover :target="`passegner-add-btn-${passenger.code}`" triggers="hover">
+        <template slot="title">passenger.passenger_name</template>
+        <b-table hover :items="getPassengerTable(passenger)"></b-table>
+      </b-popover>
+      </template>
+    </b-card-body>
   </b-card>
-  <template v-if="ordering">
-    <login-panel horizontal v-if="authenticated === false" @login="showOrderView"/>
-  </template>
-  <template v-else>
-    Some Train Details Go Here.
-  </template>
-  </b-modal>
+  <b-card class="my-2" title="座位选择">
+    <seat-selection />
+  </b-card>
 </template>
 
 <script>
-import TrainTypeMap from '@/utils/TrainTypeMap'
-import Ticket from '@/components/ticket/Ticket'
 import axios from '@/utils/axios'
-import LoginPanel from '@/components/user/CRLogin'
+import Passenger from '@/components/ticket/Passenger'
+import SeatSelection from '@/components/ticket/SeatSelection'
 export default {
   props: ['ticket', 'stationMap'],
   data () {
     return {
       ordering: false,
-      authenticated: null
+      details: null,
+      data: null,
+      authenticated: null,
+      crauthenticated: null,
+      passengers: null
     }
   },
   computed: {
@@ -55,12 +60,6 @@ export default {
     },
     showOrderView () {
       console.log('sss')
-      this.ordering = true
-      axios.post('/cr/ticket/', this.ticket)
-      .then(response => {
-        console.log(response.data)
-        this.authenticated = response.data.code !== 1
-      })
     },
     submit () {
       console.log('aaa')
@@ -68,8 +67,23 @@ export default {
     reset () {
       this.ordering = false
       this.authenticated = null
+      /*
+      axios.get(`/info/train/${this.ticket.trainTelecode}/`)
+      .then(response => {
+        console.log(response.data)
+        this.data = response.data
+      })
+      */
+    },
+    getPassengerTable (passenger) {
+      return [
+        { key: passenger.passenger_id_type_name, value: passenger.passenger_id_no },
+        { key: '手机', value: passenger.mobile_no },
+        { key: '邮箱', value: passenger.email },
+        { key: '种类', value: passenger.passenger_type_name }
+      ]
     }
   },
-  components: { Ticket, LoginPanel }
+  components: { Ticket, Passenger, SeatSelection }
 }
 </script>

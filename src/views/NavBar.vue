@@ -33,7 +33,7 @@
         @hide="userPopoverShown=false">
         <b-container fluid class="py-2">
           <glimpse v-if="user" @loggedOut="user = null" :email="user.email" :hash="user.hash" :name="user.username" />
-          <login-view v-else @loggedIn="login" />
+          <login-view v-else @login="login" />
         </b-container>
       </b-popover>
     </b-container>

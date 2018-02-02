@@ -16,7 +16,7 @@ def ticketType(value):
 
 keyMap = [
 	('secret', str),
-	('buttonText', str),
+	('buttonText', lambda x: None),
 	('trainTelecode', str),
 	('trainName', str),
 	('originStation', str),
@@ -26,7 +26,7 @@ keyMap = [
 	('departureTime', str),
 	('arrivalTime', str),
 	('duration', str),
-	('purchasability', lambda x: {'Y': True, 'N': False, 'IS_TIME_NOT_BUY': None}.get(x, None)),
+	('purchasability', lambda x: {'Y': 0, 'N': 1, 'IS_TIME_NOT_BUY': 2}.get(x, x)),
 	('yp_info', str),
 	('departureDate', lambda x: '%s-%s-%s' % (x[0:4], x[4:6], x[6:8])),
 	('train_seat_feature', str),
@@ -201,6 +201,7 @@ class DataManager:
 	user_check_url = 'https://kyfw.12306.cn/otn/login/checkUser'
 	order_url = 'https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest'
 	order_token_url = 'https://kyfw.12306.cn/otn/confirmPassenger/initDc'
+	passenger_info_url = 'https://kyfw.12306.cn/otn/confirmPassenger/getPassengerDTOs'
 
 	def check_session_status(self):
 		response = self.session.get(self.user_check_url).json()
@@ -221,18 +222,30 @@ class DataManager:
 			'purpose_codes': 'ADULT',  # adult 成人票
 			'query_from_station_name': queryset.get(telecode=ticket['departureStation']).name,
 			'query_to_station_name': queryset.get(telecode=ticket['arrivalStation']).name
-		}).json()
-		if not response['status']:
+		}, allow_redirects=False).json()
+		if not response['status']:  # 可能是secret过期。这里需要确认。
+			response['code'] = 2
 			return response
+		return {'code': 0}
+
+	def completeOrder(self):
 		response = self.session.post(self.order_token_url).text
 		submit_token = re.search(r"var globalRepeatSubmitToken = '(\S+)'", response).group(1)
 		passenger = re.search(r'var ticketInfoForPassengerForm=(\{.+\})?', response).group(1)
 		passenger = json.loads(passenger.replace("'", '"'))
 		order_request = re.search(r'var orderRequestDTO=(\{.+\})?', response).group(1)
 		order_request = json.loads(order_request.replace("'", '"'))
-		return {
+		result = {
 			'code': 0,
 			'token': submit_token,
 			'passenger': passenger,
 			'order': order_request
 		}
+
+		response = self.session.post(self.passenger_info_url, data={
+			'REPEAT_SUBMIT_TOKEN': submit_token
+		}).json()
+		if response['status']:
+			result['passengers'] = response['data']
+
+		return result

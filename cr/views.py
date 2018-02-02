@@ -1,11 +1,14 @@
 from django.http import StreamingHttpResponse
+from django.views.decorators.cache import never_cache
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ParseError, NotFound
 from info.views import GetStation
 from info.models import Station
+from utils.mixins import MethodPermissionMixin
 from .managers import DataManager
 from .serializers import ProfileSerializer
 
@@ -18,6 +21,7 @@ class DataManagerMixin:
 
 class UserView(RetrieveAPIView):
 	serializer_class = ProfileSerializer
+	permission_classes = (IsAuthenticated,)
 
 	def get_object(self):
 		if not hasattr(self.request.user, 'cr_profile'):
@@ -91,7 +95,12 @@ class SessionView(APIView, DataManagerMixin):
 		return Response(result, status=status_codes[result['code']])
 
 
-class TicketView(APIView, DataManagerMixin):
+class TicketView(MethodPermissionMixin, APIView, DataManagerMixin):
+	method_permission_classes = {
+		'POST': (IsAuthenticated, )
+	}
+
+	@never_cache
 	def get(self, request):
 		assert {'date', 'from', 'to'} <= set(request.GET), \
 			ParseError('Request Params Incomplete')
@@ -108,4 +117,4 @@ class TicketView(APIView, DataManagerMixin):
 
 	def post(self, request):
 		response = self.manager.placeOrder(request.data, Station.objects)
-		return Response(response)
+		return Response(response, [status.HTTP_200_OK, status.HTTP_403_FORBIDDEN, status.HTTP_410_GONE][response['code']])

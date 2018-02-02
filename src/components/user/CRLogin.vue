@@ -1,12 +1,12 @@
 <template>
   <b-card :header="horizontal ? null : '账号登录'">
-    <form @submit.prevent="login" class="d-flex" :class="horizontal ? 'flex-row' : 'flex-column'">
-      <div :class="{'w-50 mr-3': horizontal}">
+    <form @submit.prevent="login" :class="{'row': horizontal}">
+      <div :class="{'col-lg-6': horizontal}">
         <div class="rounded p-2 border" :class="(error ? error.code === 5 : false) ? 'border-danger' : 'border-light'">
           <c-r-captcha ref="captcha" @input="captchaInput" />
         </div>
       </div>
-      <div :class="{'w-50 ml-3': horizontal, 'mt-3': !horizontal}">
+      <div :class="{'col-lg-6': horizontal}">
         <b-form-group label="用户名：" label-for="cr-username">
           <b-form-input id="cr-username" v-model="loginForm.username" :disabled="usernameKnown" />
         </b-form-group>
