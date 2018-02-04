@@ -1,62 +1,88 @@
 <template>
-  <b-modal lazy ref="modal" title="车票详情" size="lg">
-  <ticket
-    :ticket="ticket"
-    :stationmap="stationMap"
-  />
-  <div slot="modal-footer">
-    现在购票：
-    <b-button-group>
-      <b-button
-        v-for="seat in seats"
-        :key="seat.key"
-        :variant="seat.value === true ? 'success' : (seat.value === false ? 'danger' : 'primary')"
-        :disabled="seat.value === false"
-        @click="order(seat.index)"
-      >
-        {{seat.key}}
-        <template v-if="seat.value !== true && seat.value !== false">
-          <b-badge variant="light">{{seat.value}}</b-badge>
-        </template>
-        <br />
-        ddddd
-      </b-button>
-    </b-button-group>
-  </div>
-  </b-modal>
+  <b-container class="py-3">
+    <b-row v-if="data">
+      <b-col lg="8">
+        <b-card no-body header="乘客" class="my-3">
+          <b-list-group flush>
+            <b-list-group-item v-for="passenger in passengers">
+              <passenger :value="passenger"/>
+            </b-list-group-item>
+          </b-list-group>
+          <b-card-body v-if="data" class="d-flex flex-row flex-wrap">
+            <template v-for="passenger in data.passengers.normal_passengers">
+              <b-button class="m-2" size="sm" variant="outline-primary"
+                :id="`passegner-add-btn-${passenger.code}`"
+                v-b-tooltip.hover :title="`${passenger.passenger_type_name}, ${passenger.passenger_id_type_name}: ${passenger.passenger_id_no.slice(0, 3)}...${passenger.passenger_id_no.slice(-3)}`"
+                @click="addPassenger(passenger)"
+              >
+                {{passenger.passenger_name}}
+                </b-button>
+            </template>
+          </b-card-body>
+        </b-card>
+      </b-col>
+      <b-col lg="4">
+        <b-card header="座位选择" class="my-3">
+          <seat-selection />
+        </b-card>
+        <b-card header="附加服务" class="my-3">
+          <div class="my-3" />
+        </b-card>
+        <b-card header="订单信息" class="my-3">
+          <div>
+            <h4>{{data.order.from_station_name}}</h4>
+          </div>
+          <b-button block variant="primary">提交</b-button>
+        </b-card>
+      </b-col>
+    </b-row>
+  </b-container>
+
 </template>
 
 <script>
-import TrainTypeMap from '@/utils/TrainTypeMap'
-import Ticket from '@/components/ticket/Ticket'
 import axios from '@/utils/axios'
+import Passenger from '@/components/ticket/Passenger'
+import SeatSelection from '@/components/ticket/SeatSelection'
 export default {
-  props: ['ticket', 'stationMap'],
-  computed: {
-    seats () {
-      if (!this.ticket) return null
-      let values = []
-      for (let index in this.ticket.seats) {
-        values.push({
-          index: index,
-          key: TrainTypeMap.seatTypeMap[index],
-          value: this.ticket.seats[index]
-        })
-      }
-      return values
+  data () {
+    return {
+      data: null,
+      passengers: []
     }
+  },
+  mounted () {
+    axios.get('/cr/ticket/order/')
+    .then(response => {
+      this.data = response.data
+      console.log(response.data)
+    })
+    .catch(error => {
+      if (error.response) {
+        if (error.response.status === 404) {
+          console.log('ddd')
+          this.$router.replace({name: 'TicketHome'})
+        }
+      }
+    })
   },
   methods: {
-    show () {
-      this.$refs.modal.show()
+    submit () {
+      console.log('aaa')
     },
-    order (seat) {
-      axios.post('/cr/ticket/', this.ticket)
-      .then(response => {
-        console.log(response.data)
-      })
+    getPassengerTable (passenger) {
+      return [
+        { key: passenger.passenger_id_type_name, value: passenger.passenger_id_no },
+        { key: '手机', value: passenger.mobile_no },
+        { key: '邮箱', value: passenger.email },
+        { key: '种类', value: passenger.passenger_type_name }
+      ]
+    },
+    addPassenger (passenger) {
+      this.passengers.push(passenger)
+      console.log(this.passengers)
     }
   },
-  components: { Ticket }
+  components: { Passenger, SeatSelection }
 }
 </script>

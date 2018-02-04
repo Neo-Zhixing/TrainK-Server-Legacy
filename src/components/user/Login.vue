@@ -57,7 +57,7 @@ export default {
       axios.post('/user/session/', data)
       .then((response) => {
         this.loading = false
-        this.$emit('loggedIn', response.data.key)
+        this.$emit('login', response.data.key)
       })
       .catch((error) => {
         this.loading = false

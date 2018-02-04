@@ -1,9 +1,9 @@
 <template>
-  <b-navbar tag="div" toggleable="md" variant="primary" type="dark">
+  <b-navbar tag="div" id="navbar" toggleable="md" variant="primary" type="dark">
     <b-container>
       <b-navbar-brand href="/">
-        <font-awesome-icon icon="train" size="lg" class="mr-1"></font-awesome-icon>
-        <b>TrainK</b>
+        <font-awesome-icon class="mr-1" :icon="['traink', 'logo']" />
+        <b>Train<span class="text-warning">K</span></b>
       </b-navbar-brand>
       <b-button-group class="d-md-none">
         <b-button variant="outline-light" :href="user ? '/user/' : '/user/session/'">
@@ -33,7 +33,7 @@
         @hide="userPopoverShown=false">
         <b-container fluid class="py-2">
           <glimpse v-if="user" @loggedOut="user = null" :email="user.email" :hash="user.hash" :name="user.username" />
-          <login-view v-else @loggedIn="login" />
+          <login-view v-else @login="login" />
         </b-container>
       </b-popover>
     </b-container>
@@ -55,9 +55,11 @@ import {
   faMap,
   faComments
 } from '@fortawesome/fontawesome-free-solid'
+import { MainLogo } from '@/assets/Logo'
 import fontawesome from '@fortawesome/fontawesome'
 fontawesome.library.add(faTrain, faBars, faUserCircle)
 fontawesome.library.add(faTicketAlt, faInfoCircle, faBriefcase, faMap, faComments)
+fontawesome.library.add(MainLogo)
 
 export default {
   props: {
@@ -106,7 +108,7 @@ export default {
 </script>
 
 <style>
-  #nav-collapse ul li a svg {
+  #nav-collapse svg {
     margin-right: 0.25rem;
   }
 </style>

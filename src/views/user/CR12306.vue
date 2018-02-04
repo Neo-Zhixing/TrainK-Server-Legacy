@@ -27,7 +27,7 @@ export default {
   data () {
     return {
       username: null,
-      loggedIn: false
+      loggedIn: true
     }
   },
   mounted () {

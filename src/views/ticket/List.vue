@@ -48,14 +48,17 @@
         <div v-else-if="currentTickets === null ? false : currentTickets.length === 0">没有找到</div>
         <template  v-else>
           <b-list-group>
-            <b-list-group-item button :active="currentTicket === ticket" v-for="ticket in currentTickets" :key="ticket.trainTelecode" @click="currentTicket=ticket; $refs.orderModal.show()">
+            <b-list-group-item button
+              v-for="ticket in currentTickets"
+              :key="ticket.trainTelecode"
+              @click="$refs.detailModal.show(ticket)">
               <ticket show-seats
                 :ticket = "ticket"
                 :stationmap = "stationMap"
               />
             </b-list-group-item>
           </b-list-group>
-          <order-view ref="orderModal" :ticket="currentTicket" :station-map="stationMap" />
+          <detail-view ref="detailModal" :station-map="stationMap" @reload="tickets=null; ticketList();" />
         </template>
       </b-col>
       <b-col lg="4" class="order-0 order-lg-1 d-flex flex-column flex-md-row flex-lg-column">
@@ -75,7 +78,7 @@ import TrainTypeMap from '@/utils/TrainTypeMap'
 import axios from 'axios'
 import Ticket from '@/components/ticket/Ticket'
 import RouteInput from '@/components/ticket/RouteInputPanel'
-import OrderView from './Order'
+import DetailView from './Detail'
 import Spinner from 'vue-simple-spinner'
 import Multiselect from 'vue-multiselect'
 
@@ -99,7 +102,6 @@ export default {
         order: 2,
         reversed: false
       },
-      currentTicket: null,
       currentTickets: null,
       tickets: null,
       stationMap: null
@@ -292,7 +294,7 @@ export default {
   },
   components: {
     Ticket,
-    OrderView,
+    DetailView,
     RouteInput,
     Spinner,
     Multiselect

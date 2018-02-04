@@ -2,7 +2,10 @@
 <div class="py-5" id="ticket-panel-row">
   <b-container>
     <b-row>
-      <b-col md="6">
+      <b-col md="7">
+        
+      </b-col>
+      <b-col md="5">
         <route-input @submit="submit"/>
       </b-col>
     </b-row>
@@ -35,5 +38,11 @@
 #ticket-panel-row {
   background-height:100%;
   background-position: center top;
+}
+
+#ticket-panel-row {
+  background-image: url('../../assets/index-bg.jpg');
+  background-position: center right;
+  background-size: 100% auto;
 }
 </style>

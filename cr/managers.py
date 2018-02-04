@@ -1,4 +1,6 @@
 import requests
+import re
+import json
 from datetime import date
 
 
@@ -14,7 +16,7 @@ def ticketType(value):
 
 keyMap = [
 	('secret', str),
-	('buttonText', str),
+	('buttonText', lambda x: None),
 	('trainTelecode', str),
 	('trainName', str),
 	('originStation', str),
@@ -24,7 +26,7 @@ keyMap = [
 	('departureTime', str),
 	('arrivalTime', str),
 	('duration', str),
-	('purchasability', lambda x: {'Y': True, 'N': False, 'IS_TIME_NOT_BUY': None}.get(x, None)),
+	('purchasability', lambda x: {'Y': 0, 'N': 1, 'IS_TIME_NOT_BUY': 2}.get(x, x)),
 	('yp_info', str),
 	('departureDate', lambda x: '%s-%s-%s' % (x[0:4], x[4:6], x[6:8])),
 	('train_seat_feature', str),
@@ -75,6 +77,10 @@ def ParseTicketStr(ticket_str, date):
 	return result
 
 
+def _redirect_response(response):
+	return response.status_code in {requests.codes.found, requests.codes.moved}
+
+
 class DataManager:
 	cookie_name = 'CRCookies'
 	default_user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'
@@ -91,30 +97,34 @@ class DataManager:
 
 	def __init__(self, request):
 		self.request = request
-		session = requests.Session()
-		session.headers = self.default_headers
-		session.headers['User-Agent'] = request.META.get('HTTP_USER_AGENT', self.default_user_agent)
-		session.cookies = requests.cookies.cookiejar_from_dict(request.session.get(self.cookie_name, {}))
+		self.session = requests.Session()
+		self.session.headers = self.default_headers
+		self.session.headers['User-Agent'] = request.META.get('HTTP_USER_AGENT', self.default_user_agent)
+		self.session.cookies = requests.cookies.cookiejar_from_dict(request.session.get(self.cookie_name, {}))
+
+		def ResponseHandler(response, *args, **kwargs):
+			print("\n\n")
+			print("-----------------------------------------")
+			print("Sending Request: " + response.request.url)
+			print("Headers:" + str(response.request.headers))
+			print("Cookies:" + str(self.session.cookies))
+			print("-----------------------------------------")
+			print("Received Response: " + ('Streamed Data' if kwargs['stream'] else response.text[0:100] + '...'))
+			print("Cookies:" + str(response.cookies))
+			print("-----------------------------------------")
+			cookieJar = requests.utils.dict_from_cookiejar(self.session.cookies)
+			cookieJar.update(requests.utils.dict_from_cookiejar(response.cookies))
+			self.request.session[self.cookie_name] = cookieJar
+		self.session.hooks['response'].append(ResponseHandler)
 
 		# Fetch Cookie
-		cookieKeys = set(session.cookies.keys())
-		if not {'JSSESSIONID', 'route', 'BIGipServerotn'} <= cookieKeys:
-			session.head('https://kyfw.12306.cn/otn/login/init')
-
-		self.session = session
-
-	def get_session(self, referer):
-		self.session.headers['Referer'] = referer
-		return self.session
-
-	def save(self):
-		self.request.session[self.cookie_name] = requests.utils.dict_from_cookiejar(self.session.cookies)
+		if not {'JSESSIONID', 'route', 'BIGipServerotn'} <= set(self.session.cookies.keys()):
+			self.session.head('https://kyfw.12306.cn/otn/login/init')
 
 	captcha_url = 'https://kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand'
 
 	def get_login_captcha_stream(self):
 		response = self.session.get(self.captcha_url, stream=True)
-		self.save()
 
 		def url2yield():
 			chunk = True
@@ -127,16 +137,14 @@ class DataManager:
 
 	captcha_check_url = 'https://kyfw.12306.cn/passport/captcha/captcha-check'
 	login_url = 'https://kyfw.12306.cn/passport/web/login'
-	session_status_url = 'https://kyfw.12306.cn/passport/web/auth/uamtk'
+	auth_url = 'https://kyfw.12306.cn/passport/web/auth/uamtk'
 	login_complete_url = 'https://kyfw.12306.cn/otn/uamauthclient'
 
-	def login(self, username, password, captcha):
-		if int(self.check_session_status()['result_code']) == 0:
-			return {
-				'code': 2,
-				'detail': 'Already Logged In'
-			}
+	def auth(self):
+		response = self.session.post(self.auth_url, data={'appid': 'otn'})
+		return response.json()
 
+	def login(self, username, password, captcha):
 		response = self.session.post(self.captcha_check_url, {
 			'answer': captcha,
 			'login_site': 'E',
@@ -160,23 +168,15 @@ class DataManager:
 		if int(response['result_code']) != 0:
 			return response
 
-		response = self.session.post(self.session_status_url, data={"appid": "otn"}).json()
+		response = self.session.post('https://kyfw.12306.cn/otn/login/userLogin')
+
+		response = self.auth()
 		if int(response['result_code']) != 0:
 			return response
 
-		self.session.cookies['tk'] = response['newapptk']
+		response = self.session.post(self.login_complete_url, data={'tk': response['newapptk']})
 
-		response = requests.post(self.login_complete_url, data={'tk': response['newapptk']}).json()
-		self.save()
-
-		return response
-
-	def check_session_status(self):
-		response = self.session.get(self.session_status_url, params={"appid": "otn"}).json()
-		if 'newapptk' in response:
-			self.session.cookies['tk'] = response['newapptk']
-		self.save()
-		return response
+		return response.json()
 
 	ticket_query_url = 'https://kyfw.12306.cn/otn/leftTicket/queryZ'
 
@@ -187,7 +187,6 @@ class DataManager:
 			'leftTicketDTO.to_station': to_station.telecode,
 			'purpose_codes': 'ADULT'
 		})
-		self.save()
 		if response.status_code == requests.codes.moved or response.status_code == requests.codes.found:
 			return {
 				'code': 1,
@@ -205,23 +204,61 @@ class DataManager:
 
 	user_check_url = 'https://kyfw.12306.cn/otn/login/checkUser'
 	order_url = 'https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest'
+	order_token_url = 'https://kyfw.12306.cn/otn/confirmPassenger/initDc'
+	passenger_info_url = 'https://kyfw.12306.cn/otn/confirmPassenger/getPassengerDTOs'
+
+	def check_session_status(self):
+		response = self.session.get(self.user_check_url).json()
+		return response
 
 	def placeOrder(self, ticket, queryset):
-		response = self.session.post(self.user_check_url).json()
-		print(self.session.cookies)
+		response = self.check_session_status()
 		if not response['data']['flag']:
 			return {
 				'code': 1,
 				'detail': 'CR Login Required'
 			}
 		response = self.session.post(self.order_url, data={
-			'secretStr': ticket['secret'],
+			'secretStr': requests.utils.unquote(ticket['secret']),
 			'train_date': ticket['date'],
 			'back_train_date': date.today().isoformat(),
 			'tour_flag': 'dc',  # dc 单程
 			'purpose_codes': 'ADULT',  # adult 成人票
 			'query_from_station_name': queryset.get(telecode=ticket['departureStation']).name,
 			'query_to_station_name': queryset.get(telecode=ticket['arrivalStation']).name
-		})
-		print(response.text)
-		return response.text
+		}, allow_redirects=False)
+		if _redirect_response(response):
+			return {'code': 1}
+		response = response.json()
+		if not response['status']:  # 可能是secret过期。这里需要确认。
+			response['code'] = 2
+			return response
+		return {'code': 0}
+
+	def orderInfo(self):
+		response = self.session.post(self.order_token_url, allow_redirects=False)
+		if _redirect_response(response):
+			return {
+				'code': 1,
+				'details': 'No Order Info'
+			}
+		response = response.text
+		submit_token = re.search(r"var globalRepeatSubmitToken = '(\S+)'", response).group(1)
+		passenger = re.search(r'var ticketInfoForPassengerForm=(\{.+\})?', response).group(1)
+		passenger = json.loads(passenger.replace("'", '"'))
+		order_request = re.search(r'var orderRequestDTO=(\{.+\})?', response).group(1)
+		order_request = json.loads(order_request.replace("'", '"'))
+		result = {
+			'code': 0,
+			'token': submit_token,
+			'passenger': passenger,
+			'order': order_request
+		}
+
+		response = self.session.post(self.passenger_info_url, data={
+			'REPEAT_SUBMIT_TOKEN': submit_token
+		}).json()
+		if response['status']:
+			result['passengers'] = response['data']
+
+		return result

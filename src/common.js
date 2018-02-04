@@ -7,7 +7,6 @@ Vue.config.productionTip = false
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
-import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import BootstrapVue from 'bootstrap-vue'
 Vue.use(BootstrapVue)
@@ -16,7 +15,7 @@ import 'vue-multiselect/dist/vue-multiselect.min.css'
 import 'flatpickr/dist/themes/airbnb.css'
 
 import NavBar from '@/views/NavBar'
-import './common.css'
+import './common.scss'
 
 /* eslint-disable no-new */
 new Vue({
