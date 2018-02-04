@@ -118,3 +118,11 @@ class TicketView(MethodPermissionMixin, APIView, DataManagerMixin):
 	def post(self, request):
 		response = self.manager.placeOrder(request.data, Station.objects)
 		return Response(response, [status.HTTP_200_OK, status.HTTP_403_FORBIDDEN, status.HTTP_410_GONE][response['code']])
+
+
+class OrderView(APIView, DataManagerMixin):
+	permission_classes = (IsAuthenticated, )
+
+	def get(self, request):
+		response = self.manager.orderInfo()
+		return Response(response, [status.HTTP_200_OK, status.HTTP_404_NOT_FOUND][response['code']])

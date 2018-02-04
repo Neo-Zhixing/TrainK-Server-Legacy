@@ -77,6 +77,10 @@ def ParseTicketStr(ticket_str, date):
 	return result
 
 
+def _redirect_response(response):
+	return response.status_code in {requests.codes.found, requests.codes.moved}
+
+
 class DataManager:
 	cookie_name = 'CRCookies'
 	default_user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'
@@ -228,8 +232,14 @@ class DataManager:
 			return response
 		return {'code': 0}
 
-	def completeOrder(self):
-		response = self.session.post(self.order_token_url).text
+	def orderInfo(self):
+		response = self.session.post(self.order_token_url, allow_redirects=False)
+		if _redirect_response(response):
+			return {
+				'code': 1,
+				'details': 'No Order Info'
+			}
+		response = response.text
 		submit_token = re.search(r"var globalRepeatSubmitToken = '(\S+)'", response).group(1)
 		passenger = re.search(r'var ticketInfoForPassengerForm=(\{.+\})?', response).group(1)
 		passenger = json.loads(passenger.replace("'", '"'))

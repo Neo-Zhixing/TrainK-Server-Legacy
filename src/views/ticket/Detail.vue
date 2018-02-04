@@ -74,6 +74,7 @@ export default {
         this.data = response.data
         this.authenticated = true
         this.crauthenticated = true
+        this.$router.push({name: 'PlaceOrders'})
       })
       .catch(error => {
         if (error.response) {

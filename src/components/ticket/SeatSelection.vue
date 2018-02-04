@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import SeatIcons from '@/assets/TrainSeats'
+import SeatIcons from '@/assets/Logo'
 export default {
   computed: {
     icon () {

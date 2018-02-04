@@ -1,8 +1,16 @@
+$theme-colors: (
+  "primary": #336B87,
+  "secondary": #90AFC5,
+  "dark": #2A3132
+);
+
+
 body {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
 }
+
 
 main {
   flex: 1;
@@ -17,3 +25,7 @@ hr.railsgraph {
   border-radius: 2px;
   background-image: linear-gradient(to right, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
 }
+
+
+
+@import "node_modules/bootstrap/scss/bootstrap";

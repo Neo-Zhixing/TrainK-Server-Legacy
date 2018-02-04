@@ -1,27 +1,36 @@
 <template>
-  <b-card no-body header="乘客">
-    <b-list-group flush>
-      <b-list-group-item>
-        <passenger />
-      </b-list-group-item>
-    </b-list-group>
-    <b-card-body v-if="data" class="d-flex flex-row flex-wrap">
-      <template v-for="passenger in data.passengers.normal_passengers">
-      <b-button class="m-2"
-        :id="`passegner-add-btn-${passenger.code}`"
-        vanrant="outline-primary">
-        {{passenger.passenger_name}}
-        </b-button>
-      <b-popover :target="`passegner-add-btn-${passenger.code}`" triggers="hover">
-        <template slot="title">passenger.passenger_name</template>
-        <b-table hover :items="getPassengerTable(passenger)"></b-table>
-      </b-popover>
-      </template>
-    </b-card-body>
-  </b-card>
-  <b-card class="my-2" title="座位选择">
-    <seat-selection />
-  </b-card>
+  <b-container class="py-3">
+    <b-row v-if="data">
+      <b-col lg="8">
+        <b-card no-body header="乘客" class="my-3">
+          <b-list-group flush>
+            <b-list-group-item>
+              <passenger />
+            </b-list-group-item>
+          </b-list-group>
+          <b-card-body v-if="data" class="d-flex flex-row flex-wrap">
+            <template v-for="passenger in data.passengers.normal_passengers">
+              <b-button class="m-2" size="sm"
+                :id="`passegner-add-btn-${passenger.code}`"
+                v-b-tooltip.hover :title="`${passenger.passenger_type_name}, ${passenger.passenger_id_type_name}: ${passenger.passenger_id_no.slice(0, 3)}...${passenger.passenger_id_no.slice(-3)}`"
+                vanrant="outline-primary">
+                {{passenger.passenger_name}}
+                </b-button>
+            </template>
+          </b-card-body>
+        </b-card>
+      </b-col>
+      <b-col lg="4">
+        <b-card header="座位选择" class="my-3">
+          <seat-selection />
+        </b-card>
+        <b-card header="附加服务" class="my-3">
+          <div class="my-3" />
+        </b-card>
+      </b-col>
+    </b-row>
+  </b-container>
+
 </template>
 
 <script>
@@ -29,51 +38,29 @@ import axios from '@/utils/axios'
 import Passenger from '@/components/ticket/Passenger'
 import SeatSelection from '@/components/ticket/SeatSelection'
 export default {
-  props: ['ticket', 'stationMap'],
   data () {
     return {
-      ordering: false,
-      details: null,
-      data: null,
-      authenticated: null,
-      crauthenticated: null,
-      passengers: null
+      data: null
     }
   },
-  computed: {
-    seats () {
-      if (!this.ticket) return null
-      let values = []
-      for (let index in this.ticket.seats) {
-        values.push({
-          index: index,
-          key: TrainTypeMap.seatTypeMap[index],
-          value: this.ticket.seats[index]
-        })
+  mounted () {
+    axios.get('/cr/ticket/order/')
+    .then(response => {
+      this.data = response.data
+      console.log(response.data)
+    })
+    .catch(error => {
+      if (error.response) {
+        if (error.response.status === 404) {
+          console.log('ddd')
+          this.$router.replace({name: 'TicketHome'})
+        }
       }
-      return values
-    }
+    })
   },
   methods: {
-    show () {
-      this.$refs.modal.show()
-    },
-    showOrderView () {
-      console.log('sss')
-    },
     submit () {
       console.log('aaa')
-    },
-    reset () {
-      this.ordering = false
-      this.authenticated = null
-      /*
-      axios.get(`/info/train/${this.ticket.trainTelecode}/`)
-      .then(response => {
-        console.log(response.data)
-        this.data = response.data
-      })
-      */
     },
     getPassengerTable (passenger) {
       return [
@@ -84,6 +71,6 @@ export default {
       ]
     }
   },
-  components: { Ticket, Passenger, SeatSelection }
+  components: { Passenger, SeatSelection }
 }
 </script>
