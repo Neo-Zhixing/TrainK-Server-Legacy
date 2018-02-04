@@ -4,16 +4,17 @@
       <b-col lg="8">
         <b-card no-body header="乘客" class="my-3">
           <b-list-group flush>
-            <b-list-group-item>
-              <passenger />
+            <b-list-group-item v-for="passenger in passengers">
+              <passenger :value="passenger"/>
             </b-list-group-item>
           </b-list-group>
           <b-card-body v-if="data" class="d-flex flex-row flex-wrap">
             <template v-for="passenger in data.passengers.normal_passengers">
-              <b-button class="m-2" size="sm"
+              <b-button class="m-2" size="sm" variant="outline-primary"
                 :id="`passegner-add-btn-${passenger.code}`"
                 v-b-tooltip.hover :title="`${passenger.passenger_type_name}, ${passenger.passenger_id_type_name}: ${passenger.passenger_id_no.slice(0, 3)}...${passenger.passenger_id_no.slice(-3)}`"
-                vanrant="outline-primary">
+                @click="addPassenger(passenger)"
+              >
                 {{passenger.passenger_name}}
                 </b-button>
             </template>
@@ -26,6 +27,12 @@
         </b-card>
         <b-card header="附加服务" class="my-3">
           <div class="my-3" />
+        </b-card>
+        <b-card header="订单信息" class="my-3">
+          <div>
+            <h4>{{data.order.from_station_name}}</h4>
+          </div>
+          <b-button block variant="primary">提交</b-button>
         </b-card>
       </b-col>
     </b-row>
@@ -40,7 +47,8 @@ import SeatSelection from '@/components/ticket/SeatSelection'
 export default {
   data () {
     return {
-      data: null
+      data: null,
+      passengers: []
     }
   },
   mounted () {
@@ -69,6 +77,10 @@ export default {
         { key: '邮箱', value: passenger.email },
         { key: '种类', value: passenger.passenger_type_name }
       ]
+    },
+    addPassenger (passenger) {
+      this.passengers.push(passenger)
+      console.log(this.passengers)
     }
   },
   components: { Passenger, SeatSelection }

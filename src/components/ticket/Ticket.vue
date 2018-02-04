@@ -3,7 +3,7 @@
     <div>
       <b-badge v-if="ticket.departureStation === ticket.originStation" variant="primary">始</b-badge>
       <b-badge v-else>过</b-badge>
-      {{ stationmap[ticket.departureStation] }}
+      {{ stationmap ? stationmap[ticket.departureStation] : ticket.departureStation }}
       <h2>{{ ticket.status === 0 ? ticket.departureTime : '----' }}</h2>
     </div>
     <div style="width: 10rem;">
@@ -21,7 +21,7 @@
     <div>
       <b-badge v-if="ticket.arrivalStation === ticket.destinationStation" variant="primary">终</b-badge>
       <b-badge v-else>过</b-badge>
-      {{ stationmap[ticket.arrivalStation] }}
+      {{ stationmap ? stationmap[ticket.arrivalStation] : ticket.arrivalStation }}
       <h2>{{ ticket.status === 0 ? ticket.arrivalTime : '----' }}</h2>
     </div>
     <div v-if="showSeats">
@@ -48,6 +48,7 @@ export default {
   },
   computed: {
     arrivalDay () {
+      if (!this.ticket || !this.ticket.departureTime || !this.ticket.duration) return null
       var hour = Number(this.ticket.departureTime.substring(0, 2)) + Number(this.ticket.duration.substring(0, 2))
       var minute = Number(this.ticket.departureTime.substring(3, 5)) + Number(this.ticket.duration.substring(3, 5))
       if (minute >= 60) hour += 1

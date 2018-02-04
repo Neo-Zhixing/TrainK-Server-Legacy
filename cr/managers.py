@@ -226,7 +226,10 @@ class DataManager:
 			'purpose_codes': 'ADULT',  # adult 成人票
 			'query_from_station_name': queryset.get(telecode=ticket['departureStation']).name,
 			'query_to_station_name': queryset.get(telecode=ticket['arrivalStation']).name
-		}, allow_redirects=False).json()
+		}, allow_redirects=False)
+		if _redirect_response(response):
+			return {'code': 1}
+		response = response.json()
 		if not response['status']:  # 可能是secret过期。这里需要确认。
 			response['code'] = 2
 			return response
