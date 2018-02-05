@@ -25,7 +25,7 @@ SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 DEBUG = True
 INTERNAL_IPS = ('127.0.0.1', '192.168.1.237', '192.168.1.101')
 
-ALLOWED_HOSTS = ['tra.ink', 'localhost', '192.168.1.101']
+ALLOWED_HOSTS = ['tra.ink', 'localhost', '192.168.1.101', 'home.zhangzhixing.cn']
 SITE_ID = 1
 
 # Application definition

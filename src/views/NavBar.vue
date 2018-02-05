@@ -3,7 +3,7 @@
     <b-container>
       <b-navbar-brand href="/">
         <font-awesome-icon class="mr-1" :icon="['traink', 'logo']" />
-        <b>Train<span class="text-warning">K</span></b>
+        <b>Train<span class="text-theme">K</span></b>
       </b-navbar-brand>
       <b-button-group class="d-md-none">
         <b-button variant="outline-light" :href="user ? '/user/' : '/user/session/'">

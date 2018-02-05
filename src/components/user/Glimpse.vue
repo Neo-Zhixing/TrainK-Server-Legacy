@@ -2,7 +2,7 @@
   <div>
     <b-row>
       <b-col cols="4">
-        <b-img :src="avatar" />
+        <b-img rounded="circle" :src="avatar" />
       </b-col>
       <b-col cols="8">
         {{name}}

@@ -42,7 +42,7 @@
 
 #ticket-panel-row {
   background-image: url('../../assets/index-bg.jpg');
-  background-position: center right;
+  background-position: center center;
   background-size: 100% auto;
 }
 </style>
