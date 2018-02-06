@@ -1,4 +1,4 @@
-from django.http import StreamingHttpResponse
+from django.http import HttpResponse
 from django.views.decorators.cache import never_cache
 from rest_framework import status
 from rest_framework.views import APIView
@@ -31,7 +31,7 @@ class UserView(RetrieveAPIView):
 
 def CaptchaView(request):
 	manager = DataManager(request)
-	return StreamingHttpResponse(manager.get_login_captcha_stream(), content_type="image/jpeg")
+	return HttpResponse(manager.get_login_captcha(), content_type="image/jpeg")
 
 
 class SessionView(APIView, DataManagerMixin):
@@ -122,7 +122,68 @@ class TicketView(MethodPermissionMixin, APIView, DataManagerMixin):
 
 class OrderView(APIView, DataManagerMixin):
 	permission_classes = (IsAuthenticated, )
+	passenger_name_map = {
+		'address': True,
+		'born_date': 'birthday',
+		'country_code': 'nationality',
+		'email': True,
+		'mobile_no': 'phone',
+		'passenger_id_no': 'certificate',
+		'passenger_id_type_code': 'certificateType',
+		'passenger_name': 'name',
+		'passenger_type': 'type',
+		'postalcode': 'zipcode',
+		'sex_code': 'gender'
+	}
+
+	ticket_name_map = {
+		'train_no': ('trainTelecode', None),
+		'station_train_code': ('trainName', None),
+		'lishi': ('duration', None),
+		'start_time': ('departureTime', lambda x: x[0:2] + ':' + x[2:4]),
+		'arrive_time': ('arrivalTime', lambda x: x[0:2] + ':' + x[2:4]),
+		'from_station_name': ('departureStation', None),
+		'to_station_name': ('arrivalStation', None),
+	}
 
 	def get(self, request):
 		response = self.manager.orderInfo()
-		return Response(response, [status.HTTP_200_OK, status.HTTP_404_NOT_FOUND][response['code']])
+		if not response['code'] == 0:
+			raise NotFound()
+		passengers = response['passengers']['normal_passengers']
+		newPassengers = []
+		for passenger in passengers:
+			newPassenger = {}
+			for key, handler in self.passenger_name_map.items():
+				if handler is True:
+					newPassenger[key] = passenger[key]
+				elif isinstance(handler, str):
+					newPassenger[handler] = passenger[key]
+			newPassengers.append(newPassenger)
+		response['passengers'] = newPassengers
+
+		response['certMap'] = {}
+		for cert in response['info']['cardTypes']:
+			response['certMap'][cert['id']] = cert['value']
+
+		response['ticketTypeMap'] = {}
+		for ticketType in response['info']['limitBuySeatTicketDTO']['ticket_type_codes']:
+			response['ticketTypeMap'][ticketType['id']] = ticketType['value']
+
+		response['availableSeats'] = []
+		for seat in response['info']['limitBuySeatTicketDTO']['seat_type_codes']:
+			response['availableSeats'].append(seat['id'])
+
+		response['ticket'] = {}
+		for key, (convertedKey, handler) in self.ticket_name_map.items():
+			value = response['info']['queryLeftNewDetailDTO'][key]
+			if handler:
+				value = handler(value)
+			response['ticket'][convertedKey] = value
+
+		return Response(response)
+
+	def post(self, request):
+		print(request.data)
+		self.manager.confirmOrder(request.data)
+		return Response({'code': 1})

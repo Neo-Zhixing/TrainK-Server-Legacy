@@ -2,12 +2,12 @@
   <div class="d-flex flex-row text-center justify-content-around align-items-center">
     <div>
       <b-badge v-if="ticket.departureStation === ticket.originStation" variant="primary">始</b-badge>
-      <b-badge v-else>过</b-badge>
+      <b-badge v-else-if="ticket.originStation">过</b-badge>
       {{ stationmap ? stationmap[ticket.departureStation] : ticket.departureStation }}
-      <h2>{{ ticket.status === 0 ? ticket.departureTime : '----' }}</h2>
+      <h2>{{ active ? ticket.departureTime : '----' }}</h2>
     </div>
     <div style="width: 10rem;">
-      <template v-if="ticket.status === 0">
+      <template v-if="active">
         {{ticket.duration}}
       </template>
       <div v-else class="text-danger">列车停运</div>
@@ -20,9 +20,9 @@
     </div>
     <div>
       <b-badge v-if="ticket.arrivalStation === ticket.destinationStation" variant="primary">终</b-badge>
-      <b-badge v-else>过</b-badge>
+      <b-badge v-else-if="ticket.destinationStation">过</b-badge>
       {{ stationmap ? stationmap[ticket.arrivalStation] : ticket.arrivalStation }}
-      <h2>{{ ticket.status === 0 ? ticket.arrivalTime : '----' }}</h2>
+      <h2>{{ active ? ticket.arrivalTime : '----' }}</h2>
     </div>
     <div v-if="showSeats">
       <ul class="list-unstyled">
@@ -47,6 +47,9 @@ export default {
     showSeats: Boolean
   },
   computed: {
+    active () {
+      return this.ticket.status === 0 || this.ticket.status === undefined
+    },
     arrivalDay () {
       if (!this.ticket || !this.ticket.departureTime || !this.ticket.duration) return null
       var hour = Number(this.ticket.departureTime.substring(0, 2)) + Number(this.ticket.duration.substring(0, 2))

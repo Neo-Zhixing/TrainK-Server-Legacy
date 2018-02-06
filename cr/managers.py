@@ -38,18 +38,18 @@ keyMap = [
 	('status', int),
 	('seats', [
 		('gg_num', ticketType),
-		('A6', ticketType),
+		('6', ticketType),
 		('MIN', ticketType),
-		('A4', ticketType),
-		('A2', ticketType),
+		('4', ticketType),
+		('2', ticketType),
 		('P', ticketType),
 		('WZ', ticketType),
 		('yb_num', ticketType),
-		('A3', ticketType),
-		('A1', ticketType),
+		('3', ticketType),
+		('1', ticketType),
 		('O', ticketType),
 		('M', ticketType),
-		('A9', ticketType),
+		('9', ticketType),
 		('F', ticketType)
 	]),
 	('yp_ex', str),
@@ -123,17 +123,9 @@ class DataManager:
 
 	captcha_url = 'https://kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand'
 
-	def get_login_captcha_stream(self):
+	def get_login_captcha(self):
 		response = self.session.get(self.captcha_url, stream=True)
-
-		def url2yield():
-			chunk = True
-			while chunk:
-				chunk = response.raw.read(128)
-				if not chunk:
-					break
-				yield chunk
-		return url2yield()
+		return response.content
 
 	captcha_check_url = 'https://kyfw.12306.cn/passport/captcha/captcha-check'
 	login_url = 'https://kyfw.12306.cn/passport/web/login'
@@ -243,22 +235,37 @@ class DataManager:
 				'details': 'No Order Info'
 			}
 		response = response.text
-		submit_token = re.search(r"var globalRepeatSubmitToken = '(\S+)'", response).group(1)
-		passenger = re.search(r'var ticketInfoForPassengerForm=(\{.+\})?', response).group(1)
-		passenger = json.loads(passenger.replace("'", '"'))
-		order_request = re.search(r'var orderRequestDTO=(\{.+\})?', response).group(1)
-		order_request = json.loads(order_request.replace("'", '"'))
+		submit_token = re.search(r"var globalRepeatSubmitToken = '(\S+)'", response)
+		info = re.search(r'var ticketInfoForPassengerForm=(\{.+\})?', response)
+		if not (submit_token and info):
+			return {
+				'code': 2,
+				'details': 'Parse Error'
+			}
+		submit_token = submit_token.group(1)
+		self.request.session['CRSubmitToken'] = submit_token
+		info = json.loads(info.group(1).replace("'", '"'))
 		result = {
 			'code': 0,
 			'token': submit_token,
-			'passenger': passenger,
-			'order': order_request
+			'info': info
 		}
 
 		response = self.session.post(self.passenger_info_url, data={
 			'REPEAT_SUBMIT_TOKEN': submit_token
-		}).json()
+		}, allow_redirects=False)
+		if _redirect_response(response):
+			return {
+				'code': 1,
+				'details': 'Passenger Request Failed'
+			}
+		response = response.json()
 		if response['status']:
 			result['passengers'] = response['data']
 
 		return result
+
+	order_confirm_url = 'https://kyfw.12306.cn/otn/confirmPassenger/confirmSingleForQueue'
+
+	def confirmOrder(self, passengers):
+		pass
