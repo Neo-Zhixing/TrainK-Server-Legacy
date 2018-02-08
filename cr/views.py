@@ -183,7 +183,10 @@ class OrderView(APIView, DataManagerMixin):
 
 		return Response(response)
 
+	def put(self, request):
+		return Response(self.manager.preconfirmOrder(request.data))
+
 	def post(self, request):
 		print(request.data)
-		self.manager.confirmOrder(request.data)
-		return Response({'code': 1})
+		data = self.manager.confirmOrder(request.data)
+		return Response(data)

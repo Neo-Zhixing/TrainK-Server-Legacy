@@ -42,6 +42,7 @@
         </b-card>
         <b-card header="订单信息" class="my-3" body-class="text-center">
           333.5元
+          <b-button block variant="danger" @click="update">测试</b-button>
           <b-button block variant="primary" @click="submit">提交</b-button>
         </b-card>
       </b-col>
@@ -84,7 +85,13 @@ export default {
     submit () {
       axios.post('/cr/ticket/order/', this.selectedPassengers)
       .then(response => {
-        console.log(response)
+        console.log(response.data)
+      })
+    },
+    update () {
+      axios.put('/cr/ticket/order/', this.selectedPassengers)
+      .then(response => {
+        console.log(response.data)
       })
     },
     getPassengerTable (passenger) {

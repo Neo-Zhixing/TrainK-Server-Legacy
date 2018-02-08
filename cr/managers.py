@@ -1,6 +1,7 @@
 import requests
 import re
 import json
+import time
 from datetime import date
 
 
@@ -106,6 +107,7 @@ class DataManager:
 			print("\n\n")
 			print("-----------------------------------------")
 			print("Sending Request: " + response.request.url)
+			print("Sending:" + str(response.request.body))
 			print("Headers:" + str(response.request.headers))
 			print("Cookies:" + str(self.session.cookies))
 			print("-----------------------------------------")
@@ -160,7 +162,7 @@ class DataManager:
 		if int(response['result_code']) != 0:
 			return response
 
-		response = self.session.post('https://kyfw.12306.cn/otn/login/userLogin')
+		response = self.session.head('https://kyfw.12306.cn/otn/login/userLogin')
 
 		response = self.auth()
 		if int(response['result_code']) != 0:
@@ -243,12 +245,17 @@ class DataManager:
 				'details': 'Parse Error'
 			}
 		submit_token = submit_token.group(1)
-		self.request.session['CRSubmitToken'] = submit_token
 		info = json.loads(info.group(1).replace("'", '"'))
 		result = {
 			'code': 0,
 			'token': submit_token,
 			'info': info
+		}
+		self.request.session['CRSubmitInfo'] = {
+			'locationCode': result['info']['train_location'],
+			'ticketKeyChange': result['info']['key_check_isChange'],
+			'leftTicketStr': result['info']['leftTicketStr'],
+			'submitToken': submit_token
 		}
 
 		response = self.session.post(self.passenger_info_url, data={
@@ -266,6 +273,81 @@ class DataManager:
 		return result
 
 	order_confirm_url = 'https://kyfw.12306.cn/otn/confirmPassenger/confirmSingleForQueue'
+	order_preconfirm_url = 'https://kyfw.12306.cn/otn/confirmPassenger/checkOrderInfo'
+	queue_info_url = 'https://kyfw.12306.cn/otn/confirmPassenger/getQueueCount'
+	queue_url = 'https://kyfw.12306.cn/otn/confirmPassenger/queryOrderWaitTime'
+
+	def _get_passenger_str(self, passengers):
+		passengerStr = []
+		oldPassengerStr = []
+		for p in passengers:
+			for key, value in p.items():
+				p[key] = str(value)
+			passengerStr.append(','.join([
+				p['selectedSeat'],
+				p['selectedTicketType'],
+				p['type'],
+				p['name'],
+				p['certificateType'],
+				p['certificate'],
+				p['phone'],
+				'N'
+			]))
+			oldPassengerStr.append(','.join([
+				p['name'],
+				p['certificateType'],
+				p['certificate'],
+				p['type']
+			]))
+		return {
+			'passengerTicketStr': '_'.join(passengerStr),
+			'oldPassengerStr': '_'.join(oldPassengerStr) + '_'
+		}
+
+	def preconfirmOrder(self, passengers):
+		data = {
+			'bed_level_order_num': '000000000000000000000000000000',
+			'cancel_flag': '2',
+			'REPEAT_SUBMIT_TOKEN': self.request.session['CRSubmitInfo']['submitToken'],
+			'randCode': '',
+			'tour_flag': 'dc',
+			'whatsSelect': '1'
+		}
+		data.update(self._get_passenger_str(passengers))
+		response = self.session.post(self.order_preconfirm_url, data, allow_redirects=False)
+		if _redirect_response(response):
+			return {'code': 1, 'detail': 'Upstream Refused'}
+		result = response.json()
+
+		return result
 
 	def confirmOrder(self, passengers):
-		pass
+		data = {
+			'REPEAT_SUBMIT_TOKEN': self.request.session['CRSubmitInfo']['submitToken'],
+			'choose_seats': '1D1F',
+			'dwAll': 'N',
+			'key_check_isChange': self.request.session['CRSubmitInfo']['ticketKeyChange'],
+			'leftTicketStr': self.request.session['CRSubmitInfo']['leftTicketStr'],
+			'purpose_codes': '00',
+			'randCode': '',
+			'roomType': '00',
+			'seatDetailType': '000',
+			'train_location': self.request.session['CRSubmitInfo']['locationCode'],
+			'whatsSelect': '1'
+		}
+		data.update(self._get_passenger_str(passengers))
+		response = self.session.post(self.order_confirm_url, data, allow_redirects=False)
+		if _redirect_response(response):
+			return {'code': 1, 'detail': 'Upstream Refused'}
+		response = response.json()['data']
+		if not response['submitStatus']:
+			return {
+				'code': 2,
+				'detail': response['errMsg']
+			}
+		response = self.session.get(self.queue_url, params={
+			'random': str(round(time.time() * 1000)),
+			'REPEAT_SUBMIT_TOKEN': self.request.session['CRSubmitInfo']['submitToken'],
+			'tourFlag': 'dc'
+		})
+		return response.json()

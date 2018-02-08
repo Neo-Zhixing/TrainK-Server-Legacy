@@ -47,6 +47,16 @@ class StationDetailTemplateView(DetailView):
 			queryset = self.get_queryset()
 		return GetStation(self.kwargs[self.pk_url_kwarg], queryset)
 
+	def get_context_data(self, object, *args, **kwargs):
+		data = super(StationDetailTemplateView, self).get_context_data(object=object, *args, **kwargs)
+		data['trains'] = models.Train.objects.filter(stops__contains=[{'station': data['station'].pk}])
+		for train in data['trains']:
+			for stop in train.stops:
+				if stop['station'] == object.id:
+					train.currentStop = stop
+					break
+		return data
+
 	def get(self, request, *args, **kwargs):
 		pk = self.kwargs[self.pk_url_kwarg]
 		station = self.get_object()
