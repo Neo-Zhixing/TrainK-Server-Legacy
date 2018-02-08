@@ -4,16 +4,16 @@
       <b-col>
         <b-card body-class="d-flex flex-column flex-md-row">
           <b-button-group class="m-1 btn-block">
-            <b-button id="0" class="col" :variant="filters.order===0 ? 'primary' : 'outline-primary'" @click="rankingTypePills" disabled>综合</b-button>
-            <b-button id="1" class="col" :variant="filters.order===1 ? 'primary' : 'outline-primary'" @click="rankingTypePills">
+            <b-button class="col" :variant="filters.order===0 ? 'primary' : 'outline-primary'" @click="rankingTypePills(0)" disabled>综合</b-button>
+            <b-button class="col" :variant="filters.order===1 ? 'primary' : 'outline-primary'" @click="rankingTypePills(1)">
               出发时间
               <font-awesome-icon v-if="filters.order===1" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
             </b-button>
-            <b-button id="2" class="col" :variant="filters.order===2 ? 'primary' : 'outline-primary'" @click="rankingTypePills">
+            <b-button class="col" :variant="filters.order===2 ? 'primary' : 'outline-primary'" @click="rankingTypePills(2)">
               耗时
               <font-awesome-icon v-if="filters.order===2" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
             </b-button>
-            <b-button id="3" class="col" :variant="filters.order===3 ? 'primary' : 'outline-primary'" @click="rankingTypePills">
+            <b-button class="col" :variant="filters.order===3 ? 'primary' : 'outline-primary'" @click="rankingTypePills(3)">
               到达时间
               <font-awesome-icon v-if="filters.order===3" :icon="filters.reversed ? 'sort-down' : 'sort-up'"/>
             </b-button>
@@ -191,17 +191,7 @@ export default {
     }
   },
   methods: {
-    rankingTypePills (sender) {
-      var element = sender.toElement
-      var newOrder = 0
-      for (var i = 0; i < 5; i++) {
-        if (element.id !== '') {
-          newOrder = element.id
-          break
-        }
-        element = element.parentElement
-      }
-      newOrder = Number(newOrder)
+    rankingTypePills (newOrder) {
       if (newOrder === this.filters.order) this.filters.reversed = !this.filters.reversed
       else this.filters.order = newOrder
       this.rank()

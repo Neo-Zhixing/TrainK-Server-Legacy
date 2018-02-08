@@ -1,10 +1,10 @@
 <template>
 <b-card class="text-center" style="opacity: .95;">
   <b-nav fill tabs class="card-header-tabs" slot="header">
-    <b-nav-item :active="selectedTab === 1" id="1" @click="tripTypeTab">行程</b-nav-item>
-    <b-nav-item :active="selectedTab === 2" id="2" @click="tripTypeTab">车次</b-nav-item>
-    <b-nav-item :active="selectedTab === 3" id="3" @click="tripTypeTab">站点</b-nav-item>
-    <b-nav-item disabled :active="selectedTab === 4" id="4" @click="tripTypeTab">线路</b-nav-item>
+    <b-nav-item :active="selectedTab === 1" @click="tripTypeTab(1)">行程</b-nav-item>
+    <b-nav-item :active="selectedTab === 2" @click="tripTypeTab(2)">车次</b-nav-item>
+    <b-nav-item :active="selectedTab === 3" @click="tripTypeTab(3)">站点</b-nav-item>
+    <b-nav-item disabled :active="selectedTab === 4" @click="tripTypeTab(4)">线路</b-nav-item>
   </b-nav>
   <b-form id="info-form" @submit.prevent="submit">
     <route-input required v-if="selectedTab === 1" v-model="stations" />
@@ -35,8 +35,8 @@
       }
     },
     methods: {
-      tripTypeTab (sender) {
-        this.selectedTab = Number(sender.target.parentElement.id)
+      tripTypeTab (id) {
+        this.selectedTab = id
         this.value = null
         this.stations.departureStation = null
         this.stations.arrivalStation = null

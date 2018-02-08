@@ -9,10 +9,9 @@
   class="captcha-component"
   v-for="(cursor, index) in cursors"
   :data-index="index"
-  :id="'cr-captcha-cursor-' + index"
   :key="cursor.x + '-' + cursor.y"
   :style="{left: `calc(${cursor.x*100}% - 8px)`, top: `calc(${cursor.y*100}% - 8px)`}"
-  @click.right.prevent="removeCursor" />
+  @click.right.prevent="removeCursor(index)" />
 </div>
 </template>
 
@@ -55,11 +54,8 @@ export default {
       })
       this.$emit('input', this.stringValue)
     },
-    removeCursor (event) {
-      let target = event.target
-      if (target.tagName !== 'svg') target = target.parentElement
-      console.log(target.id)
-      this.cursors.splice(target.id.slice(-1), 1)
+    removeCursor (index) {
+      this.cursors.splice(index, 1)
       this.$emit('input', this.stringValue)
     },
     reloadCaptcha () {

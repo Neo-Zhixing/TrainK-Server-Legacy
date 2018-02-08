@@ -24,7 +24,7 @@
       {{ stationmap ? stationmap[ticket.arrivalStation] : ticket.arrivalStation }}
       <h2>{{ active ? ticket.arrivalTime : '----' }}</h2>
     </div>
-    <div v-if="showSeats">
+    <div v-if="showSeats" class="text-right">
       <ul class="list-unstyled">
         <li v-for="info in ticketInfo">
           {{info.key}}<b-badge :variant="info.badge">{{info.value}}</b-badge>
