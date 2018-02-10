@@ -43,11 +43,7 @@ class MethodPermissionMixin:
     method_permission_classes = {}
 
     def get_permissions(self):
-        """
-        Instantiates and returns the list of permissions that this view and request method requires.
-        """
         permissions = self.method_permission_classes[self.request.method] \
             if self.request.method in self.method_permission_classes \
             else self.permission_classes
-        print(permissions)
         return [permission() for permission in permissions]

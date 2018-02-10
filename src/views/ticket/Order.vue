@@ -44,6 +44,7 @@
           333.5元
           <b-button block variant="danger" @click="update">测试</b-button>
           <b-button block variant="primary" @click="submit">提交</b-button>
+          <b-button block variant="warning" @click="queue">排队</b-button>
         </b-card>
       </b-col>
     </b-row>
@@ -84,6 +85,12 @@ export default {
   methods: {
     submit () {
       axios.post('/cr/ticket/order/', this.selectedPassengers)
+      .then(response => {
+        console.log(response.data)
+      })
+    },
+    queue () {
+      axios.patch('/cr/ticket/order/')
       .then(response => {
         console.log(response.data)
       })

@@ -187,6 +187,9 @@ class OrderView(APIView, DataManagerMixin):
 		return Response(self.manager.preconfirmOrder(request.data))
 
 	def post(self, request):
-		print(request.data)
 		data = self.manager.confirmOrder(request.data)
 		return Response(data)
+
+	def patch(self, request):
+		data = self.manager.queue()
+		return Response(data['data'])

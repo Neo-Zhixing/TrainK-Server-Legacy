@@ -227,6 +227,7 @@ class DataManager:
 		if not response['status']:  # 可能是secret过期。这里需要确认。
 			response['code'] = 2
 			return response
+		self.request.session['CRTicket'] = ticket
 		return {'code': 0}
 
 	def orderInfo(self):
@@ -255,7 +256,8 @@ class DataManager:
 			'locationCode': result['info']['train_location'],
 			'ticketKeyChange': result['info']['key_check_isChange'],
 			'leftTicketStr': result['info']['leftTicketStr'],
-			'submitToken': submit_token
+			'submitToken': submit_token,
+			'info': result['info']['queryLeftNewDetailDTO']
 		}
 
 		response = self.session.post(self.passenger_info_url, data={
@@ -319,6 +321,22 @@ class DataManager:
 			return {'code': 1, 'detail': 'Upstream Refused'}
 		result = response.json()
 
+		data = {
+			'fromStationTelecode': self.request.session['CRSubmitInfo']['info']['from_station_telecode'],
+			'toStationTelecode': self.request.session['CRSubmitInfo']['info']['to_station_telecode'],
+			'station_train_code': self.request.session['CRSubmitInfo']['info']['station_train_code'],
+			'leftTicket': self.request.session['CRSubmitInfo']['leftTicketStr'],
+			'purpose_codes': '00',
+			'REPEAT_SUBMIT_TOKEN': self.request.session['CRSubmitInfo']['submitToken'],
+			'seatType': passengers[0]['selectedSeat'],
+			'train_date': time.strftime('%a %b %d %Y %H:%M:%S  GMT+0800', time.strptime(self.request.session['CRTicket']['date'], '%Y-%m-%d')),
+			'train_location': self.request.session['CRSubmitInfo']['locationCode'],
+			'train_no': self.request.session['CRSubmitInfo']['info']['train_no']
+		}
+		response = self.session.post(self.queue_info_url, data=data)
+		print(data)
+		result['queue'] = response.json()
+
 		return result
 
 	def confirmOrder(self, passengers):
@@ -339,15 +357,16 @@ class DataManager:
 		response = self.session.post(self.order_confirm_url, data, allow_redirects=False)
 		if _redirect_response(response):
 			return {'code': 1, 'detail': 'Upstream Refused'}
-		response = response.json()['data']
-		if not response['submitStatus']:
-			return {
-				'code': 2,
-				'detail': response['errMsg']
-			}
+		response = response.json()
+		if not response['data']['submitStatus']:
+			return response['data']['errMsg']
+		return self.queue()
+
+	def queue(self):
 		response = self.session.get(self.queue_url, params={
 			'random': str(round(time.time() * 1000)),
+			'tourFlag': 'dc',
+			'_json_att': '',
 			'REPEAT_SUBMIT_TOKEN': self.request.session['CRSubmitInfo']['submitToken'],
-			'tourFlag': 'dc'
 		})
 		return response.json()
