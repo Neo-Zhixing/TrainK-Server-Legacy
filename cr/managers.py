@@ -4,6 +4,10 @@ import json
 import time
 from datetime import date
 
+from . import exceptions
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import authentication
+
 
 def ticketType(value):
 	if value == '有':
@@ -71,15 +75,11 @@ def _parse(values, currentKeyMap=keyMap):
 	return parsedValue
 
 
-def ParseTicketStr(ticket_str, date):
-	values = ticket_str.split('|')
-	result = _parse(values)
-	result['date'] = date
-	return result
-
-
-def _redirect_response(response):
-	return response.status_code in {requests.codes.found, requests.codes.moved}
+class CRIsAuthenticated(authentication.BaseAuthentication):
+	def authenticate(self, request):
+		manager = DataManager(self.request)
+		manager.check_session_status()
+		return (request.user, None)
 
 
 class DataManager:
@@ -134,10 +134,6 @@ class DataManager:
 	auth_url = 'https://kyfw.12306.cn/passport/web/auth/uamtk'
 	login_complete_url = 'https://kyfw.12306.cn/otn/uamauthclient'
 
-	def auth(self):
-		response = self.session.post(self.auth_url, data={'appid': 'otn'})
-		return response.json()
-
 	def login(self, username, password, captcha):
 		response = self.session.post(self.captcha_check_url, {
 			'answer': captcha,
@@ -153,18 +149,13 @@ class DataManager:
 			'password': password,
 			'appid': 'otn'
 		}, allow_redirects=False)
-		if response.status_code == requests.codes.moved or response.status_code == requests.codes.found:
-			return {
-				'code': 8,
-				'detail': 'upstream server refused the connection.'
-			}
 		response = response.json()
 		if int(response['result_code']) != 0:
 			return response
 
 		response = self.session.head('https://kyfw.12306.cn/otn/login/userLogin')
 
-		response = self.auth()
+		response = self.session.post(self.auth_url, data={'appid': 'otn'}).json()
 		if int(response['result_code']) != 0:
 			return response
 
@@ -181,13 +172,13 @@ class DataManager:
 			'leftTicketDTO.to_station': to_station.telecode,
 			'purpose_codes': 'ADULT'
 		})
-		if response.status_code == requests.codes.moved or response.status_code == requests.codes.found:
-			return {
-				'code': 1,
-				'detail': 'upstream server refused the connection.'
-			}
 		response = response.json()['data']
 
+		def ParseTicketStr(ticket_str, date):
+			values = ticket_str.split('|')
+			result = _parse(values)
+			result['date'] = date
+			return result
 		results = [ParseTicketStr(ticketStr, date) for ticketStr in response['result']]
 		return {
 			'code': 0,
@@ -202,16 +193,15 @@ class DataManager:
 	passenger_info_url = 'https://kyfw.12306.cn/otn/confirmPassenger/getPassengerDTOs'
 
 	def check_session_status(self):
+		if not hasattr(self.request.user, 'cr_profile'):
+			raise AuthenticationFailed('No associated 12306 account')
 		response = self.session.get(self.user_check_url).json()
+		print(response)
+		if not response['data']['flag']:
+			raise AuthenticationFailed('12306 not authenticated')
 		return response
 
 	def placeOrder(self, ticket, queryset):
-		response = self.check_session_status()
-		if not response['data']['flag']:
-			return {
-				'code': 1,
-				'detail': 'CR Login Required'
-			}
 		response = self.session.post(self.order_url, data={
 			'secretStr': requests.utils.unquote(ticket['secret']),
 			'train_date': ticket['date'],
@@ -221,30 +211,18 @@ class DataManager:
 			'query_from_station_name': queryset.get(telecode=ticket['departureStation']).name,
 			'query_to_station_name': queryset.get(telecode=ticket['arrivalStation']).name
 		}, allow_redirects=False)
-		if _redirect_response(response):
-			return {'code': 1}
 		response = response.json()
-		if not response['status']:  # 可能是secret过期。这里需要确认。
-			response['code'] = 2
-			return response
+		if not response['status']:
+			raise exceptions.CredentialOutdated
 		self.request.session['CRTicket'] = ticket
-		return {'code': 0}
 
 	def orderInfo(self):
 		response = self.session.post(self.order_token_url, allow_redirects=False)
-		if _redirect_response(response):
-			return {
-				'code': 1,
-				'details': 'No Order Info'
-			}
 		response = response.text
 		submit_token = re.search(r"var globalRepeatSubmitToken = '(\S+)'", response)
 		info = re.search(r'var ticketInfoForPassengerForm=(\{.+\})?', response)
 		if not (submit_token and info):
-			return {
-				'code': 2,
-				'details': 'Parse Error'
-			}
+			raise exceptions.UpstreamDataError
 		submit_token = submit_token.group(1)
 		info = json.loads(info.group(1).replace("'", '"'))
 		result = {
@@ -263,11 +241,6 @@ class DataManager:
 		response = self.session.post(self.passenger_info_url, data={
 			'REPEAT_SUBMIT_TOKEN': submit_token
 		}, allow_redirects=False)
-		if _redirect_response(response):
-			return {
-				'code': 1,
-				'details': 'Passenger Request Failed'
-			}
 		response = response.json()
 		if response['status']:
 			result['passengers'] = response['data']
@@ -317,8 +290,6 @@ class DataManager:
 		}
 		data.update(self._get_passenger_str(passengers))
 		response = self.session.post(self.order_preconfirm_url, data, allow_redirects=False)
-		if _redirect_response(response):
-			return {'code': 1, 'detail': 'Upstream Refused'}
 		result = response.json()
 
 		data = {
@@ -355,8 +326,6 @@ class DataManager:
 		}
 		data.update(self._get_passenger_str(passengers))
 		response = self.session.post(self.order_confirm_url, data, allow_redirects=False)
-		if _redirect_response(response):
-			return {'code': 1, 'detail': 'Upstream Refused'}
 		response = response.json()
 		if not response['data']['submitStatus']:
 			return response['data']['errMsg']
@@ -370,3 +339,20 @@ class DataManager:
 			'REPEAT_SUBMIT_TOKEN': self.request.session['CRSubmitInfo']['submitToken'],
 		})
 		return response.json()
+
+	# 以下为用户面板有关方法
+	# 用户面板/常用联系人
+	user_contact_url = 'https://kyfw.12306.cn/otn/passengers/init'
+
+	def userContacts(self):
+		response = self.session.get(self.user_contact_url).text
+		passengers = re.search(r'var passengers=(\[.+\]);', response)
+		if not passengers:
+			raise exceptions.UpstreamDataError
+		passengers = passengers.group(1).replace("'", '"')
+		print(passengers)
+		try:
+			passengers = json.loads(passengers)
+		except json.decoder.JSONDecodeError:
+			raise exceptions.UpstreamDataError('Upstream server returned corrupted JSON data.')
+		return passengers

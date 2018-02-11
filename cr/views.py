@@ -9,7 +9,7 @@ from rest_framework.exceptions import ParseError, NotFound
 from info.views import GetStation
 from info.models import Station
 from utils.mixins import MethodPermissionMixin
-from .managers import DataManager
+from .managers import DataManager, CRIsAuthenticated
 from .serializers import ProfileSerializer
 
 
@@ -29,33 +29,23 @@ class UserView(RetrieveAPIView):
 		return self.request.user.cr_profile
 
 
+class UserPassengerView(APIView, DataManagerMixin):
+	permission_classes = (CRIsAuthenticated,)
+
+	def get(self, request):
+		data = self.manager.userContacts()
+		return Response(data)
+
+
 def CaptchaView(request):
 	manager = DataManager(request)
 	return HttpResponse(manager.get_login_captcha(), content_type="image/jpeg")
 
 
 class SessionView(APIView, DataManagerMixin):
-	def convert_result(self, result):
-		if 'result_message' in result:
-			result['detail'] = result.pop('result_message')
-		if 'result_code' in result:
-			result['code'] = int(result.pop('result_code'))
-		result.pop('apptk', None)
-		result.pop('newapptk', None)
-		return result
-
 	def get(self, request):
-		if hasattr(request.user, 'cr_profile'):
-			status = self.convert_result(self.manager.check_session_status())
-			code = 0 if status['data']['flag'] else 1
-		else:
-			code = 2
-		return Response({
-			'code': code,
-			'message': ['Logged in', 'Unauthenticated', 'No associated 12306 account'][code]
-		})
-
-		return Response(status)
+		self.manager.check_session_status()
+		return Response(None, status=status.HTTP_204_NO_CONTENT)
 
 	def post(self, request):
 		data = request.data
@@ -97,7 +87,7 @@ class SessionView(APIView, DataManagerMixin):
 
 class TicketView(MethodPermissionMixin, APIView, DataManagerMixin):
 	method_permission_classes = {
-		'POST': (IsAuthenticated, )
+		'POST': (CRIsAuthenticated, )
 	}
 
 	@never_cache
@@ -116,8 +106,8 @@ class TicketView(MethodPermissionMixin, APIView, DataManagerMixin):
 		return Response(result, status=status_codes[result['code']])
 
 	def post(self, request):
-		response = self.manager.placeOrder(request.data, Station.objects)
-		return Response(response, [status.HTTP_200_OK, status.HTTP_403_FORBIDDEN, status.HTTP_410_GONE][response['code']])
+		self.manager.placeOrder(request.data, Station.objects)
+		return Response(None, status.HTTP_204_NO_CONTENT)
 
 
 class OrderView(APIView, DataManagerMixin):

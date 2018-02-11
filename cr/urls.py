@@ -5,6 +5,7 @@ urlpatterns = [
 	path('ticket/', views.TicketView.as_view()),
 	path('ticket/order/', views.OrderView.as_view()),
 	path('user/', views.UserView.as_view()),
+	path('user/passenger/', views.UserPassengerView.as_view()),
 	path('user/session/captcha', views.CaptchaView),
 	path('user/session/', views.SessionView.as_view())
 ]

@@ -34,7 +34,12 @@ export default {
     axios.get('/cr/user/session/')
     .then(response => {
       console.log(response.data)
-      this.loggedIn = response.data.code === 0
+      this.loggedIn = true
+    })
+    .catch(error => {
+      if (error.response) {
+        if (error.response.status === 403) this.loggedIn = false
+      }
     })
   },
   methods: {

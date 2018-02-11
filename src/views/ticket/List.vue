@@ -76,6 +76,7 @@
 <script>
 import TrainTypeMap from '@/utils/TrainTypeMap'
 import axios from 'axios'
+import moment from 'moment'
 import Ticket from '@/components/ticket/Ticket'
 import RouteInput from '@/components/ticket/RouteInputPanel'
 import DetailView from './Detail'
@@ -231,14 +232,13 @@ export default {
       let key = ['', 'departureTime', 'duration', 'arrivalTime'][this.filters.order]
       tickets.sort((a, b) => {
         if (a.status !== 0) return true  // 停运的车永远排在最下面
-        let aTime = a[key]
-        let bTime = b[key]
-        var result
-        if (aTime.slice(0, 2) === bTime.slice(0, 2)) result = Number(aTime.slice(3, 5)) > Number(bTime.slice(3, 5))
-        else result = Number(aTime.slice(0, 2)) > Number(bTime.slice(0, 2))
-        if (this.filters.reversed) result = !result
+        let aTime = moment.duration(a[key])
+        let bTime = moment.duration(b[key])
+        let result = aTime.asMinutes() - bTime.asMinutes()
+        if (this.filters.reversed) result = -result // 坑：WebKit浏览器无法接受返回Boolean。必须返回Interger。
         return result
       })
+      console.log(tickets)
       this.currentTickets = tickets
     },
     ticketList () {
