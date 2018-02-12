@@ -2,11 +2,11 @@
   <div>
     <b-row>
       <b-col cols="4">
-        <b-img rounded="circle" :src="avatar" />
+        <b-img rounded="circle" :src="`//gravatar.tra.ink/avatar/${user.hash}`" />
       </b-col>
       <b-col cols="8">
-        {{name}}
-        {{email}}
+        {{user.username}}
+        {{user.email}}
       </b-col>
     </b-row>
     <b-button-group class="btn-block mt-2">
@@ -24,41 +24,31 @@
 
 
 <script>
-import axios from 'axios'
+import { authStates } from '@/base'
 import { faSignOutAlt, faCloud, faSpinner } from '@fortawesome/fontawesome-free-solid'
 import fontawesome from '@fortawesome/fontawesome'
 fontawesome.library.add(faSignOutAlt, faCloud, faSpinner)
 
 export default {
-  props: {
-    email: String,
-    hash: String,
-    name: String
-  },
   data () {
     return {
       loading: false,
       errorMessage: null
     }
   },
-  computed: {
-    avatar () {
-      return `//gravatar.tra.ink/avatar/${this.hash}`
-    }
-  },
+  computed: authStates,
   methods: {
     logout () {
       this.errorMessage = null
       this.loading = true
-      axios.delete('/user/session/')
-      .then((response) => {
+      this.$store.dispatch('logout')
+      .then(user => {
         this.loading = false
-        this.$emit('loggedOut')
       })
-      .catch((error) => {
+      .catch(error => {
         this.loading = false
-        if (error.response) this.errorMessages = error.response.data
-        else this.errorMessage = error.message
+        if (error.response) this.errorMessages = error.response.data.non_field_errors
+        else this.errorMessages = [error.message]
       })
     }
   }

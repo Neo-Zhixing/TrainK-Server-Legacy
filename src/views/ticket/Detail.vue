@@ -78,9 +78,10 @@ export default {
       })
       .catch(error => {
         if (error.response) {
-          if (error.response.status === 403) {
-            this.authenticated = error.response.data.code !== undefined
-            this.crauthenticated = error.response.data.code !== 1
+          if (error.response.status === 403) this.authenticated = false
+          else if (error.response.status === 401) {
+            this.authenticated = true
+            this.crauthenticated = false
           } else if (error.response.status === 410) {
             this.authenticated = true
             this.crauthenticated = true

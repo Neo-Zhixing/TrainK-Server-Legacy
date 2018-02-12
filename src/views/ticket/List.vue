@@ -249,7 +249,7 @@ export default {
           'to': this.$route.query.to
         }
       })
-      .then((response) => {
+      .then(response => {
         let data = response.data
         this.stationMap = data.nameMap
         this.tickets = data.results
@@ -260,7 +260,8 @@ export default {
         }]
         this.rank()
       })
-      .catch(function (error) {
+      .catch(error => {
+        this.loading = false
         console.log(error)
       })
     },

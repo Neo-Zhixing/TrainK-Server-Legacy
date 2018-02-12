@@ -5,8 +5,6 @@ import time
 from datetime import date
 
 from . import exceptions
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework import authentication
 
 
 def ticketType(value):
@@ -75,13 +73,6 @@ def _parse(values, currentKeyMap=keyMap):
 	return parsedValue
 
 
-class CRIsAuthenticated(authentication.BaseAuthentication):
-	def authenticate(self, request):
-		manager = DataManager(self.request)
-		manager.check_session_status()
-		return (request.user, None)
-
-
 class DataManager:
 	cookie_name = 'CRCookies'
 	default_user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36'
@@ -114,6 +105,8 @@ class DataManager:
 			print("Received Response: " + ('Streamed Data' if kwargs['stream'] else response.text[0:100] + '...'))
 			print("Cookies:" + str(response.cookies))
 			print("-----------------------------------------")
+			if response.status_code in {requests.codes.moved, requests.codes.found}:
+				raise exceptions.UpstreamRefused
 			cookieJar = requests.utils.dict_from_cookiejar(self.session.cookies)
 			cookieJar.update(requests.utils.dict_from_cookiejar(response.cookies))
 			self.request.session[self.cookie_name] = cookieJar
@@ -194,12 +187,9 @@ class DataManager:
 
 	def check_session_status(self):
 		if not hasattr(self.request.user, 'cr_profile'):
-			raise AuthenticationFailed('No associated 12306 account')
+			return False
 		response = self.session.get(self.user_check_url).json()
-		print(response)
-		if not response['data']['flag']:
-			raise AuthenticationFailed('12306 not authenticated')
-		return response
+		return response['data']['flag']
 
 	def placeOrder(self, ticket, queryset):
 		response = self.session.post(self.order_url, data={
@@ -305,7 +295,6 @@ class DataManager:
 			'train_no': self.request.session['CRSubmitInfo']['info']['train_no']
 		}
 		response = self.session.post(self.queue_info_url, data=data)
-		print(data)
 		result['queue'] = response.json()
 
 		return result

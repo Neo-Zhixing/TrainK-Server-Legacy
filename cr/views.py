@@ -9,8 +9,18 @@ from rest_framework.exceptions import ParseError, NotFound
 from info.views import GetStation
 from info.models import Station
 from utils.mixins import MethodPermissionMixin
-from .managers import DataManager, CRIsAuthenticated
+from .managers import DataManager
 from .serializers import ProfileSerializer
+
+
+class IsCRAuthenticated(IsAuthenticated):
+	message = '12306 Login Required'
+
+	def has_permission(self, request, view):
+		if not super(IsCRAuthenticated, self).has_permission(request, view):
+			return False
+		manager = DataManager(request)
+		return manager.check_session_status()
 
 
 class DataManagerMixin:
@@ -30,7 +40,7 @@ class UserView(RetrieveAPIView):
 
 
 class UserPassengerView(APIView, DataManagerMixin):
-	permission_classes = (CRIsAuthenticated,)
+	permission_classes = (IsCRAuthenticated,)
 
 	def get(self, request):
 		data = self.manager.userContacts()
@@ -70,24 +80,12 @@ class SessionView(APIView, DataManagerMixin):
 
 		if result['code'] == 0:
 			serializer.save()
-
-		status_codes = [
-			status.HTTP_202_ACCEPTED,     # Success
-			status.HTTP_403_FORBIDDEN,    # Password/Email/Phone Wrong
-			status.HTTP_403_FORBIDDEN,    # Unknown
-			status.HTTP_403_FORBIDDEN,    # Unknown
-			status.HTTP_403_FORBIDDEN,    # Captcha Success
-			status.HTTP_403_FORBIDDEN,    # Captcha Failed
-			status.HTTP_403_FORBIDDEN,    # Unknown
-			status.HTTP_410_GONE,         # Captcha Outdated
-			status.HTTP_502_BAD_GATEWAY,  # Upstream Refused
-		]
-		return Response(result, status=status_codes[result['code']])
+		return Response(result)
 
 
 class TicketView(MethodPermissionMixin, APIView, DataManagerMixin):
 	method_permission_classes = {
-		'POST': (CRIsAuthenticated, )
+		'POST': (IsCRAuthenticated, )
 	}
 
 	@never_cache

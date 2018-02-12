@@ -2,7 +2,7 @@
   <b-navbar tag="div" id="navbar" toggleable="md" variant="primary" type="dark">
     <b-container>
       <b-navbar-brand href="/">
-        <font-awesome-icon class="mr-1" :icon="['traink', 'logo']" />
+        <font-awesome-icon size="lg" class="mr-1" :icon="['traink', 'logo']" />
         <b>Train<span class="text-theme">K</span></b>
       </b-navbar-brand>
       <b-button-group class="d-md-none">
@@ -27,13 +27,13 @@
       </b-button>
       <b-popover
         target="navbar-popover-trigger"
-        triggers="click blur"
+        triggers="click"
         placement="bottomleft"
         @show="userPopoverShown=true"
         @hide="userPopoverShown=false">
         <b-container fluid class="py-2">
-          <glimpse v-if="user" @loggedOut="user = null" :email="user.email" :hash="user.hash" :name="user.username" />
-          <login-view v-else @login="login" />
+          <glimpse v-if="user" />
+          <login-view v-else />
         </b-container>
       </b-popover>
     </b-container>
@@ -41,9 +41,9 @@
 </template>
 
 <script>
-import axios from 'axios'
 import LoginView from '@/components/user/Login'
 import Glimpse from '@/components/user/Glimpse'
+import { authStates } from '@/base'
 import {
   faTrain,
   faBars,
@@ -73,35 +73,25 @@ export default {
   },
   data () {
     return {
-      user: null,
       userPopoverShown: false,
       expanded: false
     }
   },
   mounted () {
     if (this.authenticated) {
-      this.user = {
+      this.$store.commit('login', {
         'email': this.email,
         'hash': this.hash,
         'username': this.username,
         'first_name': this.firstname,
         'last_name': this.lastname,
         'id': this.id
-      }
-    }
-  },
-  methods: {
-    login () {
-      axios.get('/user/')
-      .then((response) => {
-        this.user = response.data
       })
     }
   },
   computed: {
-    location () {
-      return window.location.pathname.split('/')[1]
-    }
+    location: () => window.location.pathname.split('/')[1],
+    ...authStates
   },
   components: { LoginView, Glimpse }
 }
