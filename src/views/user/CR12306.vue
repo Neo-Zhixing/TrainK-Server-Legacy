@@ -33,13 +33,7 @@ export default {
   mounted () {
     axios.get('/cr/user/session/')
     .then(response => {
-      console.log(response.data)
-      this.loggedIn = true
-    })
-    .catch(error => {
-      if (error.response) {
-        if (error.response.status === 403) this.loggedIn = false
-      }
+      this.loggedIn = response.data.loggedIn
     })
   },
   methods: {

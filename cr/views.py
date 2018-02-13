@@ -54,8 +54,8 @@ def CaptchaView(request):
 
 class SessionView(APIView, DataManagerMixin):
 	def get(self, request):
-		self.manager.check_session_status()
-		return Response(None, status=status.HTTP_204_NO_CONTENT)
+		loggedIn = self.manager.check_session_status()
+		return Response({'loggedIn': loggedIn})
 
 	def post(self, request):
 		data = request.data

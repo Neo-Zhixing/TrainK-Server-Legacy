@@ -1,13 +1,1 @@
 {% extends "./base.html" %}
-{% load render_bundle from webpack_loader %}
-
-{% block css %}
-{{ block.super }}
-{% render_bundle 'user' 'css' %}
-{% endblock css %}
-
-
-{% block content %}
-<div id="app"></div>
-{% render_bundle 'user' 'js' %}
-{% endblock content %}
