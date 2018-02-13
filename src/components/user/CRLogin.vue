@@ -1,17 +1,15 @@
 <template>
-  <b-card :header="horizontal ? null : '账号登录'">
-    <form @submit.prevent="login" :class="{'row': horizontal}">
-      <div :class="{'col-lg-6': horizontal}">
-        <div class="rounded p-2 border" :class="(error ? error.code === 5 : false) ? 'border-danger' : 'border-light'">
-          <c-r-captcha ref="captcha" @input="newValue => { loginForm.captcha = newValue }" />
-        </div>
+  <b-card header="12306账号登录">
+    <form @submit.prevent="login">
+      <div class="rounded p-2 border" :class="(error ? error.code === 5 : false) ? 'border-danger' : 'border-light'">
+        <c-r-captcha ref="captcha" @input="newValue => { loginForm.captcha = newValue }" />
       </div>
-      <div :class="{'col-lg-6': horizontal}">
-        <b-form-group label="用户名：" label-for="cr-username">
-          <b-form-input id="cr-username" v-model="loginForm.username" :disabled="crPasswordSave.username" />
+      <div>
+        <b-form-group label="用户名：" label-for="cr-username" v-if="crPasswordSave && !crPasswordSave.username">
+          <b-form-input id="cr-username" v-model="loginForm.username" />
         </b-form-group>
-        <b-form-group label="密码：" label-for="cr-password">
-          <b-form-input id="cr-password" type="password" v-model="loginForm.password" :disabled="crPasswordSave.password" />
+        <b-form-group label="密码：" label-for="cr-password" v-if="crPasswordSave && !crPasswordSave.password">
+          <b-form-input id="cr-password" type="password" v-model="loginForm.password" />
         </b-form-group>
         <b-form-checkbox
         value="accepted"
@@ -22,7 +20,7 @@
 
         <p class="text-danger">{{error ? error.detail : null}}</p>
         <b-button-group class="btn-block mt-2">
-          <b-button variant="primary" class="col-8" type="submit" :disabled="!(loginForm.captcha && loginForm.username && (loginForm.password || crPasswordSave.password))"> 
+          <b-button variant="primary" class="col-8" type="submit" :disabled="!(loginForm.captcha && loginForm.username && (loginForm.password || (crPasswordSave && crPasswordSave.password)))"> 
             登录
             <font-awesome-icon :icon="loading ? 'spinner' : 'sign-in-alt'" :spin="loading" />
           </b-button>
@@ -42,9 +40,6 @@ import { faSpinner, faSignInAlt } from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(faSpinner, faSignInAlt)
 
 export default {
-  props: {
-    horizontal: Boolean
-  },
   data () {
     return {
       error: null,
@@ -68,6 +63,9 @@ export default {
     login () {
       this.error = null
       this.$store.dispatch('auth/crLogin', this.loginForm)
+      .then(() => {
+        this.$emit('login')
+      })
       .catch(error => {
         this.error = error.response.data
         this.$refs.captcha.reloadCaptcha()

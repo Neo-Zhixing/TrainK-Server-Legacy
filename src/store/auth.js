@@ -4,10 +4,7 @@ export default {
   namespaced: true,
   state: {
     crAuthenticated: false,
-    crPasswordSave: {
-      username: null,
-      password: null
-    },
+    crPasswordSave: null,
     user: null
   },
   mutations: {
@@ -57,8 +54,12 @@ export default {
       })
     },
     crLogin ({ commit, state }, data) {
+      let newPasswordSave = state.crPasswordSave
       if (state.crPasswordSave.username) delete data.username
+      else newPasswordSave.username = data.username
       if (state.crPasswordSave.password) delete data.password
+      else newPasswordSave.password = data.password
+      commit('crPasswordSave', data)
       return axios.post('/cr/user/session/', data)
       .then(response => {
         commit('crLogin')

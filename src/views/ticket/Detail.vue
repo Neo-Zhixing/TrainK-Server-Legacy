@@ -2,20 +2,13 @@
   <b-modal lazy
     ref="modal"
     title="车票详情"
-    size="lg"
+    :size="state ? 'lg' : 'md'"
     :ok-title="ticket ? ['购票', '已售空', '锁定中'][ticket.purchasability] : ''"
     :ok-disabled="ticket ? ticket.purchasability !== 0 : true"
     @ok.prevent="showOrderView"
+    @show="state=true"
   >
-    <template v-if="state">
-      <b-card class="mb-3">
-        <ticket
-          :ticket="ticket"
-          :stationmap="stationMap"
-        />
-      </b-card>
-    </template>
-    <b-card class="my-2" body-class="row" v-else-if="!user">
+    <b-card class="my-2" body-class="row" v-if="!user">
       <b-col md="6">
         您还没有登录！
       </b-col>
@@ -23,7 +16,15 @@
         <login-panel  @login="showOrderView" />
       </b-col>
     </b-card>
-    <cr-login-panel horizontal v-else-if="!crAuthenticated" @login="showOrderView"/>
+    <template v-else-if="state">
+      <b-card class="mb-3">
+        <ticket
+          :ticket="ticket"
+          :stationmap="stationMap"
+        />
+      </b-card>
+    </template>
+    <cr-login-panel v-else-if="!crAuthenticated" @login="showOrderView"/>
 
   </b-modal>
 </template>
@@ -65,16 +66,17 @@ export default {
       this.$refs.modal.show()
     },
     showOrderView () {
-      this.state = false
       axios.post('/cr/ticket/', this.ticket)
       .then(response => {
         this.$store.commit('auth/crLogin')
-        this.$router.push({name: 'PlaceOrders'})
+        this.$router.push({name: 'Ticket-Order'})
       })
       .catch(error => {
         if (error.response) {
-          if (error.response.status === 403) this.$store.commit('auth/crLogout')
-          else if (error.response.status === 410) {
+          if (error.response.status === 403) {
+            this.state = false
+            this.$store.commit('auth/crLogout')
+          } else if (error.response.status === 410) {
             this.$store.commit('auth/crLogin')
             this.$emit('reload')
             this.$refs.modal.hide()

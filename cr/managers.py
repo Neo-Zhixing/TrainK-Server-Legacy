@@ -5,6 +5,7 @@ import time
 from datetime import date
 
 from . import exceptions
+from rest_framework.exceptions import AuthenticationFailed
 
 
 def ticketType(value):
@@ -105,7 +106,8 @@ class DataManager:
 			print("Received Response: " + ('Streamed Data' if kwargs['stream'] else response.text[0:100] + '...'))
 			print("Cookies:" + str(response.cookies))
 			print("-----------------------------------------")
-			if response.status_code in {requests.codes.moved, requests.codes.found}:
+			allow_redirects = kwargs.pop('allow_redirects', True)
+			if not allow_redirects and response.status_code in {requests.codes.moved, requests.codes.found}:
 				raise exceptions.UpstreamRefused
 			cookieJar = requests.utils.dict_from_cookiejar(self.session.cookies)
 			cookieJar.update(requests.utils.dict_from_cookiejar(response.cookies))
@@ -128,33 +130,34 @@ class DataManager:
 	login_complete_url = 'https://kyfw.12306.cn/otn/uamauthclient'
 
 	def login(self, username, password, captcha):
+		def checkResponse(response, success_code=0):
+			if int(response['result_code']) != success_code: 
+				raise AuthenticationFailed(response['result_message'])
+
 		response = self.session.post(self.captcha_check_url, {
 			'answer': captcha,
 			'login_site': 'E',
 			'rand': 'sjrand'
 		}).json()
-
-		if int(response['result_code']) != 4:  # Captcha check success when 'result_code' is 4
-			return response
+		checkResponse(response, 4)
 
 		response = self.session.post(self.login_url, data={
 			'username': username,
 			'password': password,
 			'appid': 'otn'
-		}, allow_redirects=False)
-		response = response.json()
-		if int(response['result_code']) != 0:
-			return response
+		}, allow_redirects=False).json()
+		checkResponse(response)
 
 		response = self.session.head('https://kyfw.12306.cn/otn/login/userLogin')
 
 		response = self.session.post(self.auth_url, data={'appid': 'otn'}).json()
-		if int(response['result_code']) != 0:
-			return response
+		checkResponse(response)
 
-		response = self.session.post(self.login_complete_url, data={'tk': response['newapptk']})
-
-		return response.json()
+		response = self.session.post(self.login_complete_url, data={'tk': response['newapptk']}).json()
+		checkResponse(response)
+		del response['result_message']
+		del response['result_code']
+		return response
 
 	ticket_query_url = 'https://kyfw.12306.cn/otn/leftTicket/queryZ'
 
@@ -165,7 +168,10 @@ class DataManager:
 			'leftTicketDTO.to_station': to_station.telecode,
 			'purpose_codes': 'ADULT'
 		})
-		response = response.json()['data']
+		try:
+			response = response.json()['data']
+		except json.decoder.JSONDecodeError:
+			raise exceptions.UpstreamDataError
 
 		def ParseTicketStr(ticket_str, date):
 			values = ticket_str.split('|')

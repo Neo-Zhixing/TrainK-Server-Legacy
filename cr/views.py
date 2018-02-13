@@ -76,10 +76,7 @@ class SessionView(APIView, DataManagerMixin):
 			password=data['password'] if 'password' in data else request.user.cr_profile.password,
 			captcha=captcha
 		)
-		result = self.convert_result(result)
-
-		if result['code'] == 0:
-			serializer.save()
+		serializer.save()
 		return Response(result)
 
 
