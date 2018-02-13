@@ -25,6 +25,6 @@ urlpatterns = [
     path('trip/', include('trip.urls')),
     path('info/', include('info.urls')),
     path('', TemplateView.as_view(template_name='home.html')),
-    path('map/', TemplateView.as_view(template_name='map.html')),
+    path('map/', include('map.urls')),
     path('cr/', include('cr.urls'))
 ]

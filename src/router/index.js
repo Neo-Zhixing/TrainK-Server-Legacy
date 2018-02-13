@@ -5,8 +5,10 @@ Vue.use(Router)
 
 import Ticket from './ticket'
 import User from './user'
+import MetroMap from './map'
+import Trip from './trip'
 
 export default new Router({
   mode: 'history',
-  routes: [ Ticket, User ]
+  routes: [ Ticket, User, Trip, MetroMap ]
 })
