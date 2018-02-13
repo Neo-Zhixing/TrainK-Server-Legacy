@@ -1,5 +1,5 @@
 {% load user %}
-<nav id="navbar" class="sticky-top">
+<header id="navbar" class="sticky-top">
   <nav-bar
     {% if user.is_authenticated %}
       authenticated
@@ -22,4 +22,4 @@
       {% endfor %}
     </div>
   {% endif %}
-</nav>
+</header>

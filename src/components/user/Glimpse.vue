@@ -24,7 +24,7 @@
 
 
 <script>
-import { authStates } from '@/base'
+import { states } from '@/store/auth'
 import { faSignOutAlt, faCloud, faSpinner } from '@fortawesome/fontawesome-free-solid'
 import fontawesome from '@fortawesome/fontawesome'
 fontawesome.library.add(faSignOutAlt, faCloud, faSpinner)
@@ -36,12 +36,12 @@ export default {
       errorMessage: null
     }
   },
-  computed: authStates,
+  computed: states,
   methods: {
     logout () {
       this.errorMessage = null
       this.loading = true
-      this.$store.dispatch('logout')
+      this.$store.dispatch('auth/logout')
       .then(user => {
         this.loading = false
       })

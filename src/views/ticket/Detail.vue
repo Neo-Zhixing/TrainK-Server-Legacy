@@ -6,18 +6,8 @@
     :ok-title="ticket ? ['购票', '已售空', '锁定中'][ticket.purchasability] : ''"
     :ok-disabled="ticket ? ticket.purchasability !== 0 : true"
     @ok.prevent="showOrderView"
-    @show="load"
   >
-    <b-card class="my-2" body-class="row" v-if="authenticated === false">
-      <b-col md="6">
-        您还没有登录！
-      </b-col>
-      <b-col md="6">
-        <login-panel  @login="showOrderView" />
-      </b-col>
-    </b-card>
-    <cr-login-panel horizontal v-else-if="crauthenticated === false" @login="showOrderView"/>
-    <template v-else>
+    <template v-if="state">
       <b-card class="mb-3">
         <ticket
           :ticket="ticket"
@@ -25,11 +15,22 @@
         />
       </b-card>
     </template>
+    <b-card class="my-2" body-class="row" v-else-if="!user">
+      <b-col md="6">
+        您还没有登录！
+      </b-col>
+      <b-col md="6">
+        <login-panel  @login="showOrderView" />
+      </b-col>
+    </b-card>
+    <cr-login-panel horizontal v-else-if="!crAuthenticated" @login="showOrderView"/>
+
   </b-modal>
 </template>
 
 
 <script>
+import { states } from '@/store/auth'
 import TrainTypeMap from '@/utils/TrainTypeMap'
 import Ticket from '@/components/ticket/Ticket'
 import CrLoginPanel from '@/components/user/CRLogin'
@@ -40,8 +41,7 @@ export default {
   data () {
     return {
       ticket: null,
-      authenticated: null,
-      crauthenticated: null
+      state: true // False: Order Preconfirming; True: Detail Displaying
     }
   },
   computed: {
@@ -56,35 +56,26 @@ export default {
         })
       }
       return values
-    }
+    },
+    ...states
   },
   methods: {
     show (ticket) {
       this.ticket = ticket
       this.$refs.modal.show()
     },
-    load () {
-      this.authenticated = null
-      this.crauthenticated = null
-    },
     showOrderView () {
+      this.state = false
       axios.post('/cr/ticket/', this.ticket)
       .then(response => {
-        console.log(response.data)
-        this.data = response.data
-        this.authenticated = true
-        this.crauthenticated = true
+        this.$store.commit('auth/crLogin')
         this.$router.push({name: 'PlaceOrders'})
       })
       .catch(error => {
         if (error.response) {
-          if (error.response.status === 403) this.authenticated = false
-          else if (error.response.status === 401) {
-            this.authenticated = true
-            this.crauthenticated = false
-          } else if (error.response.status === 410) {
-            this.authenticated = true
-            this.crauthenticated = true
+          if (error.response.status === 403) this.$store.commit('auth/crLogout')
+          else if (error.response.status === 410) {
+            this.$store.commit('auth/crLogin')
             this.$emit('reload')
             this.$refs.modal.hide()
           }

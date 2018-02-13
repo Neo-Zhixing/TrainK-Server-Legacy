@@ -51,7 +51,7 @@ export default {
     submit () {
       this.errorMessages = []
       this.loading = true
-      this.$store.dispatch('login', this.form)
+      this.$store.dispatch('auth/login', this.form)
       .then(user => {
         this.loading = false
         console.log(user)

@@ -1,5 +1,5 @@
 <template>
-  <b-navbar tag="div" id="navbar" toggleable="md" variant="primary" type="dark">
+  <b-navbar id="navbar" toggleable="md" variant="primary" type="dark">
     <b-container>
       <b-navbar-brand href="/">
         <font-awesome-icon size="lg" class="mr-1" :icon="['traink', 'logo']" />
@@ -43,7 +43,7 @@
 <script>
 import LoginView from '@/components/user/Login'
 import Glimpse from '@/components/user/Glimpse'
-import { authStates } from '@/base'
+import { states } from '@/store/auth'
 import {
   faTrain,
   faBars,
@@ -79,7 +79,7 @@ export default {
   },
   mounted () {
     if (this.authenticated) {
-      this.$store.commit('login', {
+      this.$store.commit('auth/login', {
         'email': this.email,
         'hash': this.hash,
         'username': this.username,
@@ -87,11 +87,11 @@ export default {
         'last_name': this.lastname,
         'id': this.id
       })
-    }
+    } else this.$store.commit('auth/logout')
   },
   computed: {
     location: () => window.location.pathname.split('/')[1],
-    ...authStates
+    ...states
   },
   components: { LoginView, Glimpse }
 }
