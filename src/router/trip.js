@@ -1,17 +1,13 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+const List = () => import('@/views/trip/List.vue')
 
-import List from '@/views/trip/List.vue'
-Vue.use(Router)
-
-export default new Router({
-  mode: 'history',
-  base: '/trip',
-  routes: [
+export default {
+  path: '/trip',
+  component: { template: '<router-view />' },
+  children: [
     {
       path: '',
-      name: 'TripList',
+      name: 'Trip',
       component: List
     }
   ]
-})
+}

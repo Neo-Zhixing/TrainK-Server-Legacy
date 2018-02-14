@@ -3,7 +3,7 @@
     <b-row>
       <b-col md="3">
         <b-list-group>
-          <b-list-group-item class="d-flex" href="/trip">
+          <b-list-group-item class="d-flex" :to="{name:'Trip'}">
             <font-awesome-icon icon="suitcase" size="3x" />
             <div class="ml-3">
               <div>我的行程</div>

@@ -6,7 +6,7 @@
         <b>Train<span class="text-theme">K</span></b>
       </b-navbar-brand>
       <b-button-group class="d-md-none">
-        <b-button variant="outline-light" :href="user ? '/user/' : '/user/session/'">
+        <b-button variant="outline-light" :href="user ? '/user/setting' : '/user/session/'">
           <font-awesome-icon icon="user-circle" size="lg" />
         </b-button>
         <b-button :variant="expanded ? 'light' : 'outline-light'" aria-controls="collapse" :aria-expanded="expanded" @click="expanded = !expanded">
@@ -15,10 +15,10 @@
       </b-button-group>
       <b-collapse is-nav id="nav-collapse" v-model="expanded" class="justify-content-end">
         <b-navbar-nav>
-          <b-nav-item href="/ticket" :active="location === 'ticket'"><font-awesome-icon icon="ticket-alt"></font-awesome-icon>购票</b-nav-item>
+          <b-nav-item :to="{name:'Ticket-Home'}" :active="location === 'ticket'"><font-awesome-icon icon="ticket-alt"></font-awesome-icon>购票</b-nav-item>
           <b-nav-item href="/info" :active="location === 'info'"><font-awesome-icon icon="info-circle" />查询</b-nav-item>
           <b-nav-item disabled href="#"><font-awesome-icon icon="briefcase" />通勤</b-nav-item>
-          <b-nav-item href="/map" :active="location === 'map'"><font-awesome-icon icon="map" />地图</b-nav-item>
+          <b-nav-item :to="{name:'Map'}" :active="location === 'map'"><font-awesome-icon icon="map" />地图</b-nav-item>
           <b-nav-item disabled href="/forum" :active="location === 'forum'"><font-awesome-icon icon="comments" />社区</b-nav-item>
         </b-navbar-nav>
       </b-collapse>

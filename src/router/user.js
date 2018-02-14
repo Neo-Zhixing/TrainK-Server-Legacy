@@ -9,6 +9,7 @@ export default {
   children: [
     {
       path: '',
+      name: 'User-Setting',
       redirect: 'account'
     },
     {
