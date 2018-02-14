@@ -1,3 +1,4 @@
+{% load static %}
 {% load user %}
 <header id="navbar" class="sticky-top">
   <nav-bar
@@ -11,15 +12,61 @@
       :id="{{user.pk}}"
     {% endif %}
   >
+    <nav id="navbar" class="navbar navbar-dark bg-primary navbar-expand-md">
+      <div class="container">
+        <a href="/" class="navbar-brand">
+          <img src="{% static "icon/favicon.svg" %}" class="align-top mr-2" style="height: 2rem;"/>
+          <b>Train<span class="text-theme">K</span></b>
+        </a>
+        <div role="group" class="d-md-none btn-group">
+          <a href="{% if user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_login' %}{% endif %}" class="btn btn-outline-light">
+            <i class="fas fa-lg fa-user-circle"></i>
+          </a>
+          <button type="button" class="btn btn-outline-light" data-toggle="collapse" data-target="#nav-collapse" aria-controls="nav-collapse" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+        <div id="nav-collapse" class="navbar-collapse collapse">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a href="/ticket/" class="nav-link">
+                <i class="fas fa-ticket-alt mr-1"></i>购票
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/info/" class="nav-link active">
+                <i class="fas fa-info-circle mr-1"></i>查询
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" tabindex="-1" aria-disabled="true" class="nav-link disabled">
+                <i class="fas fa-briefcase mr-1"></i>通勤
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/map/" class="nav-link" target="_self">
+                <i class="fas fa-map mr-1"></i>地图
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/forum/" tabindex="-1" aria-disabled="true" class="nav-link disabled">
+                <i class="fas fa-comments mr-1"></i>社区
+              </a>
+            </li>
+          </ul>
+        </div>
+        <a href="{% if user.is_authenticated %}{% url 'account_settings' %}{% else %}{% url 'account_login' %}{% endif %}" class="btn btn-outline-light ml-3 d-none d-md-block">
+            <i class="fas fa-lg fa-user-circle"></i>
+        </a>
+      </div>
+    </nav>
   </nav-bar>
-
-  {% if messages %}
-    <div>
-      {% for message in messages %}
-        <b-alert show dismissible class="my-0" variant="{{ message.tags }}">
-        	{{ message }}
-        </b-alert>
-      {% endfor %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
     </div>
-  {% endif %}
+  {% endfor %}
 </header>

@@ -1,7 +1,11 @@
 from collections import OrderedDict
 from rest_framework import viewsets
 from rest_framework.exceptions import NotFound
-from django.shortcuts import get_object_or_404, redirect
+from django.http import Http404
+from django import forms
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views.generic import FormView
 from . import models, serializers
 from utils.mixins import VersatileViewMixin
 
@@ -36,6 +40,67 @@ class OptionalPaginationMixin:
 		if param is None or param is 0:
 			return None
 		return paginator
+
+
+class HomeTabForm(forms.Form):
+	action = forms.IntegerField(widget=forms.HiddenInput(), initial=0, min_value=0, max_value=3)
+	route_from = forms.CharField(max_length=10, required=False)
+	route_to = forms.CharField(max_length=10, required=False)
+	train = forms.CharField(max_length=20, required=False)
+	station = forms.CharField(max_length=10, required=False)
+	line = forms.CharField(max_length=20, required=False)
+
+	def clean(self):
+		cleaned_data = super().clean()
+		action = cleaned_data['action']
+		if action == 0:
+			actionContent = cleaned_data['route_from'] + '或' + cleaned_data['route_to'] \
+				if cleaned_data['route_from'] and cleaned_data['route_to'] else False
+		else:
+			actionContent = cleaned_data[['train', 'station', 'line'][action - 1]]
+		newValue = {}
+		if not actionContent:
+			raise ValidationError(
+				('您没有填写相关查询条件'),
+				code='empty'
+			)
+		try:
+			if action == 1:
+				newValue['value'] = GetTrain(cleaned_data['train'])
+			elif action == 2:
+				newValue['value'] = GetStation(cleaned_data['station'])
+			elif action == 0:
+				newValue['value'] = (GetStation(cleaned_data['route_from']), GetStation(cleaned_data['route_to']))
+		except (NotFound, Http404):
+			raise ValidationError(
+				('没有找到 %(value)s'),
+				code='notfound',
+				params={'value': actionContent},
+			)
+		else:
+			newValue['action'] = action
+		return newValue
+
+	def __init__(self, *args, **kwargs):
+		super(HomeTabForm, self).__init__(*args, **kwargs)
+		self.fields['train'].widget.attrs['placeholder'] = 'G7'
+		self.fields['station'].widget.attrs['placeholder'] = '合肥南'
+		self.fields['line'].widget.attrs['placeholder'] = '京津城际'
+
+
+class InfoHomeView(FormView):
+	template_name = 'info.html'
+	form_class = HomeTabForm
+
+	def form_valid(self, form):
+		action = form.cleaned_data['action']
+		value = form.cleaned_data['value']
+		if action == 1:  # train
+			return redirect('train-detail', value.telecode)
+		if action == 2:  # station
+			return redirect('station-detail', value.telecode if value.telecode else value.id)
+		if action == 3:
+			return redirect()
 
 
 class StationDetailTemplateView(DetailView):

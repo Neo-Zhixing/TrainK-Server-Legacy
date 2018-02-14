@@ -16,7 +16,7 @@
         {% endwith %}{% endwith %}
       </div>
       <div class="col-2">
-        <h1><font-awesome-icon icon="long-arrow-alt-right" size="2x"></font-awesome-icon></h1>
+        <h1><i class="fas fa-long-arrow-alt-right fa-2x"></i></h1>
       </div>
       <div class="col text-left">
         {% with train.stops|last as stop %}{% with stop.station|station as station %}
@@ -42,7 +42,7 @@
                 </div>
                 <span {% if False %}class="rounded border border-dark bg-white"{% endif %} style="width: 1.5rem; height: 1.5rem; z-index: 3;">
                   {% if False %}
-                  <font-awesome-icon icon="university" class="w-100 h-100"></font-awesome-icon>
+                  <i class="fas fa-university w-100 h-100"></i>
                   {% endif %}
                 </span>
                 <h1 class="my-0 mx-4">{{ station.name }}</h1>
@@ -54,12 +54,56 @@
       </div>
       <div class="col-md-5">
         {% if train.telecode %}
-        <delay-chart-card telecode="{{train.telecode}}">
-          <a slot="footer" class="btn btn-primary" href="{% url 'record-list' train.telecode %}">查看历史记录</a>
-        </delay-chart-card>
+        <div class="card">
+          <div class="card-header">
+            正晚点
+          </div>
+          <div class="card-body">
+            <canvas id="delay-chart" class="mb-3"></canvas>
+            <a class="card-link" href="{% url 'record-list' train.telecode %}">查看历史记录</a>
+          </div>
+        </div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+{{ block.super }}
+<script src="https://cdn.bootcss.com/Chart.js/2.7.1/Chart.min.js"></script>
+<script>
+$.getJSON('/info/train/{{ train.telecode }}/record/',function(d){
+  var l = [], v = [];
+  d.results.forEach((e)=>{
+    l.push(e.departureDate);
+    v.push(e.delay);
+  });
+  new Chart(document.getElementById("delay-chart").getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: l,
+        datasets: [{
+            data: v,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor:  'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+      legend: { display: false },
+      tooltips: {
+        callbacks: {
+          label: function(i) {
+              var value = v[i.index];
+              if (value === 0) return '正点'
+              return '平均' + (value > 0 ? '晚点' : '早点') + value + '分';
+          }
+        }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

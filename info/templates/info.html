@@ -1,39 +1,58 @@
 {% extends "info_base.html" %}
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <div class="py-5" style="background-image: url(&quot;{% static "img/hero.jpg" %}&quot;); background-position: center top;">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-6">
-      	<div class="card text-center">
-          <form>
-            <div class="card-header">
-              <div class="nav nav-tabs card-header-tabs" id="nav-tab" role="tablist">
-                <a class="nav-item nav-link active" id="nav-route-tab" data-toggle="tab" href="#nav-route" role="tab" aria-controls="nav-route" aria-selected="true">行程</a>
-                <a class="nav-item nav-link" id="nav-train-tab" data-toggle="tab" href="#nav-train" role="tab" aria-controls="nav-train" aria-selected="false">车次</a>
-                <a class="nav-item nav-link" id="nav-station-tab" data-toggle="tab" href="#nav-station" role="tab" aria-controls="nav-station" aria-selected="false">站点</a>
-                <a class="nav-item nav-link disabled" id="nav-line-tab" data-toggle="tab" href="#nav-line" role="tab" aria-controls="nav-line" aria-selected="false">线路</a>
-              </div>
+      	<div class="card text-center" id="tab-card">
+          <div class="card-header">
+            <div class="nav nav-tabs card-header-tabs" id="nav-tab" role="tablist">
+              <a class="nav-item nav-link active" id="nav-route-tab" data-toggle="tab" href="#nav-route" role="tab" aria-controls="nav-route" aria-selected="true">行程</a>
+              <a class="nav-item nav-link" id="nav-train-tab" data-toggle="tab" href="#nav-train" role="tab" aria-controls="nav-train" aria-selected="false">车次</a>
+              <a class="nav-item nav-link" id="nav-station-tab" data-toggle="tab" href="#nav-station" role="tab" aria-controls="nav-station" aria-selected="false">站点</a>
+              <a class="nav-item nav-link disabled" id="nav-line-tab" data-toggle="tab" href="#nav-line" role="tab" aria-controls="nav-line" aria-selected="false">线路</a>
             </div>
-            <div class="card-body">
-              <div class="tab-content" id="nav-tabContent">
+          </div>
+          <div class="card-body">
+            <form method="POST" class="form-control-container">
+              {% csrf_token %}
+              <div class="tab-content my-2" id="nav-tabContent">
                 <div class="tab-pane fade show active" id="nav-route" role="tabpanel" aria-labelledby="nav-home-tab">
-                  Route
+                  <div class="input-group">
+                    {{ form.route_from }}
+                    <button type="button" id="route-swap-btn" class="btn btn-secondary input-group-btn">
+                      <i class="fas fa-arrows-alt-h fa-2x"></i>
+                    </button>
+                    {{ form.route_to }}
+                  </div>
+                  {{ form.route_from.errors }}
+                  {{ form.route_to.errors }}
                 </div>
                 <div class="tab-pane fade" id="nav-train" role="tabpanel" aria-labelledby="nav-profile-tab">
-                  <input type="text" class="form-control" name="train" placeholder="G7">
+                  {{ form.train }}
+                  {{ form.train.errors }}
                 </div>
                 <div class="tab-pane fade" id="nav-station" role="tabpanel" aria-labelledby="nav-contact-tab">
-                  <input type="text" class="form-control" name="station" placeholder="合肥">
+                  {{ form.station }}
+                  {{ form.station.errors }}
                 </div>
                 <div class="tab-pane fade" id="nav-line" role="tabpanel" aria-labelledby="nav-contact-tab">
-                  <input type="text" class="form-control" name="line" placeholder="合肥">
+                  {{ form.line }}
+                  {{ form.line.errors }}
                 </div>
               </div>
-              <button class="btn btn-primary btn-block" type="submit">搜索</button>
-            </div>
-          </form>
+              {{ form.action }}
+              {% for error in form.non_field_errors %}
+                <div class="alert alert-danger my-2" role="alert">
+                  {{ error }}
+                </div>
+              {% endfor %}
+              <button class="btn btn-primary btn-block my-2" type="submit">搜索</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -43,7 +62,20 @@
 
 {% block extra_js %}
 {{ block.super }}
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script type="text/javascript">
+(function(){
+  var ids = ['nav-route-tab', 'nav-train-tab', 'nav-station-tab', 'nav-line-tab']
+  $('#tab-card').ready(function() {
+    $('#'+ids[$('#id_action').val()]).tab('show');
+  });
+  $('#route-swap-btn').on('click',function(e){
+    var t=$('#id_route_from').val();
+    $('#id_route_from').val($('#id_route_to').val());
+    $('#id_route_to').val(t);
+  });
+  $('a[data-toggle="tab"]').on('show.bs.tab',function(e){
+    $('#id_action').attr('value', ids.indexOf(e.target.id));
+  });
+})()
+</script>
 {% endblock %}

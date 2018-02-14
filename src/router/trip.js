@@ -1,4 +1,4 @@
-const List = () => import('@/views/trip/List.vue')
+const List = () => import(/* webpackChunkName: "trip" */ '@/views/trip/List.vue')
 
 export default {
   path: '/trip',

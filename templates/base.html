@@ -20,11 +20,12 @@
       {% endblock extra_css %}
 
       {% block js %}
+      <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
       {% endblock js %}
     {% endblock head %}
   </head>
   <body>
-    <div id='app'>
+    <div{% block apptag %} id='app'{% endblock %}>
     {% block header %}
       {% include "./header.html" %}
     {% endblock %}
@@ -45,7 +46,7 @@
     {% block extra_js %}
       {% render_bundle 'app' 'js' %}
     {% endblock %}
-    <div style="display:none">
+    <div style="display:none;">
       <script src="https://s19.cnzz.com/z_stat.php?id=1271548735&web_id=1271548735"></script>
     </div>
   </body>
