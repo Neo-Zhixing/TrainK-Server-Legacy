@@ -10,7 +10,7 @@
       </b-col>
     </b-row>
     <b-button-group class="btn-block mt-2">
-      <a class="btn btn-primary col-7" href="/user/setting">用户中心<font-awesome-icon icon="cloud" /></a>
+      <router-link class="btn btn-primary col-7" :to="{name:'User-Setting'}">用户中心<font-awesome-icon icon="cloud" /></router-link>
       <b-button variant="outline-danger" class="col-5" @click="logout">
         登出
         <font-awesome-icon :icon="loading ? 'spinner' : 'sign-out-alt'" :spin="loading" /></b-button>

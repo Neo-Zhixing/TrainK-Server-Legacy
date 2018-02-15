@@ -25,26 +25,25 @@
     {% endblock head %}
   </head>
   <body>
-    <div{% block apptag %} id='app'{% endblock %}>
-    {% block header %}
-      {% include "./header.html" %}
-    {% endblock %}
+    {% block body %}
+      <div id='{% block appid %}page{% endblock %}'>
+        {% block header %}
+          {% include "./header.html" %}
+        {% endblock %}
 
-    <main>
-      {% block body %}
-        {% block content %}
-         <router-view />
-        {% endblock content %}
+        <main>
+          {% block content %}
+          {% endblock %}
+        </main>
+
+        {% block footer %}
+          {% include "./footer.html" %}
+        {% endblock %}
+      </div>
+
+      {% block extra_js %}
+        {% render_bundle 'app' 'js' %}
       {% endblock %}
-    </main>
-
-    {% block footer %}
-      {% include "./footer.html" %}
-    {% endblock %}
-    </div>
-
-    {% block extra_js %}
-      {% render_bundle 'app' 'js' %}
     {% endblock %}
     <div style="display:none;">
       <script src="https://s19.cnzz.com/z_stat.php?id=1271548735&web_id=1271548735"></script>

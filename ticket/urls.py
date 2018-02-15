@@ -3,5 +3,5 @@ from django.views.generic import TemplateView
 
 
 urlpatterns = [
-	re_path('', TemplateView.as_view(template_name="ticket.html")),
+	re_path('', TemplateView.as_view(template_name="app.html")),
 ]
