@@ -21,10 +21,11 @@ import './scss/index.scss'
 import router from './router'
 import store from './store'
 import NavBar from './views/NavBar'
+import MessageBanner from './views/MessageBanner'
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   store,
   router,
-  components: { NavBar }
+  components: { NavBar, MessageBanner }
 })

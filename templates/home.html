@@ -28,7 +28,7 @@
                 <div class="input-group">
                   <input type="text" class="form-control" id="departureStation" placeholder="出发站">
                   <span class="input-group-btn">
-                    <button class="btn btn-secondary" type="button"><em class="fa d-inline fa-lg fa-arrows-h"></em></button>
+                    <button class="btn btn-secondary" type="button"><i class="fas fa-lg fa-arrows-alt-h"></i></button>
                   </span>
                   <input type="text" class="form-control" id="arrivalStation" placeholder="目的站">
                 </div>
@@ -94,25 +94,27 @@
     </div>
   </div>
 </div>
-<div class="py-5 text-center text-white opaque-overlay gradient-overlay" style="background-image: url(&quot;{% static "img/features.jpg" %}&quot;);  background-position: center; ">
-  <div class="container">
-    <div class="row">
-      <div class="p-4 col-md-3"> <i class="d-block fa fa-3x fa-pie-chart"></i>
-        <h2 class="my-3">Improve</h2>
-        <p>Based on fluid design principles. Works with any screen resolution</p>
-      </div>
-      <div class="col-md-3 p-4"> <i class="d-block fa fa-3x fa-th"></i>
-        <h2 class="my-3">Scale</h2>
-        <p>Work simultaneously on different panels. Share the work with teammates.</p>
-      </div>
-      <div class="col-md-3 p-4"> <i class="d-block fa fa-3x fa-globe"></i>
-        <h2 class="my-3">Spread</h2>
-        <p>Help us spreading the word. Tell your friends with just one-click</p>
-      </div>
-      <div class="col-md-3 p-4"> <i class="d-block fa fa-3x fa-money"></i>
-        <h2 class="my-3">Make money</h2>
-        <p>Choose settings depending on the criteria you value the most</p>
-      </div>
+<div class="py-5 text-center text-white" style="background-image: url({% static "img/features.jpg" %});  background-position: center; ">
+  <div class="container d-flex flex-row flex-wrap justify-content-between">
+    <div class="m-3" style="width: 15rem;">
+      <i class="mx-auto fas fa-6x fa-chart-pie"></i>
+      <h2 class="my-3">Improve</h2>
+      <p>Based on fluid design principles. Works with any screen resolution</p>
+    </div>
+    <div class="m-3" style="width: 15rem;">
+      <i class="mx-auto fas fa-6x fa-th"></i>
+      <h2 class="my-3">Scale</h2>
+      <p>Work simultaneously on different panels. Share the work with teammates.</p>
+    </div>
+    <div class="m-3" style="width: 15rem;">
+      <i class="mx-auto fas fa-6x fa-globe"></i>
+      <h2 class="my-3">Spread</h2>
+      <p>Help us spreading the word. Tell your friends with just one-click</p>
+    </div>
+    <div class="m-3" style="width: 15rem;">
+      <i class="mx-auto fas fa-6x fa-money-bill-alt"></i>
+      <h2 class="my-3">Make money</h2>
+      <p>Choose settings depending on the criteria you value the most</p>
     </div>
   </div>
 </div>
@@ -121,7 +123,7 @@
     <div class="row">
       <div class="py-5 col-md-6">
         <div class="row">
-          <div class="text-center col-4"><i class="d-block mx-auto fa fa-5x fa-angle-double-up"></i></div>
+          <div class="text-center col-4"><i class="mx-auto fa fa-5x fa-angle-double-up"></i></div>
           <div class="col-8">
             <h5 class="mb-3 text-primary"><strong>迅捷购票</strong></h5>
             <p class="my-1">车客提供给您独一无二的流畅购票体验，让您与广告和隐藏收费说再见。对接12306官方网站，保证每一张票来源正规，即刻可用。</p>
@@ -130,7 +132,7 @@
       </div>
       <div class="py-5 col-md-6">
         <div class="row">
-          <div class="text-center col-4"><i class="d-block mx-auto fa fa-5x fa-map-o"></i></div>
+          <div class="text-center col-4"><i class="mx-auto fa fa-5x fa-map"></i></div>
           <div class="col-8">
             <h5 class="mb-3 text-primary"><strong>智能规划</strong></h5>
             <p class="my-1">结合多种查询方式，综合考量各方面因素，为您提供最适合的出行路径。同时，您也可参照线路图自行规划换乘。</p>
@@ -141,7 +143,7 @@
     <div class="row">
       <div class="py-5 col-md-6">
         <div class="row">
-          <div class="text-center col-4"><i class="d-block mx-auto fa fa-5x fa-file-o"></i></div>
+          <div class="text-center col-4"><i class="mx-auto fa fa-5x fa-file"></i></div>
           <div class="col-8">
             <h5 class="mb-3 text-primary"><strong>详尽信息</strong></h5>
             <p class="my-1">一旦您选择了车客，等待您的将会是一次无比流畅的旅行。从检票口、正晚点信息，到车上餐食、目的地交通，我们将会为你安排好一切。</p>
@@ -150,7 +152,7 @@
       </div>
       <div class="py-5 col-md-6">
         <div class="row">
-          <div class="text-center col-4"><i class="d-block mx-auto fa fa-5x fa-code"></i></div>
+          <div class="text-center col-4"><i class="mx-auto fa fa-5x fa-code"></i></div>
           <div class="col-8">
             <h5 class="mb-3 text-primary"><strong>可靠服务</strong></h5>
             <p class="my-1">7x24小时永不关张，即便是夜晚，我们也能为你持续提供服务</p>
@@ -163,20 +165,16 @@
 <div class="pt-5 text-white bg-primary">
   <div class="container">
     <div class="row">
-      <div class="col-md-6 text-md-left text-center align-self-center my-5">
-        <h1 class="display-1">车客 App</h1>
+      <div class="col-md-6 text-md-left text-center align-self-center p-5">
+        <h2 class="display-1">车客 App</h2>
         <p class="lead">四通八达的铁路网络，尽收你手中</p>
-        <div class="row mt-5">
-          <div class="col-md-5 col-6">
-            <a href="#">
-              <img class="center-block img-fluid d-block" src="https://pingendo.github.io/templates/sections/assets/download_android.png">
-            </a>
-          </div>
-          <div class="col-md-5 col-6">
-            <a href="#">
-              <img class="center-block img-fluid d-block" src="https://pingendo.github.io/templates/sections/assets/download_ios.png">
-            </a>
-          </div>
+        <div class="d-flex flex-row">
+          <a class="mr-3" href="#">
+            <img class="img-fluid" src="https://pingendo.github.io/templates/sections/assets/download_android.png">
+          </a>
+          <a class="ml-3" href="#">
+            <img class="img-fluid" src="https://pingendo.github.io/templates/sections/assets/download_ios.png">
+          </a>
         </div>
       </div>
       <div class="col-md-6">

@@ -29,3 +29,8 @@ hr.railsgraph {
     @extend .text-center;
   }
 }
+
+.alert.alert-banner {
+  border-color: transparent;
+  border-radius: 0;
+}
