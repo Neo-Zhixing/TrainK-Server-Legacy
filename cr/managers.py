@@ -108,7 +108,9 @@ class DataManager:
 			print("-----------------------------------------")
 			allow_redirects = kwargs.pop('allow_redirects', True)
 			if not allow_redirects and response.status_code in {requests.codes.moved, requests.codes.found}:
-				raise exceptions.UpstreamRefused
+				raise exceptions.UpstreamRefused()
+			if not allow_redirects and response.text == '':
+				raise exceptions.CredentialOutdated()
 			cookieJar = requests.utils.dict_from_cookiejar(self.session.cookies)
 			cookieJar.update(requests.utils.dict_from_cookiejar(response.cookies))
 			self.request.session[self.cookie_name] = cookieJar
@@ -286,7 +288,7 @@ class DataManager:
 		}
 		data.update(self._get_passenger_str(passengers))
 		response = self.session.post(self.order_preconfirm_url, data, allow_redirects=False)
-		result = response.json()
+		info = response.json()
 
 		data = {
 			'fromStationTelecode': self.request.session['CRSubmitInfo']['info']['from_station_telecode'],
@@ -300,10 +302,13 @@ class DataManager:
 			'train_location': self.request.session['CRSubmitInfo']['locationCode'],
 			'train_no': self.request.session['CRSubmitInfo']['info']['train_no']
 		}
-		response = self.session.post(self.queue_info_url, data=data)
-		result['queue'] = response.json()
+		response = self.session.post(self.queue_info_url, data=data, allow_redirects=False)
+		queue = response.json()
 
-		return result
+		return {
+			'queue': queue['data'],
+			'data': info['data']
+		}
 
 	def confirmOrder(self, passengers):
 		data = {

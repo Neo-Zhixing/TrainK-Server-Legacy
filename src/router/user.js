@@ -1,4 +1,4 @@
-const App = () => import(/* webpackChunkName: "ticket" */ '@/views/user/App')
+const App = () => import(/* webpackChunkName: "user" */ '@/views/user/App')
 const Account = () => import(/* webpackChunkName: "user" */ '@/views/user/Account')
 const Security = () => import(/* webpackChunkName: "user" */ '@/views/user/Security')
 const CR12306 = () => import(/* webpackChunkName: "user" */ '@/views/user/CR12306')

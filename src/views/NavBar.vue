@@ -89,10 +89,10 @@ export default {
       })
     } else this.$store.commit('auth/logout')
   },
-  computed: {
-    location: () => window.location.pathname.split('/')[1],
-    ...states
+  methods: {
+    location: () => window.location.pathname.split('/')[1]
   },
+  computed: states,
   components: { LoginView, Glimpse }
 }
 </script>

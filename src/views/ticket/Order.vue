@@ -8,11 +8,11 @@
         <b-card no-body header="乘客" class="my-3">
           <b-card-body v-if="data" class="d-flex flex-row flex-wrap">
             <b-button class="m-2" size="sm"
-              :variant="passengerSelected(passenger) ? 'primary' : 'outline-primary'"
+              :variant="isPassengerSelected(passenger) ? 'primary' : 'outline-primary'"
               v-for="passenger in data.passengers"
               :key="passenger.certificate"
               v-b-tooltip.hover :title="`${data.ticketTypeMap[passenger.type]}, ${data.certMap[passenger.certificateType]}: ${passenger.certificate.slice(0, 3)}...${passenger.certificate.slice(-3)}`"
-              @click="(passengerSelected(passenger) ? removePassenger : addPassenger)(passenger)"
+              @click="(isPassengerSelected(passenger) ? removePassenger : addPassenger)(passenger)"
             >
               {{passenger.name}}
             </b-button>
@@ -25,6 +25,7 @@
                 :ticket-type-map="data.ticketTypeMap"
                 :available-seats="data.availableSeats"
                 @remove="removePassenger(passenger)"
+                @input="checkOrderInfo()"
               />
             </b-list-group-item>
           </b-list-group>
@@ -42,7 +43,6 @@
         </b-card>
         <b-card header="订单信息" class="my-3" body-class="text-center">
           333.5元
-          <b-button block variant="danger" @click="update">测试</b-button>
           <b-button block variant="primary" @click="submit">提交</b-button>
           <b-button block variant="warning" @click="queue">排队</b-button>
         </b-card>
@@ -63,6 +63,7 @@ export default {
   data () {
     return {
       data: null,
+      orderInfo: false,
       passengers: [],
       selectedPassengers: []
     }
@@ -75,7 +76,7 @@ export default {
     })
     .catch(error => {
       if (error.response) {
-        if (error.response.status === 404) this.$router.replace({name: 'TicketHome'})
+        if (error.response.status === 503) this.$router.replace({name: 'Ticket-Home'})
       }
     })
   },
@@ -90,15 +91,23 @@ export default {
       })
     },
     queue () {
-      axios.patch('/cr/ticket/order/')
+      axios.put('/cr/ticket/order/')
       .then(response => {
         console.log(response.data)
       })
     },
-    update () {
-      axios.put('/cr/ticket/order/', this.selectedPassengers)
+    checkOrderInfo () {
+      if (this.selectedPassengers.length === 0) return
+      for (let p of this.selectedPassengers) {
+        if (p.selectedSeat === undefined || p.selectedTicketType === undefined) return
+      }
+      this.orderInfo = null
+      axios.patch('/cr/ticket/order/', this.selectedPassengers)
       .then(response => {
-        console.log(response.data)
+        this.orderInfo = response.data
+      })
+      .catch(response => {
+        this.orderInfo = false
       })
     },
     getPassengerTable (passenger) {
@@ -112,9 +121,15 @@ export default {
     getTimeStr (time) {
       return moment().hours(time.hours).minutes(time.minutes).format('HH:mm')
     },
-    passengerSelected (passenger) { return this.selectedPassengers.includes(passenger) },
-    addPassenger (passenger) { this.selectedPassengers.push(passenger) },
-    removePassenger (passenger) { this.selectedPassengers.splice(this.selectedPassengers.indexOf(passenger), 1) }
+    isPassengerSelected (passenger) { return this.selectedPassengers.includes(passenger) },
+    addPassenger (passenger) {
+      this.selectedPassengers.push(passenger)
+      this.checkOrderInfo()
+    },
+    removePassenger (passenger) {
+      this.selectedPassengers.splice(this.selectedPassengers.indexOf(passenger), 1)
+      this.checkOrderInfo()
+    }
   },
   components: { Passenger, SeatSelection, Ticket }
 }

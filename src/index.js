@@ -16,7 +16,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 import 'flatpickr/dist/themes/airbnb.css'
 
-import './common.scss'
+import './scss/index.scss'
 
 import router from './router'
 import store from './store'

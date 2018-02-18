@@ -46,9 +46,8 @@ export default {
       })
       .catch(error => {
         if (error.response && error.response.status === 404) {
-          let data = { username: null, password: null }
-          commit('crPasswordSave', data)
-          return data
+          commit('crPasswordSave', null)
+          return
         }
         throw error
       })
@@ -59,7 +58,6 @@ export default {
       else newPasswordSave.username = data.username
       if (state.crPasswordSave.password) delete data.password
       else newPasswordSave.password = data.password
-      commit('crPasswordSave', data)
       return axios.post('/cr/user/session/', data)
       .then(response => {
         commit('crLogin')

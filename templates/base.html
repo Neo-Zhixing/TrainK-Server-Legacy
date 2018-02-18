@@ -26,12 +26,12 @@
   </head>
   <body>
     {% block body %}
-      <div id='{% block appid %}page{% endblock %}'>
+      <div class="page-wrapper" id='{% block appid %}page{% endblock %}'>
         {% block header %}
           {% include "./header.html" %}
         {% endblock %}
 
-        <main>
+        <main class="content-wrapper">
           {% block content %}
           {% endblock %}
         </main>
