@@ -21,7 +21,7 @@
   </nav-bar>
   <div id="site-messages">
   {% for message in messages %}
-    <b-alert show dismissible class="alert-banner my-0" variant="{{ message.tags }}">
+    <b-alert show dismissible class="alert-flush" variant="{{ message.tags }}">
       <div class="container">{{ message }}</div>
     </b-alert>
   {% endfor %}

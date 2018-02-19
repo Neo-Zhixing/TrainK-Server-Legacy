@@ -1,7 +1,7 @@
 <template>
   <div id="app-messages">
     <b-alert show dismissible
-      class="alert-banner my-0"
+      class="alert-flush"
       v-for="message in messages"
       :key="message.content"
       :variant="message.type"
@@ -17,3 +17,6 @@ export default {
   computed: states
 }
 </script>
+
+<style>
+</style>

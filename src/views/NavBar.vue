@@ -31,10 +31,8 @@
         placement="bottomleft"
         @show="userPopoverShown=true"
         @hide="userPopoverShown=false">
-        <b-container fluid class="py-2">
-          <glimpse v-if="user" />
-          <login-view v-else />
-        </b-container>
+        <glimpse v-if="user" />
+        <login-view v-else />
       </b-popover>
     </b-container>
   </b-navbar>
@@ -100,5 +98,8 @@ export default {
 <style>
   #nav-collapse svg {
     margin-right: 0.25rem;
+  }
+  .popover-body {
+    padding: 0 !important;
   }
 </style>
