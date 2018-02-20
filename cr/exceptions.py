@@ -22,3 +22,7 @@ class SessionContextMissing(APIException):
 class CredentialOutdated(APIException):
 	status_code = status.HTTP_410_GONE
 	default_detail = 'Outdated secret key was denied by upstream server.'
+
+class UnhandledOrder(APIException):
+	status_code = status.HTTP_400_BAD_REQUEST
+	default_detail = 'Unhandled Orders'

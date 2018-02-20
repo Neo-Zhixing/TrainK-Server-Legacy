@@ -16,6 +16,7 @@ export default new Vuex.Store({
       'auth/crLogout',
       'auth/crPasswordSave',
       'addMessage',
+      'removeMessage',
       'clearMessage'
     ]})
   ],
@@ -23,15 +24,16 @@ export default new Vuex.Store({
     messages: []
   },
   mutations: {
-    addMessage (state, message) { state.messages.push(message) },
+    addMessage (state, message) {
+      if (!message.content) return false
+      if (state.messages.some((item) => item.content === message.content)) return false
+      if (!message.type) message.type = 'primary'
+      if (message.time) message.timeRemaining = message.time
+      state.messages.push(message)
+      return true
+    },
+    removeMessage (state, message) { state.messages.splice(state.messages.indexOf(message), 1) },
     clearMessage (state) { state.messages = [] }
-  },
-  actions: {
-    readMessages ({ commit, state }) {
-      let messages = state.messages
-      commit('clearMessage')
-      return messages
-    }
   },
   modules: {
     auth: Auth

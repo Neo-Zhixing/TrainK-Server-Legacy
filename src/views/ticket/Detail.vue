@@ -78,8 +78,20 @@ export default {
             this.$store.commit('auth/crLogout')
           } else if (error.response.status === 410) {
             this.$store.commit('auth/crLogin')
+            this.$store.commit('addMessage', {
+              content: '订单信息过期，请重新提交！',
+              type: 'info',
+              time: 10
+            })
             this.$emit('reload')
             this.$refs.modal.hide()
+          } else if (error.response.status === 400) {
+            this.$store.commit('addMessage', {
+              content: '您还有订单未完成！',
+              type: 'warning',
+              time: 10
+            })
+            this.$router.push({name: 'Trip'})
           }
         }
       })

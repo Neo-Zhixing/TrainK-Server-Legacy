@@ -15,7 +15,9 @@ def ticketType(value):
 		return False
 	if value == '':
 		return None
-	return int(value)
+	if value.isnumeric():
+		return int(value)
+	return value
 
 
 keyMap = [
@@ -211,7 +213,10 @@ class DataManager:
 		}, allow_redirects=False)
 		response = response.json()
 		if not response['status']:
-			raise exceptions.CredentialOutdated
+			if response['messages'][0] == '您还有未处理的订单，请您到<a href="../queryOrder/initNoComplete">[未完成订单]</a>进行处理!':
+				raise exceptions.UnhandledOrder()
+			else:
+				raise exceptions.CredentialOutdated()
 		self.request.session['CRTicket'] = ticket
 
 	def orderInfo(self):
@@ -304,6 +309,10 @@ class DataManager:
 		}
 		response = self.session.post(self.queue_info_url, data=data, allow_redirects=False)
 		queue = response.json()
+		if 'data' not in queue:
+			raise exceptions.UpstreamDataError(queue['messages'])
+		if 'data' not in info:
+			raise exceptions.UpstreamDataError(data['messages'])
 
 		return {
 			'queue': queue['data'],
@@ -329,7 +338,7 @@ class DataManager:
 		response = response.json()
 		if not response['data']['submitStatus']:
 			return response['data']['errMsg']
-		return self.queue()
+		return response
 
 	def queue(self):
 		response = self.session.get(self.queue_url, params={

@@ -10,7 +10,7 @@
       <b-button-toolbar class="justify-content-end">
         <b-button-group class="mx-2">
           <b-button size="sm"
-            :variant="value.selectedSeat === seat ? 'primary' : 'outline-secondary'"
+            :variant="selectedSeat === seat ? 'primary' : 'outline-primary'"
             v-for="seat in availableSeats"
             :key="seat"
             @click="selectSeat(seat)"
@@ -26,7 +26,7 @@
         <b-button size="sm"
           v-for="(type, index) in ticketTypes"
           :key="type.name"
-          :variant="index === value.selectedTicketType ? type.variant : 'outline-secondary'"
+          :variant="index === selectedTicketType ? type.variant : 'outline-primary'"
           @click="selectTicketType(index)"
         >
           <font-awesome-icon :icon="type.icon" />
@@ -44,6 +44,16 @@ import { faMale, faChild, faGraduationCap, faMinus } from '@fortawesome/fontawes
 import { faAccessibleIcon } from '@fortawesome/fontawesome-free-brands'
 export default {
   props: ['value', 'certMap', 'ticketTypeMap', 'availableSeats'],
+  data () {
+    return {
+      selectedTicketType: null,
+      selectedSeat: null
+    }
+  },
+  mounted () {
+    this.selectedTicketType = 0
+    this.selectedSeat = this.availableSeats[0]
+  },
   computed: {
     minusIcon () { return faMinus },
     ticketTypes () {
@@ -57,12 +67,16 @@ export default {
   },
   methods: {
     getSeatName (seatCode) { return SeatTypeMap[seatCode] },
-    selectTicketType (value) {
-      this.value.selectedTicketType = value
+    selectTicketType (newValue) {
+      this.selectedTicketType = newValue
+      console.log(newValue)
+      this.value.selectedTicketType = newValue
       this.$emit('input')
     },
-    selectSeat (value) {
-      this.value.selectedSeat = value
+    selectSeat (newValue) {
+      console.log(newValue)
+      this.selectedSeat = newValue
+      this.value.selectedSeat = newValue
       this.$emit('input')
     }
   }

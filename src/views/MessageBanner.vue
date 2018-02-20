@@ -5,8 +5,18 @@
       v-for="message in messages"
       :key="message.content"
       :variant="message.type"
+      :show="message.timeRemaining === undefined ? true : message.timeRemaining"
+      @dismissed="$store.commit('removeMessage', alert)"
+      @dismiss-count-down="message.timeRemaining = message.timeRemaining - 1"
     >
-      <div class="container">{{ message.content }}</div>
+      <div class="container py-2">
+        {{ message.content }}
+      </div>
+      <b-progress class="mt-1"
+        v-if="message.time"
+        :variant="message.type"
+        :value="message.timeRemaining"
+        :max="message.time" />
     </b-alert>
   </div>
 </template>
@@ -17,6 +27,8 @@ export default {
   computed: states
 }
 </script>
-
-<style>
+<style scoped>
+.alert.alert-flush {
+  padding: 0;
+}
 </style>

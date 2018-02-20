@@ -42,9 +42,19 @@
           <b-form-checkbox disabled>特殊服务</b-form-checkbox>
         </b-card>
         <b-card header="订单信息" class="my-3" body-class="text-center">
-          333.5元
+          <p v-if="orderInfo">剩余{{orderInfo.queue.ticket}}张</p>
           <b-button block variant="primary" @click="submit">提交</b-button>
-          <b-button block variant="warning" @click="queue">排队</b-button>
+          <b-modal lazy ref="submissionQueueModal" title="订单排队中">
+            <template v-if="queueInfo.raw">
+              <p class="my-4">剩余时间：{{getTimeStr(queueInfo.raw.waitTime)}}</p>
+              <small>下一次排队</small>
+              <b-progress
+                height="1rem"
+                :value="queueInfo.loading ? 1 : queueInfo.timeElapsed"
+                :max="queueInfo.loading ? 1 : queueInfo.interval"
+                :animated="queueInfo.loading" />
+            </template>
+          </b-modal>
         </b-card>
       </b-col>
     </b-row>
@@ -64,6 +74,14 @@ export default {
     return {
       data: null,
       orderInfo: false,
+      queueInfo: {
+        loading: false,
+        interval: null,
+        timeElapsed: null,
+        timer: null,
+        task: null,
+        raw: null
+      },
       passengers: [],
       selectedPassengers: []
     }
@@ -88,15 +106,34 @@ export default {
       axios.post('/cr/ticket/order/', this.selectedPassengers)
       .then(response => {
         console.log(response.data)
+        this.$refs.submissionQueueModal.show()
+        this.queue()
       })
     },
     queue () {
+      this.queueInfo.loading = true
+      console.log('queue')
       axios.put('/cr/ticket/order/')
       .then(response => {
-        console.log(response.data)
+        this.queueInfo.loading = false
+        this.queueInfo.raw = response.data
+        let time = this.queueInfo.raw.waitTime
+        if (time > 10) time = 10
+        this.queueInfo.interval = time
+        this.queueInfo.timeElapsed = 0
+        if (!this.queueInfo.timer) {
+          this.queueInfo.timer = setInterval(() => {
+            console.log('time elapsed')
+            console.log(this.queueInfo.timeElapsed)
+            console.log(this.queueInfo.interval)
+            this.queueInfo.timeElapsed += 1
+          }, 1000)
+        }
+        this.queueInfo.task = setTimeout(this.queue, time * 1000)
       })
     },
     checkOrderInfo () {
+      console.log(this.selectedPassengers)
       if (this.selectedPassengers.length === 0) return
       for (let p of this.selectedPassengers) {
         if (p.selectedSeat === undefined || p.selectedTicketType === undefined) return
@@ -119,17 +156,23 @@ export default {
       ]
     },
     getTimeStr (time) {
-      return moment().hours(time.hours).minutes(time.minutes).format('HH:mm')
+      return moment.duration(time, 'seconds').humanize()
     },
     isPassengerSelected (passenger) { return this.selectedPassengers.includes(passenger) },
     addPassenger (passenger) {
       this.selectedPassengers.push(passenger)
+      if (passenger.selectedSeat === undefined) passenger.selectedSeat = this.data.availableSeats[0]
+      if (passenger.selectedTicketType === undefined) passenger.selectedTicketType = 0
       this.checkOrderInfo()
     },
     removePassenger (passenger) {
       this.selectedPassengers.splice(this.selectedPassengers.indexOf(passenger), 1)
       this.checkOrderInfo()
     }
+  },
+  destroyed () {
+    if (this.queueInfo.task) clearTimeout(this.queueInfo.task)
+    if (this.queueInfo.timer) clearInterval(this.queueInfo.timer)
   },
   components: { Passenger, SeatSelection, Ticket }
 }
