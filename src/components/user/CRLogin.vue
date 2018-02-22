@@ -20,7 +20,12 @@
 
         <p class="text-danger">{{error ? error.detail : null}}</p>
         <b-button-group class="btn-block mt-2">
-          <b-button variant="primary" class="col-8" type="submit" :disabled="!(loginForm.captcha && loginForm.username && (loginForm.password || (crPasswordSave && crPasswordSave.password)))"> 
+          <b-button variant="primary" class="col-8" type="submit"
+          :disabled="loading || !loginForm.captcha || !loginForm.username || !(loginForm.password || (crPasswordSave && crPasswordSave.password))">
+          <!-- Conditions to disable login btn: -->
+          <!-- 1. We're loading data from server, or -->
+          <!-- 2. No captcha, username, or -->
+          <!-- 3. Neither saved password, nor new password input -->
             登录
             <font-awesome-icon :icon="loading ? 'spinner' : 'sign-in-alt'" :spin="loading" />
           </b-button>
@@ -61,12 +66,15 @@ export default {
   },
   methods: {
     login () {
+      this.loading = true
       this.error = null
       this.$store.dispatch('auth/crLogin', this.loginForm)
       .then(() => {
+        this.loading = false
         this.$emit('login')
       })
       .catch(error => {
+        this.loading = false
         this.error = error.response.data
         this.$refs.captcha.reloadCaptcha()
       })

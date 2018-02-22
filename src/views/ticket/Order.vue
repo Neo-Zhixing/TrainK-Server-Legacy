@@ -33,7 +33,10 @@
       </b-col>
       <b-col lg="4">
         <b-card header="座位选择">
-          <seat-selection />
+          <seat-selection
+            v-model="selectedSeats"
+            :context="orderInfo"
+            :passengers="selectedPassengers" />
         </b-card>
         <b-card header="附加服务" class="my-3">
           <b-form-checkbox disabled>驾驶室一日游</b-form-checkbox>
@@ -42,19 +45,25 @@
           <b-form-checkbox disabled>特殊服务</b-form-checkbox>
         </b-card>
         <b-card header="订单信息" class="my-3" body-class="text-center">
-          <p v-if="orderInfo">剩余{{orderInfo.queue.ticket}}张</p>
-          <b-button block variant="primary" @click="submit">提交</b-button>
-          <b-modal lazy ref="submissionQueueModal" title="订单排队中">
-            <template v-if="queueInfo.raw">
-              <p class="my-4">剩余时间：{{getTimeStr(queueInfo.raw.waitTime)}}</p>
-              <small>下一次排队</small>
-              <b-progress
-                height="1rem"
-                :value="queueInfo.loading ? 1 : queueInfo.timeElapsed"
-                :max="queueInfo.loading ? 1 : queueInfo.interval"
-                :animated="queueInfo.loading" />
-            </template>
-          </b-modal>
+          <template v-if="orderInfo">
+            <p>
+              剩余车票 {{ticketCounts[0]}}
+              <template v-if="ticketCounts.length > 1">无座剩余 {{ticketCounts[1]}}</template>
+            </p>
+            <h5 v-if="orderInfo.queue.op_2 === 'true'" class="text-danger">
+              目前排队人数已经超过余票张数，请您选择其他席别或车次。
+            </h5>
+            <h6 v-if="orderInfo.queue.countT > 0">
+                目前排队人数{{orderInfo.queue.countT}}人
+                请确认以上信息是否正确，点击“确认”后，系统将为您随机分配席位。
+            </h6>
+          </template>
+          <b-button block variant="primary"
+          @click="submit"
+          :disabled="!orderInfo || selectedPassengers.length === 0">
+            提交
+          </b-button>
+          <QueueModal ref="submissionQueueModal" />
         </b-card>
       </b-col>
     </b-row>
@@ -63,77 +72,69 @@
 </template>
 
 <script>
-import moment from 'moment'
 import axios from '@/utils/axios'
 import Passenger from '@/components/ticket/Passenger'
 import SeatSelection from '@/components/ticket/SeatSelection'
 import Ticket from '@/components/ticket/Ticket'
+import QueueModal from './Queue'
 import { faLongArrowAltDown } from '@fortawesome/fontawesome-free-solid'
 export default {
   data () {
     return {
       data: null,
       orderInfo: false,
-      queueInfo: {
-        loading: false,
-        interval: null,
-        timeElapsed: null,
-        timer: null,
-        task: null,
-        raw: null
-      },
       passengers: [],
-      selectedPassengers: []
+      selectedPassengers: [],
+      selectedSeats: []
     }
   },
   mounted () {
-    axios.get('/cr/ticket/order/')
+    axios.get('/cr/ticket/order/') // Checking Order Info
     .then(response => {
+      for (let passenger of response.data.passengers) {
+        passenger.selectedSeat = null
+        passenger.selectedTicketType = null
+      }
       this.data = response.data
       console.log(response.data)
     })
     .catch(error => {
       if (error.response) {
-        if (error.response.status === 503) this.$router.replace({name: 'Ticket-Home'})
+        if (error.response.status === 503) {
+          this.$store.commit('addMessage', {
+            content: '系统中没有您的订单信息',
+            type: 'warning',
+            time: 10
+          })
+          this.$router.replace({name: 'Ticket-Home'})
+        }
       }
     })
   },
   computed: {
-    arrowIcon () { return faLongArrowAltDown }
+    arrowIcon () { return faLongArrowAltDown },
+    ticketCounts () {
+      if (!this.orderInfo) return null
+      return this.orderInfo.queue.ticket.split(',')
+    },
+    submitDisabled () {
+      if (!this.orderInfo) return true
+      if (this.orderInfo.queue.op_2 === 'true') return true
+      return false
+    }
   },
   methods: {
     submit () {
-      axios.post('/cr/ticket/order/', this.selectedPassengers)
+      axios.post('/cr/ticket/order/', {
+        passengers: this.selectedPassengers,
+        seats: this.selectedSeats.join('')
+      })
       .then(response => {
         console.log(response.data)
-        this.$refs.submissionQueueModal.show()
-        this.queue()
-      })
-    },
-    queue () {
-      this.queueInfo.loading = true
-      console.log('queue')
-      axios.put('/cr/ticket/order/')
-      .then(response => {
-        this.queueInfo.loading = false
-        this.queueInfo.raw = response.data
-        let time = this.queueInfo.raw.waitTime
-        if (time > 10) time = 10
-        this.queueInfo.interval = time
-        this.queueInfo.timeElapsed = 0
-        if (!this.queueInfo.timer) {
-          this.queueInfo.timer = setInterval(() => {
-            console.log('time elapsed')
-            console.log(this.queueInfo.timeElapsed)
-            console.log(this.queueInfo.interval)
-            this.queueInfo.timeElapsed += 1
-          }, 1000)
-        }
-        this.queueInfo.task = setTimeout(this.queue, time * 1000)
+        this.$refs.submissionQueueModal.trigger()
       })
     },
     checkOrderInfo () {
-      console.log(this.selectedPassengers)
       if (this.selectedPassengers.length === 0) return
       for (let p of this.selectedPassengers) {
         if (p.selectedSeat === undefined || p.selectedTicketType === undefined) return
@@ -143,7 +144,15 @@ export default {
       .then(response => {
         this.orderInfo = response.data
       })
-      .catch(response => {
+      .catch(error => {
+        if (error.response.status === 503) {
+          this.$store.commit('addMessage', {
+            content: '您操作间隔太长，请重试',
+            type: 'warning',
+            time: 10
+          })
+          this.$router.replace({name: 'Ticket-Home'})
+        }
         this.orderInfo = false
       })
     },
@@ -155,14 +164,11 @@ export default {
         { key: '种类', value: passenger.passenger_type_name }
       ]
     },
-    getTimeStr (time) {
-      return moment.duration(time, 'seconds').humanize()
-    },
     isPassengerSelected (passenger) { return this.selectedPassengers.includes(passenger) },
     addPassenger (passenger) {
       this.selectedPassengers.push(passenger)
-      if (passenger.selectedSeat === undefined) passenger.selectedSeat = this.data.availableSeats[0]
-      if (passenger.selectedTicketType === undefined) passenger.selectedTicketType = 0
+      if (passenger.selectedSeat === null) passenger.selectedSeat = this.data.availableSeats[0]
+      if (passenger.selectedTicketType === null) passenger.selectedTicketType = 0
       this.checkOrderInfo()
     },
     removePassenger (passenger) {
@@ -170,10 +176,6 @@ export default {
       this.checkOrderInfo()
     }
   },
-  destroyed () {
-    if (this.queueInfo.task) clearTimeout(this.queueInfo.task)
-    if (this.queueInfo.timer) clearInterval(this.queueInfo.timer)
-  },
-  components: { Passenger, SeatSelection, Ticket }
+  components: { Passenger, SeatSelection, Ticket, QueueModal }
 }
 </script>

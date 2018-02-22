@@ -16,16 +16,13 @@
         <login-panel  @login="showOrderView" />
       </b-col>
     </b-card>
-    <template v-else-if="state">
-      <b-card class="mb-3">
-        <ticket
-          :ticket="ticket"
-          :stationmap="stationMap"
-        />
-      </b-card>
-    </template>
-    <cr-login-panel v-else-if="!crAuthenticated" @login="showOrderView"/>
-
+    <b-card v-else-if="state" class="mb-3">
+      <ticket
+        :ticket="ticket"
+        :stationmap="stationMap"
+      />
+    </b-card>
+    <cr-login-panel v-else @login="showOrderView"/>
   </b-modal>
 </template>
 

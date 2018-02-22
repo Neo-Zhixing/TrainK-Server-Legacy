@@ -108,11 +108,8 @@ class DataManager:
 			print("Received Response: " + ('Streamed Data' if kwargs['stream'] else response.text[0:100] + '...'))
 			print("Cookies:" + str(response.cookies))
 			print("-----------------------------------------")
-			allow_redirects = kwargs.pop('allow_redirects', True)
-			if not allow_redirects and response.status_code in {requests.codes.moved, requests.codes.found}:
+			if response.is_redirect and response.request.method != 'HEAD':
 				raise exceptions.UpstreamRefused()
-			if not allow_redirects and response.text == '':
-				raise exceptions.CredentialOutdated()
 			cookieJar = requests.utils.dict_from_cookiejar(self.session.cookies)
 			cookieJar.update(requests.utils.dict_from_cookiejar(response.cookies))
 			self.request.session[self.cookie_name] = cookieJar
@@ -135,7 +132,7 @@ class DataManager:
 
 	def login(self, username, password, captcha):
 		def checkResponse(response, success_code=0):
-			if int(response['result_code']) != success_code: 
+			if int(response['result_code']) != success_code:
 				raise AuthenticationFailed(response['result_message'])
 
 		response = self.session.post(self.captcha_check_url, {
@@ -319,10 +316,10 @@ class DataManager:
 			'data': info['data']
 		}
 
-	def confirmOrder(self, passengers):
+	def confirmOrder(self, passengers, seats):
 		data = {
 			'REPEAT_SUBMIT_TOKEN': self.request.session['CRSubmitInfo']['submitToken'],
-			'choose_seats': '1D1F',
+			'choose_seats': seats,
 			'dwAll': 'N',
 			'key_check_isChange': self.request.session['CRSubmitInfo']['ticketKeyChange'],
 			'leftTicketStr': self.request.session['CRSubmitInfo']['leftTicketStr'],

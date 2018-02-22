@@ -172,7 +172,9 @@ class OrderView(APIView, DataManagerMixin):
 		return Response(self.manager.preconfirmOrder(request.data))
 
 	def post(self, request):
-		data = self.manager.confirmOrder(request.data)
+		if not {'passengers', 'seats'} <= set(request.data.keys()):
+			raise ParseError('items "passengers" and "seats" is required')
+		data = self.manager.confirmOrder(passengers=request.data['passengers'], seats=request.data['seats'])
 		return Response(data)
 
 	def put(self, request):
