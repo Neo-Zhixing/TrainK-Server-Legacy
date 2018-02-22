@@ -1,5 +1,5 @@
 <template>
-  <b-navbar id="navbar" toggleable="md" variant="primary" type="dark">
+  <b-navbar id="navbar-nav" toggleable="md" variant="primary" type="dark">
     <b-container>
       <b-navbar-brand href="/">
         <font-awesome-icon size="lg" class="mr-1" :icon="['traink', 'logo']" />
@@ -26,13 +26,14 @@
         <font-awesome-icon icon="user-circle" size="lg" />
       </b-button>
       <b-popover
+        container="navbar"
         target="navbar-popover-trigger"
         triggers="click"
         placement="bottomleft"
         @show="userPopoverShown=true"
         @hide="userPopoverShown=false">
         <glimpse v-if="user" />
-        <login-view v-else />
+        <login-view class="m-4" v-else />
       </b-popover>
     </b-container>
   </b-navbar>
@@ -95,11 +96,14 @@ export default {
 }
 </script>
 
-<style>
-  #nav-collapse svg {
-    margin-right: 0.25rem;
-  }
+<style lang="scss">
+#nav-collapse svg {
+  margin-right: 0.25rem;
+}
+#navbar .popover {
+  width: 276px;
   .popover-body {
     padding: 0 !important;
   }
+}
 </style>

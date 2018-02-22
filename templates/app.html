@@ -5,6 +5,14 @@
 
 {% block appid %}app{% endblock %}
 
+{% block js %}
+{% if not DEBUG_MODE == 0 %}
+  {% render_bundle 'manifest' 'js' %}
+  {% render_bundle 'vendor' 'js' %}
+{% endif %}
+{% endblock %}
+
+
 {% block header %}
 <header id="navbar" class="sticky-top">
   <nav-bar

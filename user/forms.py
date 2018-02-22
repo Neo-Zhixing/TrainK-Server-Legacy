@@ -21,7 +21,7 @@ class LoginForm(LoginForm):
 			HTML('{% if redirect_field_value %}<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />{% endif %}'),
 			Div(
 				Submit('signin', '登录', css_class="btn-primary col-8"),
-				HTML('<a class="btn btn-outline-secondary col-4" href="{{ signup_url }}">注册</a>'),
+				HTML('<a class="btn btn-secondary col-4" href="{{ signup_url }}">注册</a>'),
 				css_class='btn-group btn-block'
 			),
 		)

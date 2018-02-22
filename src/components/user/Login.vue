@@ -22,7 +22,7 @@
         登录
         <font-awesome-icon :icon="loading ? 'spinner' : 'sign-in-alt'" :spin="loading" />
       </b-button>
-      <a class="btn btn-outline-secondary col-4" href="/user">注册</a>
+      <a class="btn btn-secondary col-4" href="/user">注册</a>
     </b-button-group>
     <b-alert show class="my-3" v-for="message in errorMessages" :key="message" variant="danger">
       {{ message }}

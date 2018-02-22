@@ -28,7 +28,7 @@ const webpackConfig = merge(baseWebpackConfig, {
   output: {
     path: config.build.assetsRoot,
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
-    chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
+    chunkFilename: utils.assetsPath('js/bundles/[name].[id].[chunkhash].js')
   },
   plugins: [
     new BundleTracker({filename: 'build/webpack-stats.prod.json'}),

@@ -1,8 +1,7 @@
 <template>
   <b-card no-body
-    img-top img-src="https://lorempixel.com/600/300/food/5/"
-    class="profile-card"
-    >
+    id="profile-card"
+    img-top img-src="https://lorempixel.com/600/300/food/5/">
     <b-img class="avatar" rounded="circle" :src="`//gravatar.tra.ink/avatar/${user.hash}`" />
     <b-card-body class="text-center">
       <h5 class="card-title">{{user.username}}</h5>
@@ -26,16 +25,16 @@
       </b-alert>
       <b-button-group class="w-100">
         <router-link
+          id="signup-btn"
           class="btn btn-primary col-7"
-          style="border-top-left-radius: 0;"
           :to="{name:'User-Setting'}">
           用户中心
           <font-awesome-icon icon="cloud" />
         </router-link>
         <b-button
+          id="login-btn"
           variant="outline-danger"
           class="col-5"
-          style="border-top-right-radius: 0;"
           @click="logout">
           登出
           <font-awesome-icon :icon="loading ? 'spinner' : 'sign-out-alt'" :spin="loading" />
@@ -88,7 +87,7 @@ export default {
 </script>
 
 <style lang="scss">
-.profile-card {
+#profile-card {
   $top-image-height: 80px;
   $avatar-image-height: 100px;
 
@@ -104,6 +103,14 @@ export default {
     left: 0;
     right: 0;
     margin: auto;
+  }
+  .btn-group {
+    #login-btn {
+      border-top-right-radius: 0;
+    }
+    #signup-btn {
+      border-top-left-radius: 0;
+    }
   }
 }
 </style>

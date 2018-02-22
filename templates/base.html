@@ -13,7 +13,7 @@
       {% endblock meta %}
 
       {% block css %}
-        {% render_bundle 'app' 'css' %}
+        {% if not DEBUG_MODE == 0 %}{% render_bundle 'app' 'css' %}{% endif %}
       {% endblock css %}
 
       {% block extra_css %}
@@ -21,8 +21,6 @@
 
       {% block js %}
       <script defer src="https://use.fontawesome.com/releases/v5.0.6/js/all.js"></script>
-        {% render_bundle 'manifest' 'js' %}
-        {% render_bundle 'vendor' 'js' %}
       {% endblock js %}
     {% endblock head %}
   </head>
@@ -46,7 +44,7 @@
       {% block extra_js %}
         <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
-        {% render_bundle 'app' 'js' %}
+        {% if DEBUG_MODE == 0 %}{% render_bundle 'app' 'js' %}{% endif %}
       {% endblock %}
     {% endblock %}
     <div style="display:none;">

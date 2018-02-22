@@ -5,17 +5,19 @@
         <c-r-captcha ref="captcha" @input="newValue => { loginForm.captcha = newValue }" />
       </div>
       <div>
-        <b-form-group label="用户名：" label-for="cr-username" v-if="crPasswordSave && !crPasswordSave.username">
+        <b-form-group label="用户名：" label-for="cr-username" v-if="!crPasswordSave || !crPasswordSave.username">
           <b-form-input id="cr-username" v-model="loginForm.username" />
         </b-form-group>
-        <b-form-group label="密码：" label-for="cr-password" v-if="crPasswordSave && !crPasswordSave.password">
-          <b-form-input id="cr-password" type="password" v-model="loginForm.password" />
-        </b-form-group>
-        <b-form-checkbox
-        value="accepted"
-        unchecked-value="not_accepted">
-          记住密码
-        </b-form-checkbox>
+        <template v-if="!crPasswordSave || !crPasswordSave.password">
+          <b-form-group label="密码：" label-for="cr-password">
+            <b-form-input id="cr-password" type="password" v-model="loginForm.password" />
+          </b-form-group>
+          <b-form-checkbox
+            v-if="!crPasswordSave || !crPasswordSave.password"
+            v-model="loginForm.save">
+            记住密码
+          </b-form-checkbox>
+        </template>
         <a class="card-link float-right" href="https://kyfw.12306.cn/otn/forgetPassword/initforgetMyPassword">忘记密码？</a>
 
         <p class="text-danger">{{error ? error.detail : null}}</p>
@@ -52,6 +54,7 @@ export default {
       loginForm: {
         username: null,
         password: null,
+        save: false,
         captcha: null
       }
     }
