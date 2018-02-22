@@ -1,7 +1,7 @@
 <template>
-<div style="position: relative;" ref="captchawrapper">
+<div class="position-relative" ref="captchawrapper">
   <b-img fluid-grow style="user-drag: none; user-select: none;" :src="captchaImageURL" ref="captcha" @click="addCursor" @click.right.prevent />
-  <b-button class="captcha-component" size="sm" variant="outline-secondary" style="right: 0; top: 0;" @click="reloadCaptcha">
+  <b-button class="captcha-component" size="sm" variant="outline-secondary" style="right: 0px; top: 0px;" @click="reloadCaptcha">
     <font-awesome-icon icon="sync-alt" />
     刷新
   </b-button>
@@ -9,10 +9,9 @@
   class="captcha-component"
   v-for="(cursor, index) in cursors"
   :data-index="index"
-  :id="'cr-captcha-cursor-' + index"
   :key="cursor.x + '-' + cursor.y"
   :style="{left: `calc(${cursor.x*100}% - 8px)`, top: `calc(${cursor.y*100}% - 8px)`}"
-  @click.right.prevent="removeCursor" />
+  @click.right.prevent="removeCursor(index)" />
 </div>
 </template>
 
@@ -32,11 +31,14 @@ export default {
     this.reloadCaptcha()
   },
   computed: {
-    value () {
+    stringValue () {
       if (this.cursors.length === 0) return null
-      let str = ''
-      for (let cursor of this.cursors) str += `${Math.round(cursor.x * 293)},${Math.round(cursor.y * 190)},`
-      return str.slice(0, -1)
+      let points = []
+      for (let cursor of this.cursors) {
+        points.push(Math.round(cursor.x * 293))
+        points.push(Math.round(cursor.y * 190 - 35))
+      }
+      return points.join()
     }
   },
   methods: {
@@ -50,16 +52,16 @@ export default {
         y: offsetY / this.$refs.captchawrapper.clientHeight,
         id: this.cursorID
       })
+      this.$emit('input', this.stringValue)
     },
-    removeCursor (event) {
-      let target = event.target
-      if (target.tagName !== 'svg') target = target.parentElement
-      console.log(target.id)
-      this.cursors.splice(target.id.slice(-1), 1)
+    removeCursor (index) {
+      this.cursors.splice(index, 1)
+      this.$emit('input', this.stringValue)
     },
     reloadCaptcha () {
-      this.captchaImageURL = `//kyfw.12306.cn/passport/captcha/captcha-image?login_site=E&module=login&rand=sjrand&${Math.random()}`
+      this.captchaImageURL = `/cr/user/session/captcha?${Math.random()}`
       this.cursors = []
+      this.$emit('input', null)
     }
   }
 }

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% load user %}
+{% load render_bundle from webpack_loader %}
+
+{% block appid %}app{% endblock %}
+
+{% block header %}
+<header id="navbar" class="sticky-top">
+  <nav-bar
+    {% if user.is_authenticated %}
+      authenticated
+      email="{{user.email}}"
+      hash="{{user.email|hash}}"
+      username="{{user.username}}"
+      firstname="{{user.first_name}}"
+      lastname="{{user.last_name}}"
+      :id="{{user.pk}}"
+    {% endif %}
+  >
+  </nav-bar>
+  <div id="site-messages">
+  {% for message in messages %}
+    <b-alert show dismissible class="alert-flush" variant="{{ message.tags }}">
+      <div class="container">{{ message }}</div>
+    </b-alert>
+  {% endfor %}
+  </div>
+  <message-banner></message-banner>
+</header>
+{% endblock %}
+
+{% block content %}
+  <router-view />
+{% endblock content %}
+
+{% block extra_js %}
+  {% render_bundle 'app' 'js' %}
+{% endblock %}

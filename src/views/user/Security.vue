@@ -67,7 +67,8 @@ export default {
   },
   methods: {
     submit () {
-      this.$validator.validateAll().then((result) => {
+      this.$validator.validateAll()
+      .then(result => {
         if (result) {
           this.loading = true
           axios.put('/user/password/', this.passwordChangeForm)

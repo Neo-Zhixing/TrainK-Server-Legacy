@@ -2,7 +2,7 @@
 	<b-input-group id="route">
     <station-input :required="required" class="route-station-input" id="departure-input" v-model="value.departureStation" placeholder="出发站"/>
     <b-input-group-button>
-      <b-button @click="swapStations" variant="secondary"><font-awesome-icon icon="arrows-alt-h"/></b-button>
+      <b-button @click="swapStations" variant="secondary"><font-awesome-icon :icon="swapIcon"/></b-button>
     </b-input-group-button>
     <station-input :required="required" class="route-station-input" id="arrival-input" v-model="value.arrivalStation" placeholder="目的站"/>
   </b-input-group>
@@ -10,13 +10,14 @@
 
 <script>
 import StationInput from './StationInput'
-import fontawesome from '@fortawesome/fontawesome'
 import { faArrowsAltH } from '@fortawesome/fontawesome-free-solid'
-fontawesome.library.add(faArrowsAltH)
 export default {
   props: {
     value: Object,
     required: Boolean
+  },
+  computed: {
+    swapIcon () { return faArrowsAltH }
   },
   methods: {
     swapStations () {

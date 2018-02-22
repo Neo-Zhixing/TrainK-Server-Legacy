@@ -37,3 +37,13 @@ class VersatileViewMixin:
 
         self.response = self.finalize_response(request, response, *args, **kwargs)
         return self.response
+
+
+class MethodPermissionMixin:
+    method_permission_classes = {}
+
+    def get_permissions(self):
+        permissions = self.method_permission_classes[self.request.method] \
+            if self.request.method in self.method_permission_classes \
+            else self.permission_classes
+        return [permission() for permission in permissions]

@@ -1,5 +1,6 @@
 {% extends "info_base.html" %}
 {% load static %}
+{% load train %}
 
 {% block title %}{{block.super}}-车站{% endblock %}
 
@@ -11,8 +12,58 @@
 <div class="container py-5">
   <div class="row">
     <div class="col-md-7">
+      <div class="card">
+        <div class="card-header">
+          经过车次
+        </div>
+          <table class="table text-center">
+            <thead>
+              <tr>
+                <th scope="col">车次号</th>
+                <th scope="col">始发车站</th>
+                <th scope="col">目的车站</th>
+                <th scope="col">到达本站</th>
+                <th scope="col">停留</th>
+                <th scope="col">从本站出发</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for train in trains|slice:":10" %}
+              <tr>
+                <th scope="row">{{ train.name }}</th>
+                <td>
+                  {% with train.stops.0.station|station as station %}{{ station.name }}{% endwith %}
+                </td>
+                <td>
+                  {% with train.stops|last as stop %}
+                  {% with stop.station|station as station %}
+                    {{ station.name }}
+                  {% endwith %}
+                  {% endwith %}
+                </td>
+                {% with train.currentStop.arrivalTime|timedelta as arrivalTime %}
+                {% with train.currentStop.departureTime|timedelta as departureTime %}
+                <td>{{ arrivalTime|timedeltaStr }}</td>
+                <td>{{departureTime|subtract:arrivalTime|timedeltaStr}}</td>
+                <td>{{ departureTime|timedeltaStr }}</td>
+                {% endwith %}
+                {% endwith %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div class="card-body">
+          {% if trains|length > 10 %}
+          <a class="card-link float-right" href="#">查看更多</a>
+          {% elif trains|length == 0 %}
+            <h5 class="card-title">暂无车次</h5>
+            <p class="card-text">本站暂停办理客运业务</p>
+          {% endif %}
+          <span>
+        </div>
+      </div>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-5"></div>
   </div>
 </div>
 {% endblock content %}

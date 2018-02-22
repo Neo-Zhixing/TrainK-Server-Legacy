@@ -1,8 +1,3 @@
 {% extends "base.html" %}
-{% load render_bundle from webpack_loader %}
 
-{% block css %}
-	{{ block.super }}
-	{% render_bundle 'info' 'css' %}
-{% endblock css %}
-
+{% block apptag %}{% endblock %}

@@ -12,7 +12,7 @@ urlpatterns = [
 	path('password/', views.PasswordView.as_view(), name='account_change_password'),
 	path('password/<uidb36>:<key>/', allauth_views.PasswordResetFromKeyView.as_view(template_name='password/confirm.html'), name='account_reset_password_from_key'),
 	path('password/done/', allauth_views.password_reset_done, name='account_reset_password_done'),
-	re_path('setting/', views.SettingView.as_view(), name="account_settings"),
+	re_path('setting', views.SettingView.as_view(), name="account_settings"),
 ]
 
 router = routers.DefaultRouter()

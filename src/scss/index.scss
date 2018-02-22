@@ -1,0 +1,37 @@
+$font-size-base: 1rem !default;
+
+@import "~bootswatch/dist/materia/variables";
+@import "~bootstrap/scss/bootstrap";
+@import "~bootswatch/dist/materia/bootswatch";
+
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  .content-wrapper {
+    flex: 1;
+  }
+}
+
+hr.railsgraph {
+  height: 5px;
+  border-top: 0;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  background: #c4e17f;
+  border-radius: 2px;
+  background-image: linear-gradient(to right, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4);
+}
+
+.form-control-container {
+  input{
+    @extend .form-control;
+    @extend .text-center;
+  }
+}
+
+.alert.alert-flush {
+  border-radius: 0;
+  border: none;
+  margin: 0;
+}

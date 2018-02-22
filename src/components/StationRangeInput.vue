@@ -4,9 +4,8 @@
       v-for="(stop, index) in stops"
       class="list-group-item list-group-item-action"
       :class="[{'active': value.departureIndex === index || value.arrivalIndex === index}, 'list-group-item-' + buttonVariant(index)]"
-      :id="'stop-range-btn-' + index"
       :disabled="buttonDisabled(index)"
-      @click="buttonClicked"
+      @click="buttonClicked(index)"
     >
       {{stop.station.name}}
     </button>
@@ -29,8 +28,7 @@ export default {
     }
   },
   methods: {
-    buttonClicked (event) {
-      let index = Number(event.target.id.split('-').pop())
+    buttonClicked (index) {
       if (this.value.departureIndex === null) this.value.departureIndex = index
       else if (this.value.arrivalIndex === null) this.value.arrivalIndex = index
       else {

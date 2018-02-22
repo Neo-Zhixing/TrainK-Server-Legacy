@@ -5,7 +5,7 @@ from .models import Trip
 
 
 class TripViewSet(ModelViewSet):
-	template_name = 'triplist.html'
+	template_name = 'app.html'
 	queryset = Trip.objects.all()
 	serializer_class = TripSerializer
 	permission_classes = (IsAuthenticated,)

@@ -108,7 +108,7 @@ class EmailViewSet(VersatileViewMixin, ModelViewSet):
 
 
 class SettingView(APIView):
-	template_name = 'settings.html'
+	template_name = 'app.html'
 	permission_classes = (IsAuthenticated,)
 
 	def get(self, request):

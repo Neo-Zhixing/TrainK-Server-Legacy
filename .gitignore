@@ -3,6 +3,7 @@
 *.pyc
 *.sublime-project
 *.sublime-workspace
+/static/
 
 node_modules/
 /dist/
@@ -21,5 +22,6 @@ selenium-debug.log
 *.ntvs*
 *.njsproj
 *.sln
+*.orig
 
 celerybeat.pid

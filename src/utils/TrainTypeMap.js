@@ -1,3 +1,23 @@
+export let SeatTypeMap = {
+  '8': 'gg_num',
+  '7': 'yb_num',
+  'P': '特等座',
+  '6': '高级软卧',
+  '4': '软卧',
+  '3': '硬卧',
+  '2': '软座',
+  '1': '硬座',
+  'F': '动卧',
+  '9': '商务座',
+  'M': '一等座',
+  'O': '二等座',
+  'WZ': '无座',
+  'MIN': '其他',
+
+  'ANY': '任意',
+  'ANYS': '任意卧铺'
+}
+
 export default {
   trainTypeMap: {
     'G': '高速',
@@ -23,24 +43,6 @@ export default {
     return key
   },
 
-  seatTypeMap: {
-    'A8': 'gg_num',
-    'A7': 'yb_num',
-    'P': '特等座',
-    'A6': '高级软卧',
-    'A4': '软卧',
-    'A3': '硬卧',
-    'A2': '软座',
-    'A1': '硬座',
-    'F': '动卧',
-    'A9': '商务座',
-    'M': '一等座',
-    'O': '二等座',
-    'WZ': '无座',
-    'MIN': '其他',
-
-    'ANY': '任意',
-    'ANYS': '任意卧铺'
-  },
-  sleeperTypes: new Set(['A4', 'A3', 'A6', 'F'])
+  seatTypeMap: SeatTypeMap,
+  sleeperTypes: new Set(['4', '3', '6', 'F'])
 }

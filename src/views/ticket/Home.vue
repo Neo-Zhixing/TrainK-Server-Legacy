@@ -2,8 +2,11 @@
 <div class="py-5" id="ticket-panel-row">
   <b-container>
     <b-row>
-      <b-col md="6">
-        <route-input-panel @submit="submit"/>
+      <b-col md="7">
+        
+      </b-col>
+      <b-col md="5">
+        <route-input @submit="submit"/>
       </b-col>
     </b-row>
   </b-container>
@@ -11,7 +14,7 @@
 </template>
 
 <script>
-  import RouteInputPanel from '@/components/ticket/RouteInputPanel'
+  import RouteInput from '@/components/ticket/RouteInputPanel'
   export default {
     name: 'ticket',
     props: [],
@@ -27,7 +30,7 @@
         })
       }
     },
-    components: { RouteInputPanel }
+    components: { RouteInput }
   }
 </script>
 
@@ -35,5 +38,11 @@
 #ticket-panel-row {
   background-height:100%;
   background-position: center top;
+}
+
+#ticket-panel-row {
+  background-image: url('../../assets/index-bg.jpg');
+  background-position: center center;
+  background-size: 100% auto;
 }
 </style>

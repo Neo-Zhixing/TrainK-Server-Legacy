@@ -56,8 +56,10 @@ INSTALLED_APPS = [
     'info',
     'ticket',
     'trip',
+    'map',
     'scrape',
     'utils',
+    'cr',
 
     'baton.autodiscover',
 ]
@@ -173,8 +175,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'dist'),
+    os.path.join(BASE_DIR, 'assets')
 )
 
+CELERY_WORKER_REDIRECT_STDOUTS = False
+CELERY_ENABLE_UTC = False
+CELERY_BROKER_URL = 'redis://:Braungardt4365@localhost:6379/1'
+CELERY_RESULT_BACKEND = 'redis://:Braungardt4365@localhost:6379/2'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 BATON = {
     'SITE_HEADER': 'TrainK Admin',
@@ -242,6 +250,3 @@ WEBPACK_LOADER = {
         'STATS_FILE': os.path.join(BASE_DIR, 'build/webpack-stats.prod.json'),
     }
 }
-
-CELERY_worker_hijack_root_logger = False
-CELERY_ENABLE_UTC = False

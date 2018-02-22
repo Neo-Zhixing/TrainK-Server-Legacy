@@ -23,6 +23,8 @@ def timedeltaComp(value, key):
 
 @register.filter
 def timedeltaStr(value):
+	if not value:
+		return ''
 	days, hours, minutes, seconds, miliseconds = durationComponents(value)
 	return '{:02d}:{:02d}'.format(hours, minutes)
 
@@ -35,3 +37,10 @@ def station(value):
 @register.filter(name='abs')
 def num_abs(value):
 	return abs(value)
+
+
+@register.filter(name='subtract')
+def num_subtract(value1, value2):
+	if not value1 or not value2:
+		return None
+	return value1 - value2

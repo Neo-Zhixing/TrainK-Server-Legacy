@@ -3,7 +3,7 @@
     <b-form-group label="用户名或邮箱:" label-for="username-field">
       <b-form-input id="username-field"
         type="text"
-        v-model="form.username"
+        v-model="form.credential"
         required
         placeholder="example@tra.ink" />
     </b-form-group>
@@ -31,7 +31,6 @@
 </template>
 
 <script>
-import axios from '@/utils/axios'
 import fontawesome from '@fortawesome/fontawesome'
 import { faSpinner, faSignInAlt } from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(faSpinner, faSignInAlt)
@@ -40,7 +39,7 @@ export default {
   data () {
     return {
       form: {
-        username: '',
+        credential: '',
         password: ''
       },
       loading: false,
@@ -52,14 +51,12 @@ export default {
     submit () {
       this.errorMessages = []
       this.loading = true
-      let data = {password: this.form.password}
-      data[this.form.username.includes('@') ? 'email' : 'username'] = this.form.username
-      axios.post('/user/session/', data)
-      .then((response) => {
+      this.$store.dispatch('auth/login', this.form)
+      .then(user => {
         this.loading = false
-        this.$emit('loggedIn', response.data.key)
+        console.log(user)
       })
-      .catch((error) => {
+      .catch(error => {
         this.loading = false
         if (error.response) this.errorMessages = error.response.data.non_field_errors
         else this.errorMessages = [error.message]

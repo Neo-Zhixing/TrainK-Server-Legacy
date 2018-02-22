@@ -34,7 +34,7 @@
       </b-form-group>
 
     </b-form>
-    <b-form-group horizontal label="个人资料" label-size="lg">
+    <b-form-group horizontal label="个人资料" label-size="lg" v-if="profile">
       <b-form-group label="地址:" label-for="address">
         <b-form-input readonly class="bg-white" :value="profile.currentLocation" />
       </b-form-group>
@@ -61,19 +61,19 @@
               <b-button variant="warning"
                 v-if="!email.verified"
                 v-b-tooltip.hover title="重新发送验证邮件"
-                @click="resendVerification">
+                @click="resendVerification(email)">
                 <font-awesome-icon class="text-white" :icon="email.loading ? 'spinner' : 'redo'" :spin="email.loading" />
               </b-button>
               <b-button variant="success"
                 v-if="!email.primary && email.verified"
                 v-b-tooltip.hover title="设为主邮箱"
-                @click="makePrimary">
+                @click="makePrimary(email)">
                 <font-awesome-icon :icon="email.loading ? 'spinner' : 'arrow-up'" :spin="email.loading" />
               </b-button>
               <b-button variant="danger"
               v-if="!email.primary"
               v-b-tooltip.hover title="移除邮箱"
-              @click="removeEmail">
+              @click="removeEmail(email)">
                 <font-awesome-icon :icon="email.loading ? 'spinner' : 'minus'" :spin="email.loading" />
               </b-button>
             </b-input-group-button>
@@ -115,7 +115,7 @@ export default {
     return {
       loading: false,
       emails: [],
-      profile: {},
+      profile: null,
       newEmail: '',
       form: {}
     }
@@ -124,7 +124,7 @@ export default {
     axios.get('/user/')
     .then((response) => {
       for (let key of ['username', 'first_name', 'last_name']) this.form[key] = response.data[key]
-      return axios.get(`https://en.gravatar.com/${response.data.hash}.json`, {adapter: axiosJsonp})
+      return axios.get(`//en.gravatar.com/${response.data.hash}.json`, {adapter: axiosJsonp})
     })
     .then((response) => {
       console.log(response.data.entry[0])
@@ -146,21 +146,7 @@ export default {
         delete this.form.email
       })
     },
-    getEmail (event) {
-      let target = event.target
-      do {
-        target = target.parentElement
-      } while (target !== null && target.className !== 'input-group')
-      if (target === null) return null
-
-      let email = target.firstChild.value
-      for (let emailObj of this.emails) {
-        if (emailObj.email === email) return emailObj
-      }
-      return null
-    },
-    makePrimary (event) {
-      let email = this.getEmail(event)
+    makePrimary (email) {
       email.loading = true
       axios.patch(`/user/email/${email.id}/`, {primary: true})
       .then((response) => {
@@ -169,16 +155,14 @@ export default {
         email.loading = false
       })
     },
-    resendVerification (event) {
-      let email = this.getEmail(event)
+    resendVerification (email) {
       email.loading = true
       axios.patch(`/user/email/${email.id}/`, {verified: true})
       .then((response) => {
         email.loading = false
       })
     },
-    removeEmail (event) {
-      let email = this.getEmail(event)
+    removeEmail (email) {
       email.loading = true
       axios.delete(`/user/email/${email.id}/`)
       .then((response) => this.emails.splice(this.emails.indexOf(email), 1))

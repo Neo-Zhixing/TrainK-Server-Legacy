@@ -1,6 +1,5 @@
-{% extends "info_base.html" %}
+{% extends "./info_base.html" %}
 {% load static %}
-{% load render_bundle from webpack_loader %}
 {% load train %}
 
 {% block title %}{{block.super}}-{{ train.name }}次{% endblock %}
@@ -17,7 +16,7 @@
         {% endwith %}{% endwith %}
       </div>
       <div class="col-2">
-        <h1><font-awesome-icon icon="long-arrow-alt-right" size="2x"></font-awesome-icon></h1>
+        <h1><i class="fas fa-long-arrow-alt-right fa-2x"></i></h1>
       </div>
       <div class="col text-left">
         {% with train.stops|last as stop %}{% with stop.station|station as station %}
@@ -31,25 +30,39 @@
   <div class="container py-5">
     <div class="row">
       <div class="col-md-7">
-        {% for stop in train.stops %}
-        <div class="row py-1 jumbotron">
-          <div class="col-2 py-1">
-            <h6>{{ stop.arrivalTime|timedelta|timedeltaStr }}</h6>
-            <h6>{{ stop.departureTime|timedelta|timedeltaStr }}</h6>
-          </div>
-          <div class="col-5 py-1">
+        <div class="position-relative">
+          <div class="border border-dark position-absolute h-100" style="width: 0.4rem; left: 5rem; z-index: 2; background-image: repeating-linear-gradient(to bottom, black, black 1.3rem, white 1.3rem, white 2.6rem);"></div>
+          <div class="list-group">
+            {% for stop in train.stops %}
             {% with station=stop.station|station %}
-            <h1>{{ station.name }}</h1>
+              <a href="{% url 'station-detail' station.id %}" class="list-group-item list-group-item-action d-flex flex-row align-items-center">
+                <div class="mr-2 d-flex flex-column" style="width: 2.5rem;">
+                  <h6 class="my-1">{{ stop.arrivalTime|timedelta|timedeltaStr }}</h6>
+                  <h6 class="my-1">{{ stop.departureTime|timedelta|timedeltaStr }}</h6>
+                </div>
+                <span {% if False %}class="rounded border border-dark bg-white"{% endif %} style="width: 1.5rem; height: 1.5rem; z-index: 3;">
+                  {% if False %}
+                  <i class="fas fa-university w-100 h-100"></i>
+                  {% endif %}
+                </span>
+                <h1 class="my-0 mx-4">{{ station.name }}</h1>
+              </a>
             {% endwith %}
+            {% endfor %}
           </div>
         </div>
-        {% endfor %}
       </div>
       <div class="col-md-5">
         {% if train.telecode %}
-        <delay-chart-card telecode="{{train.telecode}}">
-          <a slot="footer" class="btn btn-primary" href="{% url 'record-list' train.telecode %}">查看历史记录</a>
-        </delay-chart-card>
+        <div class="card">
+          <div class="card-header">
+            正晚点
+          </div>
+          <div class="card-body">
+            <canvas id="delay-chart" class="mb-3"></canvas>
+            <a class="card-link" href="{% url 'record-list' train.telecode %}">查看历史记录</a>
+          </div>
+        </div>
         {% endif %}
       </div>
     </div>
@@ -59,5 +72,38 @@
 
 {% block extra_js %}
 {{ block.super }}
-{% render_bundle 'info' 'js' %}
+<script src="https://cdn.bootcss.com/Chart.js/2.7.1/Chart.min.js"></script>
+<script>
+$.getJSON('/info/train/{{ train.telecode }}/record/',function(d){
+  var l = [], v = [];
+  d.results.forEach((e)=>{
+    l.push(e.departureDate);
+    v.push(e.delay);
+  });
+  new Chart(document.getElementById("delay-chart").getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: l,
+        datasets: [{
+            data: v,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor:  'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+      legend: { display: false },
+      tooltips: {
+        callbacks: {
+          label: function(i) {
+              var value = v[i.index];
+              if (value === 0) return '正点'
+              return '平均' + (value > 0 ? '晚点' : '早点') + value + '分';
+          }
+        }
+      }
+    }
+  });
+});
+</script>
 {% endblock %}
