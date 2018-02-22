@@ -27,7 +27,7 @@
 import Leaflet from 'vue2-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { line } from './curve'
-import axios from 'axios'
+import axios from '@/utils/axios'
 import MapData from './data'
 export default {
   data () {

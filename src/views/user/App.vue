@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from '@/utils/axios'
 import fontawesome from '@fortawesome/fontawesome'
 import { faSuitcase } from '@fortawesome/fontawesome-free-solid'
 fontawesome.library.add(faSuitcase)

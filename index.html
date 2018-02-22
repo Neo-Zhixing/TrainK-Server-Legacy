@@ -3,10 +3,21 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>traink</title>
+    <title>TrainK</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div class="page-wrapper" id="app">
+      <header id="navbar" class="sticky-top">
+        <nav-bar />
+        <message-banner />
+      </header>
+      <main class="content-wrapper">
+        <router-view />
+      </main>
+      <footer class="bg-dark text-white text-center" style="height: 300px;">
+        尾部信息将于运行时加入
+      </footer>
+    </div>
     <!-- built files will be auto injected -->
   </body>
 </html>

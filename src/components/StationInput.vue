@@ -10,7 +10,7 @@
 
   track-by="id"
   label="name"
-  
+
   :showLabels="false"
 
   :optionsLimit="10"
@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import cachios from 'cachios'
+import axios from '@/utils/axios'
 import Multiselect from 'vue-multiselect'
 export default {
   props: {
@@ -46,7 +46,7 @@ export default {
     }
   },
   mounted () {
-    cachios.get('/info/station/', {
+    axios.get('/info/station/', {
       params: {
         'all': this.all
       }

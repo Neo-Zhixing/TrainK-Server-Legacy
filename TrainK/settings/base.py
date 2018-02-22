@@ -1,5 +1,5 @@
 from .utils import *
-MODE = Mode.Develop
+MODE = Mode.Testing
 SECRET_KEY = '#hzqu*0-tby7iyvberwew29vv^c_b(*w-zux+f73hcqv9-xf53'
 
 SITE_ID = 1
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+	'corsheaders.middleware.CorsMiddleware',
 	'django.middleware.security.SecurityMiddleware',
 	'django.contrib.sessions.middleware.SessionMiddleware',
 	'django.middleware.cache.UpdateCacheMiddleware',

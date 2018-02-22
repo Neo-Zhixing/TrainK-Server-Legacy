@@ -3,7 +3,7 @@ from .base import *
 
 if MODE == Mode.Develop:
 	from .develop import *
-elif Mode == Mode.Testing:
+elif MODE == Mode.Testing:
 	from .testing import *
-elif Mode == Mode.Production:
+elif MODE == Mode.Production:
 	from .production import *

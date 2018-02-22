@@ -75,7 +75,7 @@
 
 <script>
 import TrainTypeMap from '@/utils/TrainTypeMap'
-import axios from 'axios'
+import axios from '@/utils/axios'
 import moment from 'moment'
 import Ticket from '@/components/ticket/Ticket'
 import RouteInput from '@/components/ticket/RouteInputPanel'

@@ -4,7 +4,7 @@ from .base import *
 
 DEBUG = True
 
-ALLOWED_HOSTS += '192.168.1.101'
+ALLOWED_HOSTS.append('192.168.1.101')
 
 CACHES['default'] = {
 	'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
@@ -27,3 +27,6 @@ CELERY_BROKER_URL = 'redis://:Braungardt4365@localhost:6379/1'
 CELERY_RESULT_BACKEND = 'redis://:Braungardt4365@localhost:6379/2'
 
 WEBPACK_LOADER['DEFAULT']['STATS_FILE'] = os.path.join(BASE_DIR, 'build/webpack-stats.dev.json')
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_ALLOW_ALL = True
