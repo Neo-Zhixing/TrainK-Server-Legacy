@@ -54,12 +54,10 @@ export default {
     },
     crLogin ({ commit, state }, data) {
       let dataToSend = { captcha: data.captcha }
-      if (state.crPasswordSave) {
-        if (!state.crPasswordSave.username) dataToSend.username = data.username
-        if (!state.crPasswordSave.password) {
-          dataToSend.password = data.password
-          dataToSend.save = data.save
-        }
+      if (!state.crPasswordSave || !state.crPasswordSave.username) dataToSend.username = data.username
+      if (!state.crPasswordSave || !state.crPasswordSave.password) {
+        dataToSend.password = data.password
+        dataToSend.save = data.save
       }
       return axios.post('/cr/user/session/', dataToSend)
       .then(response => {

@@ -87,8 +87,8 @@ class TicketView(MethodPermissionMixin, APIView, DataManagerMixin):
 
 	@never_cache
 	def get(self, request):
-		assert {'date', 'from', 'to'} <= set(request.GET), \
-			ParseError('Request Params Incomplete')
+		if not {'date', 'from', 'to'} <= set(request.GET):
+			raise ParseError('Request Params Incomplete')
 		from_station = GetStation(request.GET['from'])
 		to_station = GetStation(request.GET['to'])
 		result = self.manager.tickets(

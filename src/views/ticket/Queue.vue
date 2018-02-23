@@ -1,6 +1,12 @@
 <template>
-  <b-modal lazy ref="submissionQueueModal" title="订单排队中">
-    <template v-if="data">
+  <b-modal lazy ref="submissionQueueModal" title="订单排队中"
+    ok-only :ok-disabled="!error" @ok="$router.go(-1)">
+    <template v-if="error">
+      <b-alert show :variant="error.level">
+        {{error.message}}
+      </b-alert>
+    </template>
+    <template v-else-if="data">
       <h5 class="my-4">剩余时间：{{getTimeStr(data.waitTime)}}</h5>
       <p v-if="data.waitTime > 3000">
         估计是进入永久排队模式了。
@@ -27,7 +33,8 @@ export default {
       timeElapsed: null,
       timer: null,
       task: null,
-      data: null
+      data: null,
+      error: null
     }
   },
   methods: {
@@ -46,6 +53,7 @@ export default {
         this.data = response.data
         let time = this.data.waitTime
         if (time === -1) return this.completeOrdering()
+        if (time === -2) throw this.data
         if (time > 60) time = 60
         this.interval = time
         this.timeElapsed = 0
@@ -55,6 +63,15 @@ export default {
           }, 1000)
         }
         this.task = setTimeout(this.queue, time * 1000)
+      })
+      .catch(error => {
+        this.stop()
+        if (error.msg) {
+          this.error = {
+            message: error.msg,
+            level: 'warning'
+          }
+        }
       })
     },
     completeOrdering (orderID) {
