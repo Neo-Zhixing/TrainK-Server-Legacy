@@ -37,8 +37,7 @@ export default {
     })
   },
   methods: {
-    login (data) {
-      this.username = data.username
+    login () {
       this.loggedIn = true
     }
   }

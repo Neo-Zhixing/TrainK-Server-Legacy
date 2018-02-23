@@ -47,7 +47,7 @@ export default {
       .catch(error => {
         if (error.response && error.response.status === 404) {
           commit('crPasswordSave', null)
-          return
+          return false
         }
         throw error
       })

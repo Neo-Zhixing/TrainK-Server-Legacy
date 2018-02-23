@@ -7,12 +7,7 @@ ALLOWED_HOSTS.append('home.zhangzhixing.cn')
 ALLOWED_HOSTS.append('192.168.1.10')
 
 CACHES['default'] = {
-	'BACKEND': 'redis_cache.RedisCache',
-	'LOCATION': 'localhost:6379',
-	'OPTIONS': {
-		'DB': 0,
-		'PASSWORD': 'Braungardt4365',
-	},
+	'BACKEND': 'django.core.cache.backends.dummy.DummyCache'
 }
 
 DATABASES['default'] = {
@@ -34,4 +29,4 @@ CELERY_RESULT_BACKEND = 'redis://:Braungardt4365@localhost:6379/2'
 WEBPACK_LOADER['DEFAULT']['STATS_FILE'] = os.path.join(BASE_DIR, 'build/webpack-stats.prod.json')
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_REGEX_WHITELIST = (r'^(https?://)?localhost:?\d*$', )
+CORS_ORIGIN_WHITELIST = ALLOWED_HOSTS

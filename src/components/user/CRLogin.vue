@@ -31,7 +31,7 @@
             登录
             <font-awesome-icon :icon="loading ? 'spinner' : 'sign-in-alt'" :spin="loading" />
           </b-button>
-          <a class="btn btn-outline-secondary col-4" href="https://kyfw.12306.cn/otn/regist/init">注册</a>
+          <a class="btn btn-secondary col-4" href="https://kyfw.12306.cn/otn/regist/init">注册</a>
         </b-button-group>
       </div>
     </form>
@@ -63,8 +63,12 @@ export default {
   mounted () {
     this.$store.dispatch('auth/crCheckPasswordSave')
     .then(savedInfo => {
-      this.loginForm.username = savedInfo.username
-      this.loginForm.password = savedInfo.password ? 'D'.repeat(savedInfo.password) : null
+      if (savedInfo === false) {
+        console.log('CR Account Not Binded')
+      } else {
+        this.loginForm.username = savedInfo.username
+        this.loginForm.password = savedInfo.password ? 'D'.repeat(savedInfo.password) : null
+      }
     })
   },
   methods: {
